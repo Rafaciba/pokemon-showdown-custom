@@ -1,0 +1,42 @@
+# (Nome do projeto a definir)
+
+Servidor casual de batalhas Pokémon para jogar com amigos. Ele é construído sobre o **[Pokémon Showdown](https://pokemonshowdown.com/)** e tem modos de jogo próprios, como o **Desafio de Ginásios**.
+
+## Créditos
+
+Este projeto só existe graças ao trabalho do **Pokémon Showdown** e da comunidade **[Smogon](https://www.smogon.com/)**:
+
+- [smogon/pokemon-showdown](https://github.com/smogon/pokemon-showdown): servidor de jogo e simulador de batalhas (licença MIT)
+- [smogon/pokemon-showdown-client](https://github.com/smogon/pokemon-showdown-client): cliente web (licença AGPL-3.0)
+
+Pokémon Showdown foi criado por Guangcong Luo (Zarel) e é mantido por seus contribuidores. Pokémon e todos os nomes relacionados são marcas registradas de Nintendo, Game Freak e The Pokémon Company. Este é um projeto de fãs, sem fins lucrativos e sem afiliação com essas empresas.
+
+## Estrutura
+
+```
+.
+├── docker/          # imagens e configuração do ambiente (local e VPS)
+├── login/           # login server próprio (simplificado, com mínimo de dados pessoais)
+├── docs/            # documentação do projeto
+├── scripts/         # setup e utilitários
+├── server/          # fork de smogon/pokemon-showdown (repositório git próprio, ignorado aqui)
+└── client/          # fork de smogon/pokemon-showdown-client (repositório git próprio, ignorado aqui)
+```
+
+`server/` e `client/` são forks independentes. Cada um tem dois remotes:
+
+- `origin`: o fork no nosso GitHub
+- `upstream`: o repositório oficial da Smogon
+
+As branches funcionam assim:
+
+- `master`: espelho do upstream, nunca recebe commits nossos
+- `main`: nossas personalizações. Para atualizar, faça merge de `master` em `main`
+
+## Privacidade (LGPD)
+
+A conta guarda apenas o **nome de usuário** e o **hash da senha**. Não coletamos e-mail nem guardamos IP.
+
+O cadastro só é feito por convite.
+
+Os times ficam no navegador de cada jogador.

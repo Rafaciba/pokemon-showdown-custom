@@ -1,0 +1,133 @@
+# Contexto do projeto: pokemon-showdown-custom
+
+Servidor **casual** de batalhas Pokémon, para uso próprio e com amigos. Ele é construído sobre o Pokémon Showdown (PS) da Smogon e tem modos de jogo próprios. O nome definitivo e o domínio ainda serão escolhidos; por enquanto o projeto se chama `pokemon-showdown-custom`.
+
+Política da organização: **sempre observar a LGPD e boas práticas de segurança** em tudo que for gerado.
+
+Regra de trabalho combinada com o usuário: **não inventar nem inferir requisitos**. Quando algo estiver ambíguo, perguntar.
+
+## Idiomas
+
+- Código (identificadores): inglês.
+- Comentários, documentação e mensagens de commit: **português**.
+- Interface do jogo: pt-BR e inglês. O PS já tem traduções pt-BR em `server/translations/` e `client/translations/`.
+
+## Arquitetura
+
+O PS original tem três partes. Usamos duas e substituímos a terceira:
+
+| Parte | Origem | Situação |
+|---|---|---|
+| Servidor de jogo (`server/`) | fork de `smogon/pokemon-showdown` (MIT) | batalhas, formatos, salas, chat, torneios |
+| Cliente web (`client/`) | fork de `smogon/pokemon-showdown-client` (AGPL-3.0) | teambuilder, tela de batalha, interface |
+| Login server (`login/`) | **código nosso** (MIT) | substitui o `smogon/pokemon-showdown-loginserver` |
+
+### Por que o login server é nosso
+
+O oficial foi feito para a escala da Smogon. Ele exige MySQL e Postgres, depende do PHP CLI e precisa de Node 24+. Também guarda e-mail e vários registros de IP. Nosso login server é mínimo:
+
+- **SQLite**.
+- Guarda **apenas o nome de usuário e o hash da senha** (bcrypt ou argon2). Sem e-mail e sem IP persistido; o rate limit fica só em memória.
+- **Cadastro só por convite.**
+- Também **serve os arquivos estáticos do cliente**, o que elimina Apache e PHP.
+- Cookie de sessão `HttpOnly`, com duração razoável e senha mínima decente. No oficial a senha mínima é de 5 caracteres e o cookie não é HttpOnly.
+
+### Contrato que o login server precisa respeitar
+
+Assim não precisamos alterar o servidor nem o cliente:
+
+- O cliente faz POST para `/~~{serverid}/action.php` (ou `/api/{act}`) no próprio domínio, com o parâmetro `act`. O código está em `client/play.pokemonshowdown.com/src/client-connection.ts` (`PSLoginServer`).
+- As respostas JSON começam com `]`.
+- As ações que o cliente usa são: `register`, `login`, `logout`, `upkeep`, `getassertion`, `changepassword`, `changeusername`, `getteams`, `getteam`, `ladderget` e `uploadreplay`. O mínimo para começar são as 5 primeiras.
+- A assertion tem o formato `{challenge},{userid},{userType},{timestamp},{serverHost};{assinatura RSA-SHA1 em hex}`. O `challenge` vem de `|challstr|{keyid}|{challenge}`.
+  - `userType`: `1` = não registrado, `2` = registrado.
+  - Referência: `smogon/pokemon-showdown-loginserver`, arquivo `src/user.ts`, função `getAssertion`.
+- O servidor de jogo verifica a assertion com `Config.loginserverpublickey` e `Config.loginserverkeyalgo` (`server/server/verifier.ts`, `server/server/users.ts` → `validateToken`). Precisamos gerar **nosso próprio par de chaves RSA**. A chave privada nunca vai para o git.
+
+## Organização do workspace e git
+
+```
+D:\Workspace\pokemon-showdown\   ← repo "plataforma" → github: Rafaciba/pokemon-showdown-custom
+├── CLAUDE.md, README.md, LICENSE (MIT), .gitignore, .gitattributes
+├── docker/ + docker-compose.yml     (a criar)
+├── login/                           (a criar)
+├── docs/                            (a criar)
+├── scripts/                         (a criar; incluirá o setup que clona server/ e client/)
+├── server/   ← repo git próprio, ignorado pelo repo raiz
+└── client/   ← repo git próprio, ignorado pelo repo raiz
+```
+
+- Em `server/` e `client/`:
+  - remote `upstream` = Smogon. O push está desativado (`pushurl = DISABLED`) para nada ir à Smogon por engano;
+  - remote `origin` = `Rafaciba/pokemon-showdown` e `Rafaciba/pokemon-showdown-client`. No GitHub, a branch padrão é `main`.
+- Branches:
+  - `master` = espelho do upstream, **nunca** recebe commits nossos;
+  - `main` = nossas mudanças (já criada).
+  - Para atualizar: `git fetch upstream`, depois `git checkout master`, `git merge upstream/master`, `git checkout main`, `git merge master`.
+- Todos os repos são **públicos**: atende à AGPL do cliente e é boa prática de comunidade.
+- Para minimizar conflitos com o upstream, as personalizações ficam em arquivos próprios:
+  - `server/config/custom-formats.ts`: formatos próprios, carregados por `sim/dex-formats.ts`;
+  - `server/data/mods/<nosso-mod>/`: mudanças de mecânica;
+  - `server/data/rulesets.ts`: só se necessário. Preferir regras definidas em mod ou no próprio formato;
+  - `server/server/chat-plugins/<nosso-plugin>.ts`: comandos e páginas, carregados automaticamente;
+  - `RoomGame` (`server/server/room-game.ts`): jogos de sala.
+- Configuração local do git nos forks: `core.longpaths=true` (o checkout do cliente falha sem isso no Windows) e `core.autocrlf=false`. O Git do sistema tem `autocrlf=true`, e os forks já foram normalizados para LF.
+
+## Decisões de produto
+
+- Os formatos oficiais da Smogon continuam disponíveis junto com os nossos. O admin pode desabilitar modos e formatos.
+- Os times ficam no navegador (localStorage, como no PS original). A **base deve ficar pronta** para sincronizar entre dispositivos no futuro.
+- Ambiente local em **Docker** (Docker Desktop no Windows). Deploy final em **VPS na Hostgator**. Antes do deploy, confirmar acesso root, suporte a Docker e RAM (2 GB servem para poucos usuários).
+- Dar créditos visíveis ao Pokémon Showdown e à Smogon (README e interface).
+
+## Modo: Desafio de Ginásios (requisitos do usuário)
+
+"Guarda-chuva" que comporta **vários desafios simultâneos**, cada um com seus líderes e regras.
+
+- **Admin** (por enquanto só o usuário): monta os times dos líderes, da Elite 4 e do campeão. Em cada desafio, escolhe:
+  - quantos ginásios;
+  - os tipos (fixos ou **sorteados**);
+  - se haverá Elite 4.
+- **Líderes e NPCs são controlados pelo computador.** Começamos com os bots aleatórios do PS, mas a arquitetura deve ficar **pronta para IAs com níveis de dificuldade**.
+- **Formato único por desafio.** O admin escolhe formato, limite de geração e mecânicas. Padrão: **Pokédex completa (até a gen 9)** com **Megaevolução habilitada** e **sem Z-moves, Dynamax e Tera**. Existe também uma opção de formato livre.
+- **Regra configurável por desafio:** o desafiante pode alterar o time entre as batalhas, ou deve usar o mesmo time em todo o desafio. Ele pode montar um ou mais times.
+- **Validação automática:** o time de cada líder precisa ser do tipo do ginásio.
+- **Insígnias** são específicas de cada desafio:
+  - nos desafios de **tipos fixos**, são **permanentes**;
+  - nos desafios de **tipos sorteados**, valem **só enquanto o desafiante estiver ativo** naquele desafio.
+- Para enfrentar o **campeão**, é preciso ter **todas as insígnias** do desafio.
+- **Tentativas ilimitadas**, com placar de vitórias e derrotas (por tentativa e total) e **histórico de tentativas**.
+- **Painel admin** feito com páginas do próprio cliente PS (páginas de chat-plugin, `view-...`), **restrito ao perfil admin**.
+
+Em aberto: o que define o desafiante "ativo" (e quando deixa de estar) nos desafios com tipos sorteados.
+
+**Futuro:** um modo no estilo roguelite, a detalhar com calma.
+
+## Achados técnicos importantes
+
+- Node: o servidor exige **≥ 22.18** e o build do cliente também. A máquina tem a v20.10, mas rodaremos tudo em Docker com Node 22 LTS ou mais recente.
+- `server/config/config-example.js`:
+  - `exports.backdoor = true` dá acesso de admin aos sysops da Smogon. **Desligar.**
+  - `noguestsecurity` só serve para desenvolvimento.
+- O `.gitignore` do servidor ignora toda a pasta `config/` exceto `formats.ts`. No nosso fork, abrir exceção para `config/custom-formats.ts` e **continuar ignorando `config/config.js`**, que terá segredos.
+- O cliente **não** traz sprites e áudio no repositório. Por padrão ele os carrega de play.pokemonshowdown.com. Para a VPS, avaliar hospedar esses arquivos nós mesmos.
+- O teambuilder conhece a legalidade dos times porque o build do cliente lê os dados de `client/caches/pokemon-showdown` (`build-tools/build-indexes`). Esse cache precisa apontar para o **nosso** servidor, senão formatos e mods próprios não aparecem.
+- Persistência padrão do servidor: arquivos em `config/` (`usergroups.csv`, `chatrooms.json`, `ladders/*.tsv`) e `logs/`. SQLite é opcional (`Config.usesqlite`). A ladder local (`ladders-local.ts`) funciona sem login server.
+- Times no servidor do PS: `server/server/chat-plugins/teams.ts`, que exige Postgres. Quando implementarmos a sincronização, avaliar se reaproveitamos isso ou guardamos os times no nosso login server.
+
+## Status (atualizado em 2026-10-17)
+
+Feito:
+- Código original estudado: servidor, cliente e login server oficial.
+- `server/` e `client/` clonados com histórico completo.
+- Forks públicos criados no GitHub (conta `Rafaciba`), com `master` e `main` enviadas.
+- Repo raiz `Rafaciba/pokemon-showdown-custom` (público) criado, com README (créditos), LICENSE, `.gitignore`, `.gitattributes` e este arquivo.
+
+Ambiente:
+- O gh CLI está autenticado (conta Rafaciba). Ele fica em `C:\Program Files\GitHub CLI`; no Bash, adicionar ao PATH.
+- Docker Desktop: Engine 29.8.x, Compose v5.x.
+
+Próximos passos:
+1. Montar o `docker-compose` com o servidor de jogo e o serviço de login + site. Subir o PS original localmente para validar o ambiente.
+2. Implementar o login server próprio: convites, SQLite e chaves RSA.
+3. Escrever o documento de arquitetura do Desafio de Ginásios para revisão do usuário antes de programar.

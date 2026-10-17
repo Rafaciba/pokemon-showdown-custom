@@ -1,0 +1,28 @@
+# Forks independentes (cada um com seu próprio git: origin = fork, upstream = Smogon)
+/server/
+/client/
+
+# Segredos e configurações locais — nunca versionar
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Dados locais (bancos SQLite, volumes do Docker)
+/data/
+*.db
+*.db-*
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+
+# Editor / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

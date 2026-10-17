@@ -1,0 +1,6 @@
+# Força LF no repositório e na cópia de trabalho (scripts rodam em Linux/Docker)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
