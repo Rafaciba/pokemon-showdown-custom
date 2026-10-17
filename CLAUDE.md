@@ -55,7 +55,23 @@ Segurança:
 
 API interna (`/internal/invite`, `/internal/reset`): só a rede do Docker a alcança, com autenticação por token gravado no volume `login-shared`. Ela é usada pelo plugin `server/server/chat-plugins/custom-accounts.ts` (no fork), que oferece `/convite`, `/redefinirsenha` e `/conta`. As traduções desse plugin ficam em `server/translations/pt/custom-accounts.ts`.
 
-Achado sobre o PS: em comandos de chat, a tradução é `this.TL\`...\`` (não `this.tr`), e as chaves usam `{0}`, `{1}`.
+**Traduções no servidor (fluxo validado em 2026-10-17):**
+
+- Em comandos e páginas de chat, a tradução é `this.TL\`...\`` (não `this.tr`).
+- **As chaves usam o nome da variável interpolada**: `${expiry}` vira `{expiry}`. Interpolar **só variáveis simples**, nunca expressões como `${formatExpiry(x)}`. Na carga, o PS converte os nomes em posições (`TLadd` em `sim/dex-text.ts`).
+- **Nossos catálogos ficam em arquivos próprios**, para não conflitar com o `main.ts` da Smogon:
+  - `server/translations/en-template/pokemon-showdown-custom.ts` (modelo, valores `null`);
+  - `server/translations/pt/pokemon-showdown-custom.ts` (traduções).
+- **Fluxo ao criar ou alterar textos `TL`:**
+  1. `node build` (a ferramenta lê o código compilado);
+  2. `node build translations`, que lista as chaves novas;
+  3. desfazer a alteração que a ferramenta fez no `main.ts` da Smogon (`git checkout translations/en-template/main.ts`) e colocar as chaves novas, com as traduções, num JSON;
+  4. rodar `node scripts/catalogo-traducoes.cjs <json>` (na raiz), que atualiza os dois catálogos;
+  5. rodar `node build translations` de novo, que não deve listar nada.
+- **Não reutilizar chaves que já existem no catálogo da Smogon** com contexto (por exemplo, `Type` tem o contexto "kind"). Um `TL\`Type\`` nosso obrigaria a alterar o `main.ts` deles. Usar chaves próprias, como `Trainer type`.
+
+  O teste da Smogon `test/tools/translations.js` falha se o modelo estiver dessincronizado.
+- **Testes do servidor:** `docker compose exec server npx mocha test/main.js test/server/chat-plugins/gym-challenge.js`. Isso roda a suíte inteira do PS, mais de 2500 testes.
 
 ### Contrato que o login server precisa respeitar
 
@@ -248,3 +264,4 @@ Pendências:
 
 Próximos passos:
 1. **Fase 1 (prova de conceito) concluída e validada pelo usuário no navegador em 2026-10-17.** Próximo: **fase 2** (banco de treinadores, desafios, páginas de admin, formatos gerados por desafio, recarga de formatos). Decisão: o teambuilder vai reconhecer os formatos de desafio por um **ajuste no fork do cliente**, não pelo nome do formato.
+2. **Fase 2 em andamento.** Etapas 1 (banco + regras + validação de times; 15 testes) e 2 (painel admin do banco de treinadores, `/ginasioadmin`) concluídas em 2026-10-17 e validadas por e2e. Próximas: 3 (desafios no painel), 4 (formatos gerados + recarga), 5 (ajuste do teambuilder no fork do cliente).   - Ruído conhecido: ao reiniciar o container `server`, o log mostra `CRASH: EPIPE/ECONNRESET` dos subprocessos encerrados junto. Não é falha. Na VPS, avaliar um encerramento mais limpo.
