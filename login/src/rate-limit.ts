@@ -27,6 +27,12 @@ export class RateLimiter {
 		return entry.count <= this.limit;
 	}
 
+	/** Consulta sem registrar: true se a chave já estourou o limite na janela atual. */
+	isLimited(key: string): boolean {
+		const entry = this.hits.get(key);
+		return !!entry && entry.resetAt > Date.now() && entry.count >= this.limit;
+	}
+
 	private sweep() {
 		const now = Date.now();
 		for (const [key, entry] of this.hits) {

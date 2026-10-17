@@ -34,8 +34,9 @@
 		reverse_proxy server:8000
 	}
 
-	# Login server próprio (mesmo contrato do action.php oficial)
-	@login path_regexp login ^/(~~[^/]+/action\.php|api(/.*)?)$
+	# Login server próprio: contrato do action.php oficial + páginas de conta.
+	# (A API /internal/* do login NÃO é roteada: só a rede do Docker a alcança.)
+	@login path_regexp login ^/(~~[^/]+/action\.php|api(/.*)?|cadastro|redefinir|conta(/(sair|senha|excluir))?)/?$
 	handle @login {
 		reverse_proxy login:9000
 	}

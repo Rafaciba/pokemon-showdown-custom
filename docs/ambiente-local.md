@@ -42,6 +42,39 @@ Import-Certificate -FilePath "$env:TEMP\caddy-root.crt" -CertStoreLocation Cert:
 
 O cliente exige HTTPS mesmo localmente, porque compara a própria origem com `https://{routes.client}`.
 
+## Contas
+
+O servidor **exige conta**, e o cadastro só acontece com um convite de uso único que vale 3 dias. Quem não tem conta continua como "Guest": não escolhe nome, não joga e não fala no chat.
+
+### Primeira vez: criar a conta de admin
+
+1. Coloque o seu nome em `PS_ADMINS` no `.env`, por exemplo `PS_ADMINS=Rafaciba`, e rode `docker compose up -d`.
+2. Gere um convite reservado para esse nome:
+   ```sh
+   docker compose exec login node src/cli.ts convite --nome Rafaciba
+   ```
+3. Abra o link que o comando mostra (https://ps.localhost/cadastro?convite=...) e escolha sua senha ali. A senha nunca passa pelo terminal.
+4. Entre no jogo com o seu nome e senha. Você terá o rank `~` (administrador).
+
+### Convites e senhas
+
+| Ação | No chat do jogo (admin) | No terminal |
+|---|---|---|
+| Gerar convite | `/convite` | `docker compose exec login node src/cli.ts convite` |
+| Convite só para um nome | `/convite Nome` | `... convite --nome Nome` |
+| Código para redefinir senha (24h) | `/redefinirsenha Nome` | `... redefinir Nome` |
+| Contar contas e convites | — | `... usuarios` |
+
+O código aparece só para quem gerou. Envie-o em particular.
+
+### Páginas
+
+- `/cadastro`: criar conta com convite.
+- `/redefinir`: usar o código de redefinição de senha.
+- `/conta`: trocar a senha, sair ou **excluir a conta** (com aviso de que tudo será apagado). No jogo, `/conta` mostra o link.
+
+Trocar a senha também funciona pela opção "Password..." do próprio cliente.
+
 ## Serviços
 
 | Serviço | O que faz | Porta |
@@ -66,8 +99,9 @@ Rotas no domínio:
 | Mudou formatos/mods e quer que o teambuilder enxergue | `CLIENT_FORCE_BUILD=1 docker compose run --rm client-build` e depois `docker compose restart server` |
 | Mudou código do `client/` | `docker compose run --rm client-build` |
 | Mudou o `login/` | `docker compose restart login` |
+| Rodar os testes do login | `docker compose run --rm --no-deps login npm test` |
 | Parar tudo | `docker compose down` |
-| Apagar tudo, incluindo chaves e certificados | `docker compose down -v` |
+| Apagar tudo, incluindo contas, chaves e certificados | `docker compose down -v` |
 
 ## Configuração
 
@@ -88,16 +122,25 @@ Nada de configuração é alterado dentro dos forks. Os templates ficam em `dock
 - `docker/client/config.js` e `docker/client/routes.json` são templates. O build substitui `__PS_HOST__` pelo valor configurado e grava o resultado no volume `client-config`, que o Caddy serve em `/config/*`. A pasta `config/` do fork não é tocada.
 - `docker/caddy/Caddyfile` contém as regras equivalentes ao `.htaccess` original do cliente.
 
-## Chaves de login
+## Segredos e dados do login
 
-O login server gera um par RSA de 3072 bits no primeiro start:
+No primeiro start, o login server gera:
 
-- a chave **privada** fica no volume `login-data`, acessível só pelo serviço `login`;
-- a chave **pública** fica no volume `login-public-key`, montado em modo somente leitura no `server`.
+- um par RSA de 3072 bits. A chave **privada** fica no volume `login-data`, acessível só pelo serviço `login`. A **pública** fica no volume `login-shared`, montado somente leitura no `server`;
+- um **token interno**, também no `login-shared`. Com ele o servidor de jogo pede convites ao login pela API `/internal/*`, que o Caddy não expõe.
 
-Nenhuma das duas vai para o git.
+O banco SQLite de contas (`login.db`) fica no volume `login-data`. Nada disso vai para o git.
+
+Dados guardados (LGPD):
+
+- **contas:** nome de usuário e hash scrypt da senha. Sem e-mail e sem IP;
+- **sessões:** hash do token, com validade de 30 dias renovada a cada uso;
+- **códigos de convite e de redefinição:** guardados como hash e apagados ao serem usados ou ao vencerem.
+
+Os registros vencidos são apagados a cada hora.
 
 ## Pendências conhecidas
 
 - **Sprites e áudio** não estão no repositório do cliente. Provisoriamente, o Caddy os busca em play.pokemonshowdown.com. Para a VPS, avaliar hospedar esses arquivos nós mesmos.
+- **Exclusão de conta:** hoje apaga tudo o que está no login server. Os dados ligados ao nome no servidor de jogo (ranking da ladder, rank, e no futuro times e insígnias) ainda precisam ser apagados junto. Isso fica para quando esses dados existirem.
 - Os containers de desenvolvimento rodam como `root`. As imagens de produção (VPS) devem usar um usuário sem privilégios.

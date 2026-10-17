@@ -28,10 +28,17 @@ exports.loginserver = process.env.LOGIN_SERVER_URL || 'http://login:9000/';
 exports.loginserverkeyalgo = 'RSA-SHA256';
 exports.loginserverpublickeyid = Number(process.env.LOGIN_KEY_ID || 1);
 exports.loginserverpublickey = fs.readFileSync(
-	process.env.LOGIN_PUBLIC_KEY_PATH || '/run/ps-keys/public.pem', 'utf8'
+	process.env.LOGIN_PUBLIC_KEY_PATH || '/run/login-shared/public.pem', 'utf8'
 );
 // Só aceita assertions emitidas para este host
 exports.legalhosts = [host];
+
+// API interna do login server (convites e redefinição de senha), usada pelo
+// plugin server/chat-plugins/custom-accounts.ts. Nunca exposta pelo Caddy.
+exports.customlogin = {
+	internalUrl: process.env.LOGIN_INTERNAL_URL || 'http://login:9000',
+	tokenPath: process.env.LOGIN_INTERNAL_TOKEN_PATH || '/run/login-shared/internal-token',
+};
 exports.serverid = process.env.PS_SERVER_ID || 'custom';
 
 exports.routes = {

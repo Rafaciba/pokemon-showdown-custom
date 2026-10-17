@@ -5,8 +5,17 @@ export function toID(text: unknown): string {
 }
 
 /** Regras de nome do PS: 1 a 18 caracteres no id, com pelo menos uma letra. */
-export function validateUserid(userid: string): string | null {
-	if (userid.length < 1 || userid.length > 18) return 'O nome precisa ter entre 1 e 18 letras ou números.';
-	if (!/[a-z]/.test(userid)) return 'O nome precisa ter pelo menos uma letra.';
+export function validateUserid(userid: string): 'nameLength' | 'nameNeedsLetter' | null {
+	if (userid.length < 1 || userid.length > 18) return 'nameLength';
+	if (!/[a-z]/.test(userid)) return 'nameNeedsLetter';
 	return null;
+}
+
+export function escapeHTML(text: string): string {
+	return text
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
 }

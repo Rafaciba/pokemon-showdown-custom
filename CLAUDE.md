@@ -26,11 +26,36 @@ O PS original tem três partes. Usamos duas e substituímos a terceira:
 
 O oficial foi feito para a escala da Smogon. Ele exige MySQL e Postgres, depende do PHP CLI e precisa de Node 24+. Também guarda e-mail e vários registros de IP. Nosso login server é mínimo:
 
-- **SQLite**.
-- Guarda **apenas o nome de usuário e o hash da senha** (bcrypt ou argon2). Sem e-mail e sem IP persistido; o rate limit fica só em memória.
-- **Cadastro só por convite.**
-- Também **serve os arquivos estáticos do cliente**, o que elimina Apache e PHP.
-- Cookie de sessão `HttpOnly`, com duração razoável e senha mínima decente. No oficial a senha mínima é de 5 caracteres e o cookie não é HttpOnly.
+- **SQLite** via `node:sqlite`. O serviço não tem nenhuma dependência de runtime.
+- Guarda **apenas o nome de usuário e o hash da senha** (scrypt). Sem e-mail e sem IP persistido; o rate limit fica só em memória.
+- Os arquivos estáticos do cliente são servidos pelo Caddy, não pelo login.
+
+Regras definidas pelo usuário em 2026-10-17:
+
+- **Convites:**
+  - só o admin gera;
+  - código de uso único, válido por **3 dias**;
+  - gerado por comando no chat (`/convite`) ou pelo CLI. Uma página no painel admin fica para depois.
+- **Senha:** mínimo de **8** caracteres.
+- **Sessão:** **30 dias**, renovada a cada uso, com cookie `ps_session` HttpOnly, Secure e SameSite=Lax.
+- **Esqueci a senha:** o admin gera um código de redefinição (`/redefinirsenha`, válido por 24h), e o jogador usa em `/redefinir`.
+- **Quem não tem conta é bloqueado:** o `getassertion` de um nome sem conta devolve erro com o link de cadastro.
+- **Troca de nome:** permitida, mas fica para depois.
+- **Exclusão de conta pelo jogador** em `/conta`, com aviso de que tudo é apagado (times, conquistas e insígnias).
+- **Admin:** a conta é Rafaciba. `PS_ADMINS` no `.env` garante o rank `~` no `usergroups.csv`. A conta é criada com `cli.ts convite --nome Rafaciba`, e a senha é escolhida na página, nunca no terminal.
+
+O cadastro **não** usa a janela do cliente, que tem um captcha fixo e nenhum campo de convite; mudá-la exigiria alterar os dois clientes. Ele acontece em páginas próprias do login (`/cadastro`, `/redefinir`, `/conta`), sem JavaScript e com CSP restrita. O `register` do cliente responde com o link para `/cadastro`.
+
+Código: `login/src/`. `app.ts` faz o roteamento, `accounts.ts`, `sessions.ts` e `codes.ts` cuidam do domínio, `pages.ts` gera o HTML e `i18n.ts` tem os textos em pt/en. Testes em `login/test/` (`npm test`).
+
+Segurança:
+
+- POST com `Origin` diferente de `https://{PS_HOST}` é recusado (CSRF);
+- limite de 10 falhas de senha por conta e de 30 por IP a cada 15 minutos.
+
+API interna (`/internal/invite`, `/internal/reset`): só a rede do Docker a alcança, com autenticação por token gravado no volume `login-shared`. Ela é usada pelo plugin `server/server/chat-plugins/custom-accounts.ts` (no fork), que oferece `/convite`, `/redefinirsenha` e `/conta`. As traduções desse plugin ficam em `server/translations/pt/custom-accounts.ts`.
+
+Achado sobre o PS: em comandos de chat, a tradução é `this.TL\`...\`` (não `this.tr`), e as chaves usam `{0}`, `{1}`.
 
 ### Contrato que o login server precisa respeitar
 
@@ -136,7 +161,7 @@ Em aberto: o que define o desafiante "ativo" (e quando deixa de estar) nos desaf
 - No Windows, `client/play.pokemonshowdown.com/config/*` são symlinks que viram arquivos de texto (`core.symlinks=false`). Por isso o Caddy serve `/config/*` direto do volume `client-config`.
 - Chaves RSA:
   - a **privada** fica no volume `login-data`, visível só para o `login`;
-  - a **pública** fica no volume `login-public-key`, montado somente leitura no `server`.
+  - a **pública** e o token interno ficam no volume `login-shared`, montado somente leitura no `server`.
 - Teste e2e validado em 2026-10-17: login via assertion, `/trn`, Random Battle gen 9 até o turno 5 e assertion forjada rejeitada. O script ficou no scratchpad da sessão; vale transformá-lo em teste versionado depois.
 - O PS não pareia na ladder jogadores do mesmo IP (`server/server/ladders.ts`). Em dev, `PS_NO_IP_CHECKS=1` liga o `noipchecks`. **Decisão do usuário (2026-10-17): na VPS a proteção fica LIGADA** (`PS_NO_IP_CHECKS=0`); jogadores do mesmo IP só jogam por desafio direto.
 - Pendências do ambiente:
@@ -156,12 +181,14 @@ Ambiente:
 - O gh CLI está autenticado (conta Rafaciba). Ele fica em `C:\Program Files\GitHub CLI`; no Bash, adicionar ao PATH.
 - Docker Desktop: Engine 29.8.x, Compose v5.x.
 
-- Ambiente Docker funcionando e validado pelo usuário no navegador (batalha completa), com o PS original e o login mínimo. Nesse login só existem nomes não registrados: `getassertion` com userType 1, `upkeep` sem sessão e `getteams` vazio.
+- Ambiente Docker funcionando e validado pelo usuário no navegador (batalha completa).
+- Login server completo: contas por convite, sessões, troca, redefinição e exclusão de senha/conta, admin e `/convite`.
+  - 13 testes de integração passando;
+  - teste e2e validado com contas reais: login via sessão, intruso bloqueado, batalha pela ladder, `/convite` para admin e não-admin, exclusão de conta.
+
+Pendências:
+- Exclusão de conta → apagar também os dados do nome no servidor de jogo (ranking `config/ladders/*.tsv`, `usergroups.csv`, e no futuro times e insígnias). Fazer quando esses dados existirem.
+- Guests (sem conta) podem assistir batalhas públicas e ver salas, mas não escolhem nome, não jogam e não falam. **Decisão do usuário (2026-10-17): manter assim.**
 
 Próximos passos:
-1. Login server completo:
-   - contas com SQLite (`node:sqlite`) e hash de senha;
-   - sessões com cookie HttpOnly;
-   - cadastro por convite;
-   - usuário admin (`~` em `usergroups.csv`).
-2. Escrever o documento de arquitetura do Desafio de Ginásios para revisão do usuário antes de programar.
+1. Escrever o documento de arquitetura do Desafio de Ginásios para revisão do usuário antes de programar.

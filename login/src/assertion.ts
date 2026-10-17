@@ -10,6 +10,7 @@
  */
 import { sign, type KeyObject } from 'node:crypto';
 import { toID } from './util.ts';
+import { t, type Lang } from './i18n.ts';
 
 export type UserType = '1' | '2';
 
@@ -38,15 +39,11 @@ export function parseChallstr(challstr: string): { keyId: number, challenge: str
 
 /** Retorna a assertion assinada, ou uma string iniciada por ";;" com a mensagem de erro (contrato do cliente). */
 export function buildAssertion(
-	ctx: AssertionContext, challstr: string, userid: string, userType: UserType
+	ctx: AssertionContext, challstr: string, userid: string, userType: UserType, lang: Lang
 ): string {
 	const parsed = parseChallstr(challstr);
-	if (!parsed || toID(parsed.challenge) !== parsed.challenge) {
-		return ';;Desafio de login corrompido. Recarregue a página.';
-	}
-	if (parsed.keyId !== ctx.keyId) {
-		return ';;Chave de login desconhecida. O servidor está configurado incorretamente.';
-	}
+	if (!parsed || toID(parsed.challenge) !== parsed.challenge) return `;;${t(lang, 'corruptChallenge')}`;
+	if (parsed.keyId !== ctx.keyId) return `;;${t(lang, 'unknownKey')}`;
 
 	const timestamp = Math.floor(Date.now() / 1000);
 	const data = `${parsed.challenge},${userid},${userType},${timestamp},${ctx.serverHost}`;

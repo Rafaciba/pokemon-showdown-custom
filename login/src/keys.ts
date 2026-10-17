@@ -1,19 +1,21 @@
 /**
- * Par de chaves RSA usado para assinar as assertions de login.
+ * Segredos gerados no primeiro start:
  *
- * A chave privada fica num diretório exclusivo deste serviço. A pública é
- * gravada em outro diretório (volume compartilhado, somente leitura no
- * servidor de jogo), para que o servidor de jogo nunca enxergue a privada.
+ * - Par de chaves RSA que assina as assertions de login. A privada fica num
+ *   diretório exclusivo deste serviço; a pública vai para o diretório
+ *   compartilhado (somente leitura no servidor de jogo).
+ * - Token interno: autentica o servidor de jogo na API /internal (convites,
+ *   redefinição). Fica no diretório compartilhado.
  */
-import { generateKeyPairSync, createPrivateKey, createPublicKey, type KeyObject } from 'node:crypto';
+import { generateKeyPairSync, createPrivateKey, createPublicKey, randomBytes, type KeyObject } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, chmodSync } from 'node:fs';
 import { join } from 'node:path';
 
 const MODULUS_BITS = 3072;
 
-export function ensureKeyPair(privateDir: string, publicDir: string): KeyObject {
+export function ensureKeyPair(privateDir: string, sharedDir: string): KeyObject {
 	const privatePath = join(privateDir, 'private.pem');
-	const publicPath = join(publicDir, 'public.pem');
+	const publicPath = join(sharedDir, 'public.pem');
 
 	if (!existsSync(privatePath)) {
 		mkdirSync(privateDir, { recursive: true, mode: 0o700 });
@@ -33,9 +35,19 @@ export function ensureKeyPair(privateDir: string, publicDir: string): KeyObject 
 	const privateKey = createPrivateKey(readFileSync(privatePath));
 	// A pública é sempre derivada da privada: nunca fica dessincronizada
 	const publicPem = createPublicKey(privateKey).export({ type: 'spki', format: 'pem' }) as string;
-	mkdirSync(publicDir, { recursive: true });
+	mkdirSync(sharedDir, { recursive: true });
 	if (!existsSync(publicPath) || readFileSync(publicPath, 'utf8') !== publicPem) {
 		writeFileSync(publicPath, publicPem, { mode: 0o644 });
 	}
 	return privateKey;
+}
+
+export function ensureInternalToken(sharedDir: string): string {
+	const tokenPath = join(sharedDir, 'internal-token');
+	if (!existsSync(tokenPath)) {
+		mkdirSync(sharedDir, { recursive: true });
+		writeFileSync(tokenPath, randomBytes(32).toString('base64url'), { mode: 0o644 });
+		console.log('[keys] Novo token interno gerado');
+	}
+	return readFileSync(tokenPath, 'utf8').trim();
 }
