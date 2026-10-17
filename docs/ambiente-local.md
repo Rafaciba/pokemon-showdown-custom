@@ -89,7 +89,7 @@ Rotas no domínio:
 - `/showdown/*` → servidor de jogo (WebSocket)
 - `/~~custom/action.php` e `/api/*` → login server
 - `/` e `/{sala}` → cliente clássico
-- `/preactalpha` → cliente novo (Preact)
+- só o **cliente clássico** é servido; `/preactalpha` e as demais rotas do cliente novo também abrem o clássico (decisão de 2026-10-17)
 
 ## Comandos do dia a dia
 

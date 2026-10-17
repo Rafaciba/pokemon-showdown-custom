@@ -60,22 +60,23 @@
 		file_server
 	}
 
-	# Cliente web (regras equivalentes às do .htaccess original)
+	# Páginas de teste do cliente (não fazem parte do site)
+	@testclient path_regexp testclient ^/testclient-[a-z]+\.html$
+	handle @testclient {
+		respond 404
+	}
+
+	# Cliente web
 	handle {
 		root * /srv/client/play.pokemonshowdown.com
 
-		# Cliente novo (Preact): rotas explícitas ou cookie de opt-in
-		@newclient path_regexp ^/(newclient|preactalpha|preactbeta|beta|dev|development|login|users|(dm|challenge|user|viewuser|ladder)-[a-z0-9-]*)$
-		@newclientcookie {
-			path_regexp ^/(|[A-Za-z0-9][A-Za-z0-9-]*)$
-			header_regexp Cookie preactalpha=1
-		}
-		# Cliente clássico: raiz, /oldclient e ids de sala (/lobby, /battle-..., /view-...)
-		@oldclient path_regexp ^/(oldclient|[A-Za-z0-9][A-Za-z0-9-]*)?$
-
-		rewrite @newclient /caches/index-new.html
-		rewrite @newclientcookie /caches/index-new.html
-		rewrite @oldclient /caches/index-old.html
+		# Só o cliente CLÁSSICO é servido (decisão do projeto, 2026-10-17: o cliente
+		# novo/Preact ainda é alpha). Toda rota de página, inclusive as que o
+		# .htaccess original mandava para o cliente novo (/preactalpha, /newclient,
+		# cookie preactalpha=1...), abre o clássico. Para reativar o novo, ver as
+		# regras do .htaccess em client/play.pokemonshowdown.com/.
+		@clientpage path_regexp ^/[A-Za-z0-9-]*$
+		rewrite @clientpage /caches/index-old.html
 		rewrite /crossprotocol.html /caches/crossprotocol.html
 
 		# O header é avaliado antes do rewrite: casa com a URL original das páginas do cliente

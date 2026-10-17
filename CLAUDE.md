@@ -100,6 +100,8 @@ D:\Workspace\pokemon-showdown\   ← repo "plataforma" → github: Rafaciba/poke
 
 ## Decisões de produto
 
+- **Somente o cliente CLÁSSICO** (decisão do usuário, 2026-10-17). O cliente novo (Preact, `src/panel-*.tsx`) está em alpha e não é mantido nem servido. Mudanças de cliente são feitas só no clássico (`src/oldclient/`, `index-old.html`, CSS em `style/oldclient.css`). As páginas do Desafio de Ginásios são geradas pelo servidor e funcionam no clássico. Se um dia a Smogon trocar o padrão para o novo, portamos as nossas pequenas mudanças de cliente.
+
 - Os formatos oficiais da Smogon continuam disponíveis junto com os nossos. O admin pode desabilitar modos e formatos.
 - Os times ficam no navegador (localStorage, como no PS original). A **base deve ficar pronta** para sincronizar entre dispositivos no futuro.
 - Ambiente local em **Docker** (Docker Desktop no Windows). Deploy final em **VPS na Hostgator**. Antes do deploy, confirmar acesso root, suporte a Docker e RAM (2 GB servem para poucos usuários).
@@ -171,7 +173,7 @@ Terceira rodada (2026-10-17):
 - **Elite 4 e Campeão em sequência direta**, como nos jogos: perder em qualquer ponto volta ao primeiro membro da Elite 4.
 - **Nível de IA por treinador em cada desafio**, não no treinador: o mesmo treinador pode ser Fácil num desafio e Difícil em outro. A dificuldade é a qualidade das escolhas da IA. O nível mais fácil é o bot aleatório padrão. A **dificuldade base do desafio é o mínimo** para todos os seus treinadores. O que cada nível faz será definido depois.
 - **Aviso de projeto de fã** no rodapé do cliente: sem fins lucrativos, direitos das imagens da Nintendo, Creatures, Game Freak e The Pokémon Company. Feito no fork do cliente (`index-old.html`, `index-new.html`, `src/panel-mainmenu.tsx`) e nas páginas de conta.
-- **Achado:** o cliente do PS **não tem tradução pt-BR** (só de, es, fr, it, ja, ko, zh). As traduções pt existentes são só do servidor. O requisito de interface em pt-BR exige criar essa tradução; decidir com o usuário quando fazer.
+- **Achado:** o cliente do PS **não tem tradução pt-BR** (só de, es, fr, it, ja, ko, zh). As traduções pt existentes são só do servidor. O requisito de interface em pt-BR exige criar essa tradução. **Decisão do usuário (2026-10-17): fica para depois**, não é prioridade agora.
 
 **Identidade visual (2026-10-17):** todas as telas, inclusive as nossas (painel admin, páginas de conta), seguem a **identidade visual oficial do PS**. O cliente deles é a base, e as alterações necessárias ficam no nosso fork, com a mesma premissa do servidor.
 
@@ -206,7 +208,7 @@ Ideias para o futuro, sem implementar agora:
   - `/showdown/*` → server:8000 (WebSocket);
   - `/~~custom/action.php` e `/api/*` → login:9000;
   - `/` e `/{sala}` → cliente clássico;
-  - `/preactalpha` → cliente novo.
+  - só o **cliente clássico** é servido. As rotas do cliente novo (`/preactalpha` etc.) também abrem o clássico.
 - O id do servidor no cliente é `custom` (`docker/client/config.js`).
 - Os forks **não são alterados** para configurar o ambiente:
   - `docker/server/config.js` é copiado para `server/config/config.js`, que é ignorado pelo git;
