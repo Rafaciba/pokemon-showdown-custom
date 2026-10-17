@@ -39,7 +39,7 @@ Assim não precisamos alterar o servidor nem o cliente:
 - O cliente faz POST para `/~~{serverid}/action.php` (ou `/api/{act}`) no próprio domínio, com o parâmetro `act`. O código está em `client/play.pokemonshowdown.com/src/client-connection.ts` (`PSLoginServer`).
 - As respostas JSON começam com `]`.
 - As ações que o cliente usa são: `register`, `login`, `logout`, `upkeep`, `getassertion`, `changepassword`, `changeusername`, `getteams`, `getteam`, `ladderget` e `uploadreplay`. O mínimo para começar são as 5 primeiras.
-- A assertion tem o formato `{challenge},{userid},{userType},{timestamp},{serverHost};{assinatura RSA-SHA1 em hex}`. O `challenge` vem de `|challstr|{keyid}|{challenge}`.
+- A assertion tem o formato `{challenge},{userid},{userType},{timestamp},{serverHost};{assinatura RSA em hex}`. Usamos **RSA-SHA256** (`Config.loginserverkeyalgo`), e não o SHA1 legado do oficial. O `challenge` vem de `|challstr|{keyid}|{challenge}`.
   - `userType`: `1` = não registrado, `2` = registrado.
   - Referência: `smogon/pokemon-showdown-loginserver`, arquivo `src/user.ts`, função `getAssertion`.
 - O servidor de jogo verifica a assertion com `Config.loginserverpublickey` e `Config.loginserverkeyalgo` (`server/server/verifier.ts`, `server/server/users.ts` → `validateToken`). Precisamos gerar **nosso próprio par de chaves RSA**. A chave privada nunca vai para o git.
@@ -115,6 +115,35 @@ Em aberto: o que define o desafiante "ativo" (e quando deixa de estar) nos desaf
 - Persistência padrão do servidor: arquivos em `config/` (`usergroups.csv`, `chatrooms.json`, `ladders/*.tsv`) e `logs/`. SQLite é opcional (`Config.usesqlite`). A ladder local (`ladders-local.ts`) funciona sem login server.
 - Times no servidor do PS: `server/server/chat-plugins/teams.ts`, que exige Postgres. Quando implementarmos a sincronização, avaliar se reaproveitamos isso ou guardamos os times no nosso login server.
 
+## Ambiente Docker (detalhes em docs/ambiente-local.md)
+
+- Serviços:
+  - `web`: Caddy, com HTTPS, cliente estático e proxy. Substitui o Apache e o `.htaccess`;
+  - `login`: Node 24, roda o TS direto, **sem dependências de runtime**;
+  - `server`: PS;
+  - `client-build`: compila o cliente e encerra.
+- Tudo responde em **https://ps.localhost** (`PS_HOST`). O cliente **exige HTTPS** porque compara a origem com `https://{routes.client}`; o Caddy usa uma CA local para `*.localhost`. **O host não pode ser `localhost` puro**: com esse host, o cliente clássico força `ws://localhost:{port}` sem TLS (`client/play.pokemonshowdown.com/src/oldclient/client.js`, `connect`) e não conecta.
+- Rotas:
+  - `/showdown/*` → server:8000 (WebSocket);
+  - `/~~custom/action.php` e `/api/*` → login:9000;
+  - `/` e `/{sala}` → cliente clássico;
+  - `/preactalpha` → cliente novo.
+- O id do servidor no cliente é `custom` (`docker/client/config.js`).
+- Os forks **não são alterados** para configurar o ambiente:
+  - `docker/server/config.js` é copiado para `server/config/config.js`, que é ignorado pelo git;
+  - `config.js` e `routes.json` do cliente são templates (`__PS_HOST__`), renderizados pelo `docker/client/build.sh` no volume `client-config`;
+  - `client/caches/pokemon-showdown` é um bind mount do `server/`, e o build roda com `--no-update`.
+- No Windows, `client/play.pokemonshowdown.com/config/*` são symlinks que viram arquivos de texto (`core.symlinks=false`). Por isso o Caddy serve `/config/*` direto do volume `client-config`.
+- Chaves RSA:
+  - a **privada** fica no volume `login-data`, visível só para o `login`;
+  - a **pública** fica no volume `login-public-key`, montado somente leitura no `server`.
+- Teste e2e validado em 2026-10-17: login via assertion, `/trn`, Random Battle gen 9 até o turno 5 e assertion forjada rejeitada. O script ficou no scratchpad da sessão; vale transformá-lo em teste versionado depois.
+- O PS não pareia na ladder jogadores do mesmo IP (`server/server/ladders.ts`). Em dev, `PS_NO_IP_CHECKS=1` liga o `noipchecks`. **Decisão do usuário (2026-10-17): na VPS a proteção fica LIGADA** (`PS_NO_IP_CHECKS=0`); jogadores do mesmo IP só jogam por desafio direto.
+- Pendências do ambiente:
+  - sprites e áudio vêm de play.pokemonshowdown.com via proxy (provisório);
+  - os containers de dev rodam como root, e a produção deve usar um usuário sem privilégios;
+  - o PS grava IPs em logs e modlog. Revisar isso por causa da LGPD antes da produção.
+
 ## Status (atualizado em 2026-10-17)
 
 Feito:
@@ -127,7 +156,12 @@ Ambiente:
 - O gh CLI está autenticado (conta Rafaciba). Ele fica em `C:\Program Files\GitHub CLI`; no Bash, adicionar ao PATH.
 - Docker Desktop: Engine 29.8.x, Compose v5.x.
 
+- Ambiente Docker funcionando e validado pelo usuário no navegador (batalha completa), com o PS original e o login mínimo. Nesse login só existem nomes não registrados: `getassertion` com userType 1, `upkeep` sem sessão e `getteams` vazio.
+
 Próximos passos:
-1. Montar o `docker-compose` com o servidor de jogo e o serviço de login + site. Subir o PS original localmente para validar o ambiente.
-2. Implementar o login server próprio: convites, SQLite e chaves RSA.
-3. Escrever o documento de arquitetura do Desafio de Ginásios para revisão do usuário antes de programar.
+1. Login server completo:
+   - contas com SQLite (`node:sqlite`) e hash de senha;
+   - sessões com cookie HttpOnly;
+   - cadastro por convite;
+   - usuário admin (`~` em `usergroups.csv`).
+2. Escrever o documento de arquitetura do Desafio de Ginásios para revisão do usuário antes de programar.

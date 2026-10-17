@@ -1,0 +1,36 @@
+#!/bin/sh
+# Build do cliente do PS dentro do container (código montado em /app).
+#
+# Os dados do teambuilder (pokédex, golpes, formatos...) são gerados a partir
+# do NOSSO servidor, montado em /app/caches/pokemon-showdown. O "--no-update"
+# impede o script original de clonar/puxar o repositório da Smogon.
+#
+# /app/config é um volume próprio (não a pasta config/ do fork): aqui geramos
+# config.js e routes.json a partir dos templates em /opt/client, com PS_HOST.
+# O Caddy serve /config/* desse mesmo volume.
+#
+# CLIENT_FORCE_BUILD=1 força o build completo (ex.: após mudar formatos/mods).
+set -eu
+cd /app
+
+: "${PS_HOST:?PS_HOST não definido}"
+case "$PS_HOST" in
+	localhost) echo "[client] PS_HOST não pode ser 'localhost' (use ps.localhost)"; exit 1 ;;
+	*[!A-Za-z0-9.-]*) echo "[client] PS_HOST inválido: $PS_HOST"; exit 1 ;;
+esac
+
+render() { sed "s/__PS_HOST__/$PS_HOST/g" "$1" > "$2"; }
+# O build acrescenta Config.routes/version ao config.js; partimos sempre do template
+render /opt/client/config.js config/config.js
+render /opt/client/routes.json config/routes.json
+
+if [ "${CLIENT_FORCE_BUILD:-0}" = "1" ] \
+	|| [ ! -f play.pokemonshowdown.com/data/pokedex.js ] \
+	|| [ ! -f play.pokemonshowdown.com/js/client-main.js ] \
+	|| [ ! -f play.pokemonshowdown.com/caches/index-old.html ]; then
+	echo "[client] build completo (dados do servidor + compilação) para $PS_HOST..."
+	node build full --no-update
+else
+	echo "[client] build rápido para $PS_HOST. Use CLIENT_FORCE_BUILD=1 para regenerar os dados."
+	node build
+fi

@@ -1,0 +1,19 @@
+{
+  "name": "pokemon-showdown-custom-login",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Login server próprio (mínimo, LGPD-friendly) para o pokemon-showdown-custom",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0"
+  }
+}

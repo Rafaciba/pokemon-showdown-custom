@@ -1,0 +1,86 @@
+# Proxy público do pokemon-showdown-custom.
+#
+# Substitui o Apache + .htaccess do cliente original. Um único domínio serve:
+#   - o cliente web (arquivos estáticos)
+#   - o login server próprio (/~~{id}/action.php e /api/*)
+#   - o servidor de jogo (WebSocket em /showdown/*)
+#
+# Em "localhost" o Caddy usa automaticamente uma CA local (certificado de dev).
+# Em produção, com um domínio real, ele emite o certificado via Let's Encrypt.
+
+{$PS_HOST:localhost} {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options SAMEORIGIN
+		-Server
+	}
+
+	# Caminhos que não devem ser expostos (código PHP legado, artefatos internos)
+	# (exceto o action.php, que é atendido pelo login server)
+	@blocked {
+		path_regexp blocked (\.php$|/\.htaccess$|^/\.git/|^/caches/|^/lib/)
+		not path_regexp ^/~~[^/]+/action\.php$
+	}
+	handle @blocked {
+		respond 404
+	}
+
+	# Servidor de jogo
+	@game path /showdown/*
+	handle @game {
+		reverse_proxy server:8000
+	}
+
+	# Login server próprio (mesmo contrato do action.php oficial)
+	@login path_regexp login ^/(~~[^/]+/action\.php|api(/.*)?)$
+	handle @login {
+		reverse_proxy login:9000
+	}
+
+	# PROVISÓRIO: sprites e áudio não estão no repositório do cliente.
+	# Enquanto não hospedamos esses arquivos, buscamos no site oficial.
+	@remoteassets path /sprites/* /audio/*
+	handle @remoteassets {
+		reverse_proxy https://play.pokemonshowdown.com {
+			header_up Host {upstream_hostport}
+		}
+	}
+
+	# Config do cliente gerada no build (volume client-config). No repositório,
+	# play.pokemonshowdown.com/config/* são symlinks para ../../config/, que no
+	# Windows viram arquivos de texto; por isso servimos direto do volume.
+	@clientconfig path /config/*
+	handle @clientconfig {
+		uri strip_prefix /config
+		root * /srv/client-config
+		file_server
+	}
+
+	# Cliente web (regras equivalentes às do .htaccess original)
+	handle {
+		root * /srv/client/play.pokemonshowdown.com
+
+		# Cliente novo (Preact): rotas explícitas ou cookie de opt-in
+		@newclient path_regexp ^/(newclient|preactalpha|preactbeta|beta|dev|development|login|users|(dm|challenge|user|viewuser|ladder)-[a-z0-9-]*)$
+		@newclientcookie {
+			path_regexp ^/(|[A-Za-z0-9][A-Za-z0-9-]*)$
+			header_regexp Cookie preactalpha=1
+		}
+		# Cliente clássico: raiz, /oldclient e ids de sala (/lobby, /battle-..., /view-...)
+		@oldclient path_regexp ^/(oldclient|[A-Za-z0-9][A-Za-z0-9-]*)?$
+
+		rewrite @newclient /caches/index-new.html
+		rewrite @newclientcookie /caches/index-new.html
+		rewrite @oldclient /caches/index-old.html
+		rewrite /crossprotocol.html /caches/crossprotocol.html
+
+		# O header é avaliado antes do rewrite: casa com a URL original das páginas do cliente
+		@indexpage path_regexp ^/[A-Za-z0-9-]*$
+		header @indexpage Cache-Control "no-cache, no-store, must-revalidate"
+
+		file_server
+	}
+}

@@ -1,0 +1,36 @@
+/**
+ * Limitador de requisições em memória (janela fixa).
+ *
+ * LGPD: o IP é usado só como chave temporária em memória e descartado ao fim
+ * da janela. Nada é persistido em disco ou log.
+ */
+export class RateLimiter {
+	private hits = new Map<string, { count: number, resetAt: number }>();
+	private readonly limit: number;
+	private readonly windowMs: number;
+
+	constructor(limit: number, windowMs: number) {
+		this.limit = limit;
+		this.windowMs = windowMs;
+		setInterval(() => this.sweep(), windowMs).unref();
+	}
+
+	/** Retorna true se a requisição pode seguir. */
+	allow(key: string): boolean {
+		const now = Date.now();
+		const entry = this.hits.get(key);
+		if (!entry || entry.resetAt <= now) {
+			this.hits.set(key, { count: 1, resetAt: now + this.windowMs });
+			return true;
+		}
+		entry.count++;
+		return entry.count <= this.limit;
+	}
+
+	private sweep() {
+		const now = Date.now();
+		for (const [key, entry] of this.hits) {
+			if (entry.resetAt <= now) this.hits.delete(key);
+		}
+	}
+}

@@ -33,6 +33,20 @@ As branches funcionam assim:
 - `master`: espelho do upstream, nunca recebe commits nossos
 - `main`: nossas personalizações. Para atualizar, faça merge de `master` em `main`
 
+## Como rodar
+
+```sh
+git clone https://github.com/Rafaciba/pokemon-showdown-custom.git
+cd pokemon-showdown-custom
+git clone -c core.longpaths=true https://github.com/Rafaciba/pokemon-showdown.git server
+git clone -c core.longpaths=true https://github.com/Rafaciba/pokemon-showdown-client.git client
+git -C server remote add upstream https://github.com/smogon/pokemon-showdown.git
+git -C client remote add upstream https://github.com/smogon/pokemon-showdown-client.git
+docker compose up -d
+```
+
+Depois abra https://ps.localhost. Os detalhes estão em [docs/ambiente-local.md](docs/ambiente-local.md).
+
 ## Privacidade (LGPD)
 
 A conta guarda apenas o **nome de usuário** e o **hash da senha**. Não coletamos e-mail nem guardamos IP.

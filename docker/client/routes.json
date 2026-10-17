@@ -1,0 +1,8 @@
+{
+    "root": "__PS_HOST__",
+    "client": "__PS_HOST__",
+    "dex": "dex.pokemonshowdown.com",
+    "replays": "__PS_HOST__",
+    "users": "__PS_HOST__/users",
+    "teams": "__PS_HOST__"
+}
