@@ -112,6 +112,8 @@ D:\Workspace\pokemon-showdown\   ← repo "plataforma" → github: Rafaciba/poke
   - `server/data/rulesets.ts`: só se necessário. Preferir regras definidas em mod ou no próprio formato;
   - `server/server/chat-plugins/<nosso-plugin>.ts`: comandos e páginas, carregados automaticamente;
   - `RoomGame` (`server/server/room-game.ts`): jogos de sala.
+- **Commits com vários repositórios:** um repositório por comando, nunca em paralelo, e sempre conferindo antes `test "$(git rev-parse --show-toplevel)" = "<caminho esperado>"`. Em 2026-10-17 um commit do repo raiz foi parar no fork por causa de um diretório errado, e a mensagem precisou ser corrigida com `push --force-with-lease`, com autorização do usuário.
+- **Testes de interface:** Playwright em container (`mcr.microsoft.com/playwright:v1.49.1-noble`), com `--host-resolver-rules=MAP ps.localhost host.docker.internal` e `ignoreHTTPSErrors`. O Chrome resolve `*.localhost` para o próprio container. Para testar páginas de admin: conta temporária por convite, mais uma linha temporária no `usergroups.csv`; apagar as duas no fim.
 - Configuração local do git nos forks: `core.longpaths=true` (o checkout do cliente falha sem isso no Windows) e `core.autocrlf=false`. O Git do sistema tem `autocrlf=true`, e os forks já foram normalizados para LF.
 
 ## Decisões de produto
