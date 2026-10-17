@@ -277,6 +277,25 @@ A prova de conceito foi validada com um teste de ponta a ponta pelo fluxo real: 
 
 **Achado para a fase 2 (decisão do usuário, 2026-10-17: resolver com ajuste no fork do cliente):** o teambuilder do cliente decide a Pokédex pelo **id do formato**. Ele só usa a National Dex se o id contiver `natdex` ou `nationaldex` (`client/play.pokemonshowdown.com/src/battle-dex-search.ts`). Os formatos gerados para desafios com Pokédex completa precisam desse marcador no id, por exemplo com um nome terminando em "(NatDex)". A alternativa é um ajuste no fork do cliente que reconheça os formatos de desafio. Sem isso, o teambuilder mostra só a Pokédex de Scarlet/Violet, embora o servidor aceite todas as gerações.
 
+**Resultado da fase 2, etapa 3 (desafios no painel, 2026-10-17):**
+
+- **Página `view-ginasiosadmin-desafio-<id>`** (e `-novo`), com dois formulários: a configuração do desafio e a atribuição de treinadores (etapas fixas ou banco de sorteio, mais Elite 4 e Campeão). Abaixo, a lista "Pronto para abrir?", com todas as pendências, e os botões de abrir, encerrar e apagar rascunho (os dois últimos pedem confirmação dentro de um `<details>`).
+- **Validação para abrir** (`challenges.ts`): as regras de `rules.ts` mais o time de cada treinador validado no formato do desafio, com `Force Monotype` para líderes, Elite 4 e banco de sorteio. O Campeão é validado só no formato.
+- **Formato padrão de um desafio novo:** `[Gen 9] National Dex AG` + `Standard NatDex, Terastal Clause, Z-Move Clause, Dynamax Clause`. A tabela de regras resultante é idêntica à do formato da prova de conceito.
+- **Seletor de formato:** a página usa o `<formatselect>` oficial do cliente, sem alteração no fork. O servidor escreve o nome do formato como o cliente escreve (sem o prefixo da geração atual).
+- **Formulário recusado volta preenchido.** O cliente clássico troca o formulário enviado por "Submitted!"; se a validação falha, o servidor guarda em memória o que foi enviado (por usuário e página, usado uma vez) e redesenha a página com esses valores. Vale também para o editor de treinador.
+- **Campos de formulário só com letras** (`fieldKey`): o cliente só limpa marcadores `{a-z}` não preenchidos no `data-submitsend`.
+- **Decisões de interface (confirmadas pelo usuário em 2026-10-17):**
+  - desafio **encerrado** fica só para leitura, mas **pode ser reaberto** (com a mesma validação de abrir);
+  - desafio **aberto** pode ser editado, mas a alteração só é salva se ele continuar pronto para abrir;
+  - um treinador usado em desafio aberto só pode ser salvo se o time novo continuar válido nesse desafio;
+  - nos tipos fixos, dois ginásios podem ter o mesmo tipo;
+  - padrões de um desafio novo: 8 ginásios, **sem Elite 4**, sem trava de time, tempo livre, derrotas ilimitadas.
+- **Menu de formatos (pedido do usuário, 2026-10-17):** os formatos nossos aparecem primeiro, com as seções abertas, e os oficiais ficam agrupados em "Official Formats", fechado por padrão (o estado aberto/fechado fica salvo nas preferências, como nas outras seções). Como funciona:
+  - no servidor, `config/custom-formats.ts` marca seus formatos com `customFormat: true`, e `server/rooms.ts` (`formatListText`, 2 linhas no fork) envia isso como o bit 512 do código de exibição. Clientes que não conhecem o bit o ignoram;
+  - no cliente, `client-custom.js` lê o bit (envolvendo `App#parseFormats`) e redesenha o `FormatPopup`. Vale para todo menu de formatos que tenha formatos nossos (tela inicial, teambuilder, desafio a outro jogador). Sem formatos nossos no menu, ele fica exatamente como o original;
+  - o `renderFormats` do menu foi reescrito no nosso arquivo. Se a Smogon mudar o original, conferir se o nosso precisa acompanhar.
+
 1. **Prova de conceito**, para reduzir os riscos técnicos:
    - batalha contra NPC com bot aleatório, dentro do processo;
    - ajuste no `search` e um formato gerado dinamicamente;
