@@ -265,6 +265,18 @@ Os formulários usam os recursos nativos das páginas do PS (`<form data-submits
 
 ## 11. Plano de entrega (fases)
 
+### Resultado da fase 1 (2026-10-17)
+
+A prova de conceito foi validada com um teste de ponta a ponta pelo fluxo real: conta criada por convite, `/utm` + `/search` no formato de desafio, batalha inteira contra o NPC e resultado entregue ao plugin.
+
+- **Batalha contra NPC dentro do processo: funciona.** Ficou na classe `NpcBattle` (subclasse de `RoomBattle`), em `server/chat-plugins/gym-challenge/npc-battle.ts`. O NPC é o jogador p2, sem usuário. Ele é marcado como ativo, então o timer nunca o considera desconectado: validado com `/timer on` durante a batalha. Responde aos pedidos de jogada pela `NpcAI`.
+- **IA:** `RandomAI` reaproveita o `RandomPlayerAI` do PS (`ai.ts`). A interface `NpcAI` e o `BattleView` (log público da batalha) já estão prontos para os outros níveis.
+- **Ajuste no fork:** 6 linhas no total. Um handler `onSearchOverride` foi declarado em `server/chat.ts`, e o comando `search` em `server/chat-commands/core.ts` passou a consultá-lo. Testado: a busca em `gen9randombattle` continua indo para a fila normal.
+- **Formato do desafio:** `config/custom-formats.ts` (agora versionado no fork) cria a seção "Desafio de Ginásios", com o campo `gymChallenge` que identifica o formato para o plugin. As regras do padrão foram validadas: Mega liberada, Z-Crystal bloqueado, Pokémon da gen 9 aceitos, e `Force Monotype = Fire` aceita o time de Fogo e recusa como Água.
+- **Recarga de formatos:** o `/hotpatch formats` do PS recarrega o Dex, reinicia os processos e envia a lista nova aos clientes. A recarga automática a partir do banco fica para a fase 2. Ponto de atenção: o `require` do `custom-formats.ts` fica em cache, então a geração dinâmica precisa ler os dados de um jeito que a recarga enxergue.
+
+**Achado para a fase 2 (decisão do usuário, 2026-10-17: resolver com ajuste no fork do cliente):** o teambuilder do cliente decide a Pokédex pelo **id do formato**. Ele só usa a National Dex se o id contiver `natdex` ou `nationaldex` (`client/play.pokemonshowdown.com/src/battle-dex-search.ts`). Os formatos gerados para desafios com Pokédex completa precisam desse marcador no id, por exemplo com um nome terminando em "(NatDex)". A alternativa é um ajuste no fork do cliente que reconheça os formatos de desafio. Sem isso, o teambuilder mostra só a Pokédex de Scarlet/Violet, embora o servidor aceite todas as gerações.
+
 1. **Prova de conceito**, para reduzir os riscos técnicos:
    - batalha contra NPC com bot aleatório, dentro do processo;
    - ajuste no `search` e um formato gerado dinamicamente;

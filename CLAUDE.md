@@ -247,4 +247,4 @@ Pendências:
 - Guests (sem conta) podem assistir batalhas públicas e ver salas, mas não escolhem nome, não jogam e não falam. **Decisão do usuário (2026-10-17): manter assim.**
 
 Próximos passos:
-1. Revisão do usuário do documento de arquitetura do Desafio de Ginásios (`docs/arquitetura-desafio-ginasios.md`, escrito em 2026-10-17), todas as questões respondidas. Próximo: fase 1 (prova de conceito).
+1. **Fase 1 (prova de conceito) concluída e validada pelo usuário no navegador em 2026-10-17.** Próximo: **fase 2** (banco de treinadores, desafios, páginas de admin, formatos gerados por desafio, recarga de formatos). Decisão: o teambuilder vai reconhecer os formatos de desafio por um **ajuste no fork do cliente**, não pelo nome do formato.
