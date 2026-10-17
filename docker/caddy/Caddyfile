@@ -43,7 +43,11 @@
 
 	# PROVISÓRIO: sprites e áudio não estão no repositório do cliente.
 	# Enquanto não hospedamos esses arquivos, buscamos no site oficial.
-	@remoteassets path /sprites/* /audio/*
+	# O pokedex-mini(-bw).js descreve esses sprites (números dos ícones e tamanhos
+	# das animações) e só é gerado pelo build quando os sprites estão no disco
+	# (build-tools/build-minidex); sem ele, ícones desenhados antes do pokedex.js
+	# carregar ficam como "?".
+	@remoteassets path /sprites/* /audio/* /data/pokedex-mini.js /data/pokedex-mini-bw.js
 	handle @remoteassets {
 		reverse_proxy https://play.pokemonshowdown.com {
 			header_up Host {upstream_hostport}

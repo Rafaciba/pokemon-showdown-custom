@@ -239,7 +239,7 @@ Ideias para o futuro, sem implementar agora:
 - Teste e2e validado em 2026-10-17: login via assertion, `/trn`, Random Battle gen 9 até o turno 5 e assertion forjada rejeitada. O script ficou no scratchpad da sessão; vale transformá-lo em teste versionado depois.
 - O PS não pareia na ladder jogadores do mesmo IP (`server/server/ladders.ts`). Em dev, `PS_NO_IP_CHECKS=1` liga o `noipchecks`. **Decisão do usuário (2026-10-17): na VPS a proteção fica LIGADA** (`PS_NO_IP_CHECKS=0`); jogadores do mesmo IP só jogam por desafio direto.
 - Pendências do ambiente:
-  - sprites e áudio vêm de play.pokemonshowdown.com via proxy (provisório);
+  - sprites, áudio e `data/pokedex-mini(-bw).js` vêm de play.pokemonshowdown.com via proxy (provisório). O `pokedex-mini` só é gerado pelo build quando os sprites estão no disco; sem ele, os ícones de Pokémon calculados antes do `pokedex.js` carregar ficam como "?";
   - os containers de dev rodam como root, e a produção deve usar um usuário sem privilégios;
   - o PS grava IPs em logs e modlog. Revisar isso por causa da LGPD antes da produção.
 
