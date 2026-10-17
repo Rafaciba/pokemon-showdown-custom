@@ -296,6 +296,18 @@ A prova de conceito foi validada com um teste de ponta a ponta pelo fluxo real: 
   - no cliente, `client-custom.js` lê o bit (envolvendo `App#parseFormats`) e redesenha o `FormatPopup`. Vale para todo menu de formatos que tenha formatos nossos (tela inicial, teambuilder, desafio a outro jogador). Sem formatos nossos no menu, ele fica exatamente como o original;
   - o `renderFormats` do menu foi reescrito no nosso arquivo. Se a Smogon mudar o original, conferir se o nosso precisa acompanhar.
 
+**Resultado da fase 2, etapa 4 (formatos gerados e recarga, 2026-10-17):**
+
+- **Um formato por desafio aberto**, chamado `[Desafio] <nome do desafio>`. O `config/custom-formats.ts` chama `buildChallengeFormats` (`gym-challenge/formats.ts`) toda vez que o Dex carrega a lista, tanto no processo principal quanto nos processos de batalha e validação. O formato usa o formato base como regra (`ruleset: [base, ...regras extras]`), herda `mod` e `gameType` e fica só na busca (`searchShow`), sem ranking (`rated: false`).
+- **O gerador nunca derruba o servidor:** ele não depende dos globais do servidor, abre o banco só para leitura e pula, registrando no log, desafios com ID repetido ou com formato base indisponível (removido numa atualização da Smogon, por exemplo). Um ID repetido derrubaria a carga de todos os formatos.
+- **Recarga automática** (`gym-challenge/reload.ts`) quando o admin abre, encerra ou reabre um desafio, ou salva um desafio aberto. Repete os passos de formatos do `/hotpatch formats` oficial, sem `/rebuild` (exige IP de console e recompila) e relendo o simulador, os dados e as listas de formatos. O Dex novo só entra no lugar se todos os formatos montarem a tabela de regras; se algo falhar, os formatos anteriores continuam valendo e o admin recebe um aviso.
+  - **Achado:** os mods de `data/` precisam ser relidos junto. O mod oficial `linked` altera os próprios dados ao inicializar e falha se o módulo for reaproveitado.
+  - **Custo:** cada recarga trava o processo principal por cerca de 3 s, como o hotpatch oficial. Para um servidor pequeno e ações raras do admin, é aceitável.
+  - Batalhas em andamento continuam nos processos antigos até terminarem (comportamento do `PM.respawn` do PS).
+- **Nome do desafio** não pode coincidir com um formato existente.
+- **"Battle!" num formato de desafio:** por enquanto valida o time (a mesma validação de uma busca normal) e avisa que as jornadas chegam em breve. O formato fixo da prova de conceito ("[Desafio] Teste POC") e o treinador fixo dela foram removidos.
+- **Validado por e2e com dois navegadores:** o jogador conectado recebe o formato quando o admin abre o desafio, vê a troca quando o desafio aberto é renomeado e o formato some ao encerrar e volta ao reabrir, tudo sem recarregar a página. Time válido e inválido recebem as respostas certas. Depois de subir com um desafio aberto e passar por duas recargas, uma Random Battle oficial continua funcionando.
+
 1. **Prova de conceito**, para reduzir os riscos técnicos:
    - batalha contra NPC com bot aleatório, dentro do processo;
    - ajuste no `search` e um formato gerado dinamicamente;
