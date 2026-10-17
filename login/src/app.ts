@@ -29,7 +29,8 @@ import { issueCode, INVITE_TTL_SECONDS, RESET_TTL_SECONDS } from './codes.ts';
 import { renderAccount, renderRegister, renderReset, type PageMessage } from './pages.ts';
 
 const MAX_BODY_BYTES = 16 * 1024;
-const PAGE_CSP = "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
+// O CSS e as imagens vêm do próprio cliente (mesmo domínio); nada de script
+const PAGE_CSP = "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
 
 export interface AppDeps {
 	db: Database;

@@ -117,14 +117,68 @@ D:\Workspace\pokemon-showdown\   ← repo "plataforma" → github: Rafaciba/poke
 - **Formato único por desafio.** O admin escolhe formato, limite de geração e mecânicas. Padrão: **Pokédex completa (até a gen 9)** com **Megaevolução habilitada** e **sem Z-moves, Dynamax e Tera**. Existe também uma opção de formato livre.
 - **Regra configurável por desafio:** o desafiante pode alterar o time entre as batalhas, ou deve usar o mesmo time em todo o desafio. Ele pode montar um ou mais times.
 - **Validação automática:** o time de cada líder precisa ser do tipo do ginásio.
-- **Insígnias** são específicas de cada desafio:
+- **Insígnias** são específicas de cada desafio. A regra original abaixo (2026-10-16) foi **SUBSTITUÍDA** em 2026-10-17: as insígnias são sempre da jornada.
   - nos desafios de **tipos fixos**, são **permanentes**;
   - nos desafios de **tipos sorteados**, valem **só enquanto o desafiante estiver ativo** naquele desafio.
 - Para enfrentar o **campeão**, é preciso ter **todas as insígnias** do desafio.
 - **Tentativas ilimitadas**, com placar de vitórias e derrotas (por tentativa e total) e **histórico de tentativas**.
 - **Painel admin** feito com páginas do próprio cliente PS (páginas de chat-plugin, `view-...`), **restrito ao perfil admin**.
 
-Em aberto: o que define o desafiante "ativo" (e quando deixa de estar) nos desafios com tipos sorteados.
+Regras de participação, definidas pelo usuário em 2026-10-17 e válidas para **todos** os desafios:
+
+- Em desafios com **trava de time**, o desafiante pode **desistir**, por exemplo para trocar de time. O admin também pode **encerrar** o desafio.
+- **Tentativas ilimitadas** de qualquer batalha, inclusive Elite 4 e Campeão, a não ser que o admin ative, ao criar ou editar o desafio, uma destas opções:
+  - **limite de derrotas**;
+  - **eliminação por derrota para a Elite 4**;
+  - **eliminação por derrota para o Campeão**.
+
+**Jornadas (runs)**, definidas pelo usuário em 2026-10-17:
+
+- Cada tentativa de um desafio é uma **jornada** (run).
+- **As insígnias pertencem à jornada.** Quando o jogador **vence o desafio**, as conquistas vão para a conta (perfil) dele.
+- **Desistir encerra a jornada.** O que foi ganho fica salvo no histórico, mas não conta para novas tentativas, que recomeçam do zero.
+- **Eliminação equivale a desistência:** a jornada é encerrada, e o jogador pode tentar de novo.
+- Vencer o mesmo desafio várias vezes **acumula conquistas**. Num eventual ranking de pontos por desafio, porém, vitórias repetidas **não geram mais pontos**.
+- O **limite de derrotas** conta o **total de derrotas na jornada inteira**.
+- A **Elite 4** é enfrentada **em sequência**, como nos jogos.
+- O admin pode **encerrar o desafio inteiro** ou **a jornada de um jogador**. O histórico é sempre mantido, e o desafio encerrado fica marcado como "encerrado".
+- **Placar:** por jornada e total do desafio, além do histórico de jornadas.
+
+Respostas às questões do documento de arquitetura (2026-10-17):
+
+1. As insígnias são **de cada jornada**. A regra antiga (permanentes nos tipos fixos) foi **substituída**.
+2. Os tipos são **sorteados a cada jornada**. Líderes **podem ser reaproveitados** entre desafios, o que implica um banco de treinadores.
+3. A **Elite 4 tem restrição de tipo**. O **Campeão não**.
+4. Trava de time = **sets idênticos**. Qualquer mudança (item, EVs etc.) exige uma nova jornada. Depois que a jornada começa, nada muda no time.
+5. A ordem dos ginásios é **livre por padrão**, e o admin pode **fixar uma ordem** (configurável por desafio).
+6. O timer fica **ligado**, mas **sem tempo limite** para as batalhas contra NPC.
+7. As batalhas contra NPC são **públicas**.
+8. A dificuldade da IA é **por treinador**, e o desafio pode ter uma **dificuldade base**.
+9. Alterar o fork (servidor e cliente) é permitido, **desde que não quebre os modos oficiais**. Nada é enviado à Smogon.
+
+Respostas às questões restantes (2026-10-17):
+
+1. A **Elite 4 e o Campeão são sempre fixos**, sem sorteio. Para enfrentar a Elite 4 são precisos **8 insígnias**. Por isso, no modo sorteado, são **sorteados 8 tipos** para a jornada, e todos precisam ser vencidos.
+2. O **banco de treinadores NPC é independente**, mantido pelo admin. Ao criar o desafio, o admin **seleciona os treinadores válidos** para ele.
+3. O nível de IA do desafio é o **padrão**, e os treinadores **podem estar acima**. A base não substitui o nível específico do treinador.
+4. **Timer:** o admin escolhe, por desafio, entre **limite de tempo por turno** e **tempo livre** (sem limite nenhum). Nos dois casos, o **tempo total da batalha não é limitado**.
+5. Na trava de time, **trocar apelido ou ordem dos Pokémon é permitido**. O resto precisa ser idêntico.
+6. Insígnias: os **ícones de tipo do PS servem de placeholder**. Depois serão trocados por **imagens das insígnias dos jogos oficiais**.
+
+Terceira rodada (2026-10-17):
+
+- **Quantidade de ginásios configurável.** A Elite 4 (ou o Campeão, se não houver Elite 4) exige **todas** as insígnias. No modo sorteado, são sorteados tantos tipos quantos forem os ginásios. (A menção anterior a "8 insígnias" era o caso típico, não uma regra.)
+- **Elite 4 e Campeão em sequência direta**, como nos jogos: perder em qualquer ponto volta ao primeiro membro da Elite 4.
+- **Nível de IA por treinador em cada desafio**, não no treinador: o mesmo treinador pode ser Fácil num desafio e Difícil em outro. A dificuldade é a qualidade das escolhas da IA. O nível mais fácil é o bot aleatório padrão. A **dificuldade base do desafio é o mínimo** para todos os seus treinadores. O que cada nível faz será definido depois.
+- **Aviso de projeto de fã** no rodapé do cliente: sem fins lucrativos, direitos das imagens da Nintendo, Creatures, Game Freak e The Pokémon Company. Feito no fork do cliente (`index-old.html`, `index-new.html`, `src/panel-mainmenu.tsx`) e nas páginas de conta.
+- **Achado:** o cliente do PS **não tem tradução pt-BR** (só de, es, fr, it, ja, ko, zh). As traduções pt existentes são só do servidor. O requisito de interface em pt-BR exige criar essa tradução; decidir com o usuário quando fazer.
+
+**Identidade visual (2026-10-17):** todas as telas, inclusive as nossas (painel admin, páginas de conta), seguem a **identidade visual oficial do PS**. O cliente deles é a base, e as alterações necessárias ficam no nosso fork, com a mesma premissa do servidor.
+
+Ideias para o futuro, sem implementar agora:
+
+- desafio **"Hardcore"**: só uma tentativa permitida;
+- **ranking de pontos** por desafio.
 
 **Futuro:** um modo no estilo roguelite, a detalhar com calma.
 
@@ -191,4 +245,4 @@ Pendências:
 - Guests (sem conta) podem assistir batalhas públicas e ver salas, mas não escolhem nome, não jogam e não falam. **Decisão do usuário (2026-10-17): manter assim.**
 
 Próximos passos:
-1. Escrever o documento de arquitetura do Desafio de Ginásios para revisão do usuário antes de programar.
+1. Revisão do usuário do documento de arquitetura do Desafio de Ginásios (`docs/arquitetura-desafio-ginasios.md`, escrito em 2026-10-17), todas as questões respondidas. Próximo: fase 1 (prova de conceito).

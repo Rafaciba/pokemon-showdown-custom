@@ -121,6 +121,10 @@ const messages = {
 		pt: 'Construído sobre o Pokémon Showdown, da comunidade Smogon.',
 		en: 'Built on Pokémon Showdown by the Smogon community.',
 	},
+	fanDisclaimer: {
+		pt: 'Projeto de fã, sem fins lucrativos. Pokémon e todos os nomes e imagens relacionados são marcas e propriedade da Nintendo, Creatures, Game Freak e The Pokémon Company.',
+		en: 'Fan project, non-profit. Pokémon and all related names and images are trademarks and property of Nintendo, Creatures, Game Freak and The Pokémon Company.',
+	},
 } satisfies Record<string, Record<Lang, string>>;
 
 export type MessageKey = keyof typeof messages;
