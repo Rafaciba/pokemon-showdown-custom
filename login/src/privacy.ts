@@ -38,6 +38,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 					'Conta: o seu nome de usuário e um hash da sua senha (a senha em si nunca é guardada). Não pedimos e-mail nem nenhum outro dado pessoal.',
 					'Sessão: um cookie (ps_session) que mantém você conectado por 30 dias, renovados a cada uso. No servidor fica só um hash desse cookie.',
 					'Jogo: a sua posição no ranking (ladder), um eventual cargo de moderação e, no Desafio de Ginásios, as suas jornadas, insígnias e conquistas. O seu perfil e histórico no Desafio de Ginásios ficam visíveis para os outros usuários logados.',
+					'Batalhas do Desafio de Ginásios em andamento: o estado da batalha (nomes, times e jogadas, sem as mensagens de chat), para que ela continue se for interrompida. Ele é apagado quando a batalha termina.',
 					'Registros de batalhas da ladder: nomes dos jogadores e times usados, guardados por 30 dias. As batalhas são públicas enquanto acontecem.',
 					'Registros de moderação: só se houver uma punição (por exemplo, um bloqueio), com o nome e o IP de quem foi punido, guardados enquanto forem necessários para a segurança do servidor.',
 					'Times e preferências ficam só no seu navegador; não são enviados ao servidor. O idioma escolhido também fica num cookie (ps_lang), só para as páginas de conta abrirem no mesmo idioma do jogo, e é informado ao servidor de jogo enquanto você está conectado.',
@@ -65,7 +66,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 				title: 'Por quanto tempo',
 				paragraphs: [
 					'Os dados da conta e do jogo ficam até você excluir a conta. Os registros de batalhas da ladder são apagados depois de 30 dias. Os registros técnicos do servidor têm tamanho limitado e não guardam o seu IP.',
-					'Ao excluir a conta em /conta, apagamos em poucos minutos: a conta, as sessões, o ranking, os cargos, as jornadas, as conquistas e os registros de batalhas em que você jogou.',
+					'Ao excluir a conta em /conta, apagamos em poucos minutos: a conta, as sessões, o ranking, os cargos, as jornadas (com as batalhas salvas), as conquistas e os registros de batalhas em que você jogou. As batalhas em andamento terminam com a sua desistência.',
 				],
 			},
 			{
@@ -92,6 +93,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 					'Account: your username and a hash of your password (the password itself is never stored). We do not ask for an e-mail address or any other personal data.',
 					'Session: a cookie (ps_session) that keeps you logged in for 30 days, renewed whenever you use it. The server keeps only a hash of it.',
 					'Game: your ladder ranking, any moderation rank and, in the Gym Challenge, your journeys, badges and achievements. Your Gym Challenge profile and history are visible to other logged-in users.',
+					'Gym Challenge battles in progress: the battle state (names, teams and moves, without chat messages), so the battle can continue if it is interrupted. It is deleted when the battle ends.',
 					'Ladder battle logs: player names and the teams used, kept for 30 days. Battles are public while they happen.',
 					'Moderation records: only if there is a punishment (for example, a lock), with the name and IP of the punished user, kept while needed for the server\'s security.',
 					'Teams and preferences stay in your browser only; they are not sent to the server. Your chosen language is also kept in a cookie (ps_lang), only so that the account pages open in the same language as the game, and it is sent to the game server while you are connected.',
@@ -119,7 +121,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 				title: 'How long we keep it',
 				paragraphs: [
 					'Account and game data are kept until you delete your account. Ladder battle logs are deleted after 30 days. The server\'s technical logs have a limited size and do not keep your IP address.',
-					'When you delete your account at /conta, within a few minutes we delete: the account, sessions, ranking, ranks, journeys, achievements and the battle logs you played in.',
+					'When you delete your account at /conta, within a few minutes we delete: the account, sessions, ranking, ranks, journeys (with their saved battles), achievements and the battle logs you played in. Battles in progress end with your forfeit.',
 				],
 			},
 			{

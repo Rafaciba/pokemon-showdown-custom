@@ -251,7 +251,7 @@ Os formulários usam os recursos nativos das páginas do PS (`<form data-submits
 
 ## 10. LGPD e exclusão de conta
 
-- **Dados guardados:** só o `userid` e os resultados (jornadas, batalhas, insígnias, conquistas). Sem IP.
+- **Dados guardados:** só o `userid` e os resultados (jornadas, batalhas, insígnias, conquistas). Sem IP. Enquanto uma batalha está em andamento, também o estado dela (save state: nomes, times e jogadas, sem o chat), apagado quando a batalha termina.
 - **Exclusão de conta:** quando o jogador exclui a conta em `/conta`, as jornadas, batalhas, insígnias e conquistas dele precisam ser apagadas no servidor de jogo. O mesmo vale para o ranking da ladder e o `usergroups.csv`, pendência já registrada.
 
   Proposta:
@@ -327,7 +327,7 @@ A prova de conceito foi validada com um teste de ponta a ponta pelo fluxo real: 
 
 - **Dados** (migração 2 do banco): `runs` (uma ativa por jogador e desafio, por índice único), `run_stages` (cópia das etapas com nome, tipo, time e nível efetivo do treinador, feita quando a jornada começa) e `run_battles` (resultado `win`, `loss`, `tie`, `void`, ou vazio enquanto a batalha está em andamento). Insígnias, derrotas e a posição na Elite 4 são calculadas a partir das batalhas (`journey.ts`, funções puras), sem tabela própria.
 - **Batalha:** o "Battle!" no formato do desafio confere a jornada ativa, a batalha em andamento, a trava de time (hash do time validado, sem apelidos e em qualquer ordem) e a etapa atual, e inicia a batalha contra o treinador da cópia da jornada. O resultado chega pelo `NpcBattle` (vitória, derrota ou empate) e atualiza a jornada: insígnia, vitória no desafio ou eliminação. Os avisos na sala ficam em inglês, como os do PS, porque a sala é pública.
-- **Batalha interrompida** (sala fechada sem fim, ou servidor reiniciado) vira `void` e não conta (confirmado pelo usuário "por enquanto"; ver a ideia de save state abaixo). A verificação é feita sob demanda: uma batalha "em andamento" cuja sala não existe mais é descartada. Assim, batalhas que continuam vivas depois de um hotpatch não são afetadas.
+- **Batalha interrompida** (sala fechada sem fim, ou servidor reiniciado): ~~vira `void` e não conta~~ **substituído em 2026-10-18 pelo save state** (ver "Save state das batalhas"). Ela fica suspensa e continua do ponto em que parou. Só vira `void` a batalha que some antes de ter qualquer jogada salva. A verificação é feita sob demanda, e batalhas que continuam vivas depois de um hotpatch não são afetadas.
 - **Limite de derrotas** (confirmado pelo usuário): ao **atingir** o limite, o jogador é eliminado (limite 3 = eliminado na 3ª derrota). A página mostra "Derrotas: 1 de 3".
 - **Timer por turno:** a própria batalha ajusta o timer (saldo de N segundos, reabastecido a N a cada turno), em vez das regras de timer do formato, que limitam o acréscimo por turno a 30 s e acabariam limitando o tempo total. Ligado pelo servidor, o jogador não consegue desligá-lo.
 - **Batalhas sempre públicas** (confirmado pelo usuário): as preferências de privacidade do jogador não se aplicam às batalhas contra NPC (requisito). O aviso de batalha no Lobby mostra o nome do NPC.
@@ -339,7 +339,7 @@ A prova de conceito foi validada com um teste de ponta a ponta pelo fluxo real: 
 - **Validado por e2e com batalhas reais:**
   - jornada: ginásio e Campeão vencidos; desistência no meio da batalha; trava de time (apelido e ordem aceitos, item diferente recusado); eliminação por limite de derrotas; timer por turno ligado e sem poder desligar;
   - páginas: começar, escolher ginásio, atualização automática, insígnia, visitante só para leitura, admin encerrando a jornada, histórico e encerramento do desafio com jornada ativa.
-- **Ideia para depois (usuário, 2026-10-17):** um **save state automático** das batalhas, para que uma batalha interrompida (servidor reiniciado) possa continuar e para evitar o "reload scam" (o jogador recarregar a página ou derrubar a conexão para escapar de uma derrota).
+- **Ideia para depois (usuário, 2026-10-17):** um **save state automático** das batalhas, para que uma batalha interrompida (servidor reiniciado) possa continuar e para evitar o "reload scam" (o jogador recarregar a página ou derrubar a conexão para escapar de uma derrota). **Feito em 2026-10-18** (ver "Save state das batalhas").
 - **Fica para a fase 4:** conquistas no perfil (a jornada vencida já fica registrada como `won`), placar total, página de histórico e perfil, e a exclusão dos dados de jogo junto com a exclusão da conta.
 
 **Decisões do usuário para a fase 4 (2026-10-18):**
@@ -420,6 +420,28 @@ A prova de conceito foi validada com um teste de ponta a ponta pelo fluxo real: 
 
   O que mais pesa é trocar bem: o Médio sem trocas ganha só 25% do Médio normal. No Difícil, cada regra a mais acrescenta 1 a 3 pontos contra o Médio. Contra outra IA, que quase não troca, hazards e status valem pouco; contra pessoas, que trocam bastante, eles devem pesar mais. Dois ajustes testados e descartados por piorarem o resultado: trocar diante de um adversário mais rápido que nocauteia, e trocar quando o ativo quase não causa dano.
 - **Validado:** testes de unidade das decisões (11 cenários, incluindo buffs, debuffs e Haze) e batalhas reais no servidor (Brock no Difícil usou Stealth Rock e golpes de dano; Misty no Médio).
+
+### Save state das batalhas (2026-10-18)
+
+Objetivo (usuário): uma batalha interrompida continua de onde parou, e fechar a página ou derrubar a conexão não serve para escapar de uma derrota ("reload scam").
+
+**Decisões do usuário:**
+- **Só no Desafio de Ginásios.** Nas batalhas entre jogadores, o timer do PS já pune quem abandona.
+- **Retomada automática ao entrar com a conta**, e também pelo botão "Continuar sua batalha" na página do desafio (`/ginasio continuar <desafio>`) e pelo "Battle!" do formato.
+- **Sem prazo:** a batalha suspensa espera o jogador. A jornada não avança até ela terminar, e desistir conta como derrota.
+- **Desafio encerrado com a batalha suspensa:** o formato sai da lista e não há como remontar a batalha, então ela é anulada e o jogador recebe um aviso (decisão proposta e aceita).
+- **A exclusão de conta encerra as batalhas em andamento** com forfeit, inclusive as batalhas entre jogadores. Isso foi achado durante os testes: uma conta nova com o mesmo nome assumia as batalhas da conta excluída.
+
+**Como funciona:**
+- **Salvamento:** a cada pedido de jogada do desafiante, `NpcBattle` pede o input log ao simulador e grava em `run_battles.input_log` (migração 3). O simulador só registra as escolhas quando o turno fecha, já resolvidas, então o estado tem apenas jogadas confirmadas. A semente aleatória está no log, e reproduzi-lo remonta a batalha no mesmo ponto, com a mesma sorte.
+- **Minimização (LGPD):** as linhas `>chat` (mensagens da sala) saem antes de gravar, e o resultado da batalha apaga o estado.
+- **Suspensão:** quando a sala some sem resultado, a batalha continua "em andamento" no banco (`runState` devolve `suspended`).
+- **Retomada** (`resumeBattle` em `runs.ts`): cria uma sala nova com `inputLog`, os mesmos ganchos e o mesmo treinador, e atualiza `roomid`. Durante a reprodução, o NPC não responde aos pedidos antigos. Ele só volta a jogar quando chega a resposta de um `>requestlog` enviado depois do log, porque o simulador responde em ordem.
+- **Gatilho automático:** handler `onRename` do plugin, depois de o PS juntar a conexão nova ao usuário. Salas vivas ficam de fora, porque o PS já recoloca o jogador nelas.
+
+**Validado:**
+- testes: banco (salvar, apagar no resultado, listar), chat fora do estado, batalha real salva a cada decisão, retomada no mesmo turno com o NPC jogando em seguida, forfeit das batalhas da conta excluída;
+- e2e com o servidor de verdade (simulador em subprocessos): batalha no turno 3, `docker compose restart server`, batalha reaberta sozinha no turno 3 com o histórico e o aviso, turno seguinte jogado, reload da página sem perder a batalha, desistência como derrota e estado apagado no banco.
 
 1. **Prova de conceito**, para reduzir os riscos técnicos:
    - batalha contra NPC com bot aleatório, dentro do processo;

@@ -108,6 +108,7 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 | Rank e autoridade de sala | `server/config` | até a exclusão | Sim |
 | Ladder | `server/config/ladders` | até a exclusão | Sim |
 | Jornadas, insígnias e histórico | `server/databases/gym-challenge.db` | até a exclusão | Sim |
+| Estado das batalhas de ginásio em andamento (nomes, times e jogadas, sem chat) | `server/databases/gym-challenge.db` (`run_battles.input_log`) | até a batalha terminar | Sim (e as batalhas em andamento terminam com forfeit) |
 | Logs dos containers | Docker (3 × 10 MB por serviço) | por tamanho | Não (sem IP; pode haver nomes em erros) |
 | Logs de batalha da ladder (nomes e times) | `server/logs/AAAA-MM/...` | 30 dias | Sim |
 | **Modlog e punições** (nome e IP, só quando há moderação) | `server/logs/modlog`, `config/punishments.tsv` | **indefinida** | **Não** |
@@ -133,6 +134,15 @@ Revisada contra o OWASP Top 10 ao ser feita. Detalhes em `docs/traducao-pt-br.md
 - **A05/A04 (desempenho).** Padrões só valem para textos de até 300 caracteres; as entradas `html` só são comparadas quando o começo do texto bate.
 - **Cookie `ps_lang`:** só `pt` ou `en`, validado no login (`parseLang`), SameSite=Lax e Secure. Não é HttpOnly porque o cliente também o grava, e não é sensível.
 - **LGPD:** o aviso de privacidade passou a citar o idioma guardado no navegador e no cookie.
+
+### Save state das batalhas (2026-10-18)
+Revisado contra o OWASP Top 10 e a LGPD ao ser feito. Detalhes em `docs/arquitetura-desafio-ginasios.md`.
+- **A01 (acesso).** Só o dono da jornada retoma a batalha: `resumeBattle` confere o `userid` da jornada, e a retomada automática só roda para contas registradas, depois do login. A batalha retomada mantém as proteções da `NpcBattle`: ninguém entra no lugar do NPC, e ela é sempre pública.
+- **A03 (injeção).** O estado salvo vem do próprio simulador e só volta para ele. O banco usa consultas parametrizadas. O formato lido do log é conferido contra a lista de formatos antes de criar a sala.
+- **A04 (design).** Fechar a página, perder a conexão ou reiniciar o servidor não anula mais a batalha ("reload scam"); a única saída é desistir, que conta como derrota. O defeito de reprodução em que o NPC responderia a pedidos antigos é evitado esperando a reprodução terminar.
+- **A08 (integridade).** O estado salvo só tem jogadas confirmadas: uma escolha feita, mas ainda não fechada no turno, não fica salva, e não dá para "voltar" uma jogada.
+- **Exclusão de conta.** As batalhas em andamento da conta terminam com forfeit antes de o nome ser liberado. Uma conta nova com o mesmo nome não assume mais essas batalhas (achado nos testes e corrigido).
+- **LGPD.** As mensagens de chat saem do estado antes de gravar, o estado é apagado no fim da batalha e junto com a conta, e os avisos de privacidade e de exclusão de conta foram atualizados.
 
 ## Testes desta revisão
 - **Login:** 19 testes (5 novos: aviso de privacidade, nomes reservados, anulação de códigos, bloqueio por conta e IP sem afetar outro IP e sem escapar por `X-Forwarded-For` forjado, POST de outro site sem `Origin`).

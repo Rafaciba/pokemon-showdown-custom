@@ -11,16 +11,18 @@ Nos comandos, troque:
 | Marcador | Por |
 |---|---|
 | `IP_DA_VPS` | o IPv4 que a HostGator informa no painel |
+| `PORTA_SSH` | a porta do SSH da VPS. Na HostGator ela vem como **22022**, não a 22. Confira no painel ou, já na VPS, com `sudo ss -tlnp` |
 | `deploy` | o nome do usuário de administração, se quiser outro |
+| `SEU_USUARIO` | a sua pasta de usuário no Windows (`C:\Users\SEU_USUARIO`) |
 
 > **Antes de começar:** ative a verificação em duas etapas na conta da HostGator e na do registro do domínio (registro.br ou outro). Quem entra nessas contas controla o servidor e o domínio.
 
 ## 1. Chave SSH (no seu computador)
 
-No PowerShell do Windows, gere uma chave só para a VPS. Proteja-a com uma senha (passphrase):
+Gere uma chave só para a VPS e proteja-a com uma senha (passphrase). Use o caminho completo, com barras normais: assim o comando funciona em qualquer terminal (PowerShell, Prompt de Comando ou Git Bash). `$env:USERPROFILE` só existe no PowerShell; em outro terminal o caminho fica vazio e dá "No such file or directory".
 
-```powershell
-ssh-keygen -t ed25519 -f "$env:USERPROFILE\.ssh\ps-vps" -C "ps-vps"
+```
+ssh-keygen -t ed25519 -f C:/Users/SEU_USUARIO/.ssh/ps-vps -C ps-vps
 ```
 
 A chave **privada** (`ps-vps`) nunca sai do seu computador. A **pública** (`ps-vps.pub`) vai para a VPS no passo 3.
@@ -29,8 +31,8 @@ A chave **privada** (`ps-vps`) nunca sai do seu computador. A **pública** (`ps-
 
 Entre como root com a senha que a HostGator enviou:
 
-```powershell
-ssh root@IP_DA_VPS
+```
+ssh -p PORTA_SSH root@IP_DA_VPS
 ```
 
 Na VPS:
@@ -41,7 +43,7 @@ timedatectl set-timezone America/Sao_Paulo
 reboot
 ```
 
-Espere um minuto e entre de novo como root.
+Espere um minuto e entre de novo como root. Para conferir: `timedatectl | grep "Time zone"` deve mostrar `America/Sao_Paulo`.
 
 ## 3. Usuário de administração
 
@@ -52,24 +54,28 @@ mkdir -p /home/deploy/.ssh
 chmod 700 /home/deploy/.ssh
 ```
 
-No **seu computador**, em outra janela do PowerShell, copie a chave pública para a VPS:
+No **seu computador**, em outra janela, copie a chave pública para a VPS. No PowerShell ou no Prompt de Comando:
 
-```powershell
-Get-Content "$env:USERPROFILE\.ssh\ps-vps.pub" | ssh root@IP_DA_VPS "cat >> /home/deploy/.ssh/authorized_keys"
 ```
+type C:\Users\SEU_USUARIO\.ssh\ps-vps.pub | ssh -p PORTA_SSH root@IP_DA_VPS "cat >> /home/deploy/.ssh/authorized_keys"
+```
+
+No Git Bash, troque `type C:\Users\...` por `cat C:/Users/SEU_USUARIO/.ssh/ps-vps.pub`.
 
 De volta na VPS (como root):
 
 ```sh
 chown -R deploy:deploy /home/deploy/.ssh
 chmod 600 /home/deploy/.ssh/authorized_keys
+cat /home/deploy/.ssh/authorized_keys     # deve mostrar a linha "ssh-ed25519 ... ps-vps"
 ```
 
-Para facilitar, crie no seu computador o arquivo `%USERPROFILE%\.ssh\config` com:
+Para facilitar, abra no seu computador o arquivo de configuração do SSH: `notepad C:\Users\SEU_USUARIO\.ssh\config`. Se ele já existir com outros servidores, **não apague nada**: acrescente no final, depois de uma linha em branco:
 
 ```
 Host ps-vps
     HostName IP_DA_VPS
+    Port PORTA_SSH
     User deploy
     IdentityFile ~/.ssh/ps-vps
 ```
@@ -93,27 +99,64 @@ EOF
 sshd -t && systemctl restart ssh
 ```
 
-Teste de novo em outra janela: `ssh ps-vps` deve entrar e `ssh root@IP_DA_VPS` deve ser recusado. A partir daqui, use sempre `ssh ps-vps`.
+Antes de reiniciar o SSH, confira o que ficou valendo. Se alguma linha vier diferente, não reinicie:
+
+```sh
+sshd -T | grep -Ei "^(permitrootlogin|passwordauthentication|kbdinteractiveauthentication|allowusers)"
+# esperado: permitrootlogin no / passwordauthentication no / kbdinteractiveauthentication no / allowusers deploy
+```
+
+(Esta conferência vem antes do `systemctl restart ssh` acima: rode-a depois do `sshd -t`.)
+
+Teste de novo em outra janela:
+- `ssh ps-vps` deve entrar;
+- `ssh -p PORTA_SSH root@IP_DA_VPS` deve ser recusado, com `Permission denied (publickey)`.
+
+A partir daqui, use sempre `ssh ps-vps`.
+
+**Se o `sudo` avisar "unable to resolve host ...":** o nome da máquina não está no `/etc/hosts`, o que acontece na HostGator. Corrija com:
+
+```sh
+echo "127.0.1.1 $(hostname) $(hostname -s)" | sudo tee -a /etc/hosts
+```
 
 ## 5. Firewall e proteção do SSH
+
+Antes, veja se a imagem já traz regras de firewall. Algumas imagens da Oracle Cloud, a infraestrutura da HostGator, bloqueiam tudo menos o SSH. O esperado é `Chain INPUT (policy ACCEPT)`, sem nenhuma regra:
+
+```sh
+sudo iptables -L INPUT -n --line-numbers
+```
+
+Libere a **porta real do SSH** (`PORTA_SSH`). Se liberar a errada, o `ufw enable` tranca você para fora:
 
 ```sh
 sudo apt install -y ufw fail2ban
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
-sudo ufw allow 22/tcp
+sudo ufw allow PORTA_SSH/tcp
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
 sudo ufw allow 443/udp
+sudo ufw show added          # confira que aparece "ufw allow PORTA_SSH/tcp"
 sudo ufw enable
-sudo systemctl enable --now fail2ban
 ```
 
-O fail2ban já protege o SSH na configuração padrão do Ubuntu: bloqueia por um tempo os IPs com muitas falhas de login.
+O fail2ban bloqueia por um tempo os IPs com muitas falhas de login no SSH. Ele precisa saber a porta, porque o padrão dele é a 22:
+
+```sh
+printf '[sshd]\nport = PORTA_SSH\n' | sudo tee /etc/fail2ban/jail.d/sshd-port.local
+sudo systemctl enable --now fail2ban
+sudo systemctl restart fail2ban
+sudo ufw status verbose
+sudo fail2ban-client status sshd
+```
+
+Teste `ssh ps-vps` numa janela nova, já com o firewall ligado.
 
 > **Atenção ao Docker:** portas publicadas por containers (`ports:` no compose) **passam por fora do ufw**. O compose só publica 80 e 443 (Caddy), que são as portas que devem ficar abertas mesmo. **Nunca** publique as portas 8000 (servidor) ou 9000 (login).
 
-Se o painel da HostGator tiver um firewall próprio (lista de segurança), libere nele as mesmas portas: 22, 80 e 443 (TCP) e 443 (UDP).
+Se o painel da HostGator tiver um firewall próprio (lista de segurança), libere nele as mesmas portas: `PORTA_SSH`, 80 e 443 (TCP) e 443 (UDP).
 
 ## 6. Atualizações automáticas e limites do sistema
 
@@ -268,12 +311,12 @@ age-keygen -o "$env:USERPROFILE\.ssh\ps-backup-key.txt"
 
 O comando mostra a chave pública (`age1...`). Guarde o arquivo da chave privada também fora do computador, por exemplo num gerenciador de senhas: **sem ele, nenhum backup pode ser aberto**.
 
-**Na VPS**, registre a chave pública e agende o backup diário às 04:00:
+**Na VPS**, registre a chave pública e agende o backup diário às 03:00. O horário precisa ser antes do reinício automático do passo 6, se ele estiver ligado (o exemplo usa 04:00 ou 05:00), para o backup não ser interrompido:
 
 ```sh
 sudo mkdir -p /etc/ps-custom
 echo 'age1...COLE_A_CHAVE_PUBLICA...' | sudo tee /etc/ps-custom/backup-recipient.txt
-echo '0 4 * * * root BACKUP_GROUP=deploy /bin/sh /opt/pokemon-showdown-custom/scripts/vps-backup.sh >> /var/log/ps-custom-backup.log 2>&1' | sudo tee /etc/cron.d/ps-custom-backup
+echo '0 3 * * * root BACKUP_GROUP=deploy /bin/sh /opt/pokemon-showdown-custom/scripts/vps-backup.sh >> /var/log/ps-custom-backup.log 2>&1' | sudo tee /etc/cron.d/ps-custom-backup
 sudo BACKUP_GROUP=deploy sh /opt/pokemon-showdown-custom/scripts/vps-backup.sh     # primeiro backup, para testar
 ```
 
@@ -289,8 +332,12 @@ scp "ps-vps:/var/backups/ps-custom/*.age" "$env:USERPROFILE\Backups\ps-custom\"
 **Para conferir um backup** no seu computador (não precisa restaurar):
 
 ```powershell
-age -d -i "$env:USERPROFILE\.ssh\ps-backup-key.txt" ps-custom-AAAA-MM-DD_HHMM.tar.gz.age | tar -tzf -
+age -d -i C:\Users\SEU_USUARIO\.ssh\ps-backup-key.txt -o teste.tar.gz ps-custom-AAAA-MM-DD_HHMM.tar.gz.age
+tar -tzf teste.tar.gz
+Remove-Item teste.tar.gz      # é a cópia sem criptografia: não deixe no disco
 ```
+
+Não use `age ... | tar ...` no Windows PowerShell 5.1: ele trata o que passa pelo `|` como texto e corrompe o arquivo ("Unrecognized archive format").
 
 > **LGPD:** quem exclui a conta continua nos backups até eles vencerem (14 dias na VPS, e o prazo que você mantiver no seu computador). O aviso de privacidade ainda **não** menciona isso. Decida o prazo das cópias fora da VPS e me avise, para atualizarmos o aviso (`login/src/privacy.ts`).
 

@@ -115,8 +115,8 @@ const messages = {
 	accountLoggedInAs: { pt: 'Logado como {name}.', en: 'Logged in as {name}.' },
 	deleteTitle: { pt: 'Excluir conta', en: 'Delete account' },
 	deleteWarning: {
-		pt: 'Atenção: a exclusão é definitiva. Serão apagados junto com a conta todos os seus dados no servidor, inclusive times salvos, conquistas e insígnias, histórico e placar dos desafios. Não é possível desfazer.',
-		en: 'Warning: deletion is permanent. All your data on the server will be deleted along with the account, including saved teams, achievements and badges, challenge history and scores. This cannot be undone.',
+		pt: 'Atenção: a exclusão é definitiva. Serão apagados junto com a conta todos os seus dados no servidor, inclusive times salvos, conquistas e insígnias, histórico e placar dos desafios. Batalhas em andamento terminam com a sua desistência. Não é possível desfazer.',
+		en: 'Warning: deletion is permanent. All your data on the server will be deleted along with the account, including saved teams, achievements and badges, challenge history and scores. Battles in progress end with your forfeit. This cannot be undone.',
 	},
 	deleteConfirm: {
 		pt: 'Entendo que todos os meus dados serão excluídos definitivamente.',

@@ -79,7 +79,9 @@ export const RULES: { [lang in Lang]: Notice } = {
 				paragraphs: [
 					'As batalhas contra os treinadores são sempre públicas: qualquer um pode assistir, e o Lobby anuncia a batalha.',
 					'Empate não conta: nem vitória nem derrota. Você enfrenta o mesmo treinador de novo.',
-					'Batalha interrompida sem terminar (por exemplo, se o servidor reiniciar) é anulada e não conta. Você enfrenta o mesmo treinador de novo.',
+					'As batalhas são salvas a cada jogada. Uma batalha interrompida sem terminar (servidor reiniciado, página fechada, conexão perdida) continua do ponto em que parou: ela reabre sozinha quando você entra com a sua conta, ou pelo botão "Continuar sua batalha" na página do desafio. Fechar a página não apaga uma derrota, e a jornada só avança quando a batalha termina.',
+					'Para sair de uma batalha sem terminá-la, desista da jornada: a batalha conta como derrota.',
+					'Se o administrador encerrar o desafio enquanto a sua batalha estiver interrompida, ela é anulada e não conta.',
 					'O timer fica ligado. Conforme o desafio, há um limite de tempo por turno ou tempo livre; o tempo total da batalha nunca é limitado.',
 				],
 			},
@@ -168,7 +170,9 @@ export const RULES: { [lang in Lang]: Notice } = {
 				paragraphs: [
 					'Battles against trainers are always public: anyone can watch, and the Lobby announces them.',
 					'A tie does not count as a win or a loss. You face the same trainer again.',
-					'A battle interrupted before it ends (for example, if the server restarts) is void and does not count. You face the same trainer again.',
+					'Battles are saved after every move. A battle interrupted before it ends (server restart, page closed, lost connection) continues from where it stopped: it reopens by itself when you log in to your account, or with the "Continue your battle" button on the challenge page. Closing the page does not erase a loss, and the journey only moves on when the battle ends.',
+					'To leave a battle without finishing it, give up the journey: the battle counts as a loss.',
+					'If the administrator closes the challenge while your battle is interrupted, the battle is void and does not count.',
 					'The timer is always on. Depending on the challenge, there is a per-turn time limit or no limit at all; the total battle time is never limited.',
 				],
 			},

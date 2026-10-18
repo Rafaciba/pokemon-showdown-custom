@@ -18,9 +18,9 @@ const PATHS = {
 
 // Tabelas de batalha: arquivo, export e se o "name" fica de fora (nomes em inglês)
 const TABLES = [
-	{ file: 'moves', exportName: 'MovesText', type: '{ [id: IDEntry]: MoveText }', table: 'Moves' },
-	{ file: 'abilities', exportName: 'AbilitiesText', type: '{ [id: IDEntry]: AbilityText }', table: 'Abilities' },
-	{ file: 'items', exportName: 'ItemsText', type: '{ [id: IDEntry]: ItemText }', table: 'Items' },
+	{ file: 'moves', exportName: 'MovesText', type: '{ [id: IDEntry]: Partial<MoveText> }', table: 'Moves' },
+	{ file: 'abilities', exportName: 'AbilitiesText', type: '{ [id: IDEntry]: Partial<AbilityText> }', table: 'Abilities' },
+	{ file: 'items', exportName: 'ItemsText', type: '{ [id: IDEntry]: Partial<ItemText> }', table: 'Items' },
 	{ file: 'default', exportName: 'DefaultText', type: '{ [id: IDEntry]: DefaultText }', table: 'Default' },
 ];
 const NAME_TABLES = ['StatNames', 'StatMediumNames', 'StatusNames', 'TargetNames', 'GenderNames', 'ColorNames'];
