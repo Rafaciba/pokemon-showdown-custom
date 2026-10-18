@@ -19,7 +19,8 @@ import { RateLimiter } from './rate-limit.ts';
 import { toID, validateUserid } from './util.ts';
 import { t, detectLang, type Lang, type MessageKey } from './i18n.ts';
 import {
-	authenticate, changePassword, deleteAccount, getUser, register, resetPassword, normalizeUsername, type User,
+	authenticate, changePassword, completePurge, deleteAccount, getUser, listPendingPurges, register, resetPassword,
+	normalizeUsername, type User,
 } from './accounts.ts';
 import {
 	createSession, getSession, deleteSession, deleteOtherSessions, sessionCookie, clearSessionCookie, readCookie,
@@ -270,6 +271,15 @@ export function createApp(deps: AppDeps) {
 			const issued = issueCode(db, 'reset', user.userid, RESET_TTL_SECONDS);
 			console.log('[admin] código de redefinição gerado');
 			return { status: 200, body: { ok: true, ...issued, url: `https://${config.serverHost}/redefinir`, username: user.username } };
+		}
+		case '/internal/purges':
+			// Contas excluídas cujos dados de jogo o servidor de jogo ainda precisa apagar
+			return { status: 200, body: { ok: true, userids: listPendingPurges(db) } };
+		case '/internal/purges/done': {
+			const userid = toID(params.userid);
+			if (!userid) return { status: 400, body: { ok: false, error: 'userid required' } };
+			completePurge(db, userid);
+			return { status: 200, body: { ok: true } };
 		}
 		default:
 			return { status: 404, body: { ok: false, error: 'not found' } };

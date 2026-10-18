@@ -16,6 +16,10 @@ const messages = {
 	nameNeedsLetter: { pt: 'O nome precisa ter pelo menos uma letra.', en: 'Names must contain at least one letter.' },
 	nameReserved: { pt: 'Esse nome é reservado.', en: 'That name is reserved.' },
 	nameTaken: { pt: 'Esse nome já está em uso.', en: 'That name is already taken.' },
+	nameReleasing: {
+		pt: 'Esse nome é de uma conta excluída há pouco e ainda está sendo liberado. Tente de novo em alguns minutos.',
+		en: 'That name belongs to a recently deleted account and is still being released. Try again in a few minutes.',
+	},
 	inviteInvalid: {
 		pt: 'Código de convite inválido, já usado ou expirado.',
 		en: 'Invalid, used or expired invite code.',

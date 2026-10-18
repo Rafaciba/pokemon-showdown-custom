@@ -46,6 +46,23 @@ export function getUser(db: Database, userid: string): User | null {
 	return row ?? null;
 }
 
+// --- Fila de exclusão dos dados de jogo ------------------------------------
+
+/** Conta excluída cujos dados de jogo ainda não foram apagados pelo servidor de jogo. */
+export function isPendingPurge(db: Database, userid: string): boolean {
+	return !!db.prepare('SELECT 1 FROM pending_purges WHERE userid = ?').get(userid);
+}
+
+export function listPendingPurges(db: Database): string[] {
+	return (db.prepare('SELECT userid FROM pending_purges ORDER BY deleted_at').all() as { userid: string }[])
+		.map(row => row.userid);
+}
+
+/** O servidor de jogo apagou os dados: o userid sai da fila e o nome volta a ficar livre. */
+export function completePurge(db: Database, userid: string): boolean {
+	return db.prepare('DELETE FROM pending_purges WHERE userid = ?').run(userid).changes === 1;
+}
+
 export async function register(
 	db: Database, inviteCode: string, rawName: string, password: string, confirm: string
 ): Promise<Result<User>> {
@@ -57,6 +74,7 @@ export async function register(
 	const { userid, username } = name.value;
 	if (invite.userid && invite.userid !== userid) return fail('inviteForOtherName');
 	if (getUser(db, userid)) return fail('nameTaken');
+	if (isPendingPurge(db, userid)) return fail('nameReleasing');
 
 	if (password !== confirm) return fail('passwordMismatch');
 	const policyError = checkPasswordPolicy(password, userid);
@@ -73,6 +91,10 @@ export async function register(
 		if (getUser(db, userid)) {
 			db.exec('ROLLBACK');
 			return fail('nameTaken');
+		}
+		if (isPendingPurge(db, userid)) {
+			db.exec('ROLLBACK');
+			return fail('nameReleasing');
 		}
 		const now = nowSeconds();
 		db.prepare('INSERT INTO users (userid, username, password_hash, created_at, password_changed_at) VALUES (?, ?, ?, ?, ?)')
@@ -135,7 +157,9 @@ export async function resetPassword(
 
 /**
  * Exclui a conta e tudo que está neste serviço (sessões e códigos ligados a ela).
- * Dados guardados no servidor de jogo precisam ser apagados lá (ver docs).
+ * Os dados do servidor de jogo (jornadas, conquistas, ladder, ranks) são apagados
+ * por ele: o userid entra na fila pending_purges, que o servidor de jogo consulta
+ * pela API interna e confirma depois de apagar.
  */
 export async function deleteAccount(db: Database, user: User, password: string): Promise<Result> {
 	if (!await authenticate(db, user.userid, password)) return fail('wrongPassword');
@@ -144,6 +168,7 @@ export async function deleteAccount(db: Database, user: User, password: string):
 		db.prepare('DELETE FROM codes WHERE userid = ?').run(user.userid);
 		db.prepare('DELETE FROM sessions WHERE userid = ?').run(user.userid);
 		db.prepare('DELETE FROM users WHERE userid = ?').run(user.userid);
+		db.prepare('INSERT OR REPLACE INTO pending_purges (userid, deleted_at) VALUES (?, ?)').run(user.userid, nowSeconds());
 		db.exec('COMMIT');
 	} catch (err) {
 		db.exec('ROLLBACK');

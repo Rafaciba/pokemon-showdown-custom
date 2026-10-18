@@ -246,6 +246,25 @@ test('exclusão de conta exige confirmação e senha, e apaga tudo', async () =>
 	assert.equal(left.n, 0);
 });
 
+test('exclusão de conta entra na fila de dados de jogo até o servidor confirmar', async () => {
+	const session = await registerUser('Forrest', 'onix-rocha-1');
+	const pending = async () => (await internal('/internal/purges', {})).json.userids as string[];
+	assert.ok(!(await pending()).includes('forrest'));
+	await post('/conta/excluir', { password: 'onix-rocha-1', confirm: 'yes' }, { cookie: session });
+	assert.equal((await internal('/internal/purges', {}, 'token-errado')).status, 401);
+	assert.ok((await pending()).includes('forrest'));
+
+	// Enquanto os dados de jogo não forem apagados, o nome não pode ser recadastrado
+	const invite = await newInvite();
+	const blocked = await post('/cadastro', { invite, username: 'Forrest', password: 'outra-senha-1', confirm: 'outra-senha-1' });
+	assert.match(blocked.text, /sendo liberado/);
+
+	assert.equal((await internal('/internal/purges/done', { userid: 'Forrest' })).status, 200);
+	assert.ok(!(await pending()).includes('forrest'));
+	const again = await post('/cadastro', { invite, username: 'Forrest', password: 'outra-senha-1', confirm: 'outra-senha-1' });
+	assert.match(again.text, /Conta criada/);
+});
+
 test('limite de tentativas de senha por conta', async () => {
 	await registerUser('Lance', 'dragonite-9');
 	for (let i = 0; i < 10; i++) await action('login', { name: 'Lance', pass: `errada-${i}`, challstr: CHALLSTR });

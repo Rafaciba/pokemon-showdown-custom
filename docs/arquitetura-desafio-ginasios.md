@@ -342,6 +342,41 @@ A prova de conceito foi validada com um teste de ponta a ponta pelo fluxo real: 
 - **Ideia para depois (usuário, 2026-10-17):** um **save state automático** das batalhas, para que uma batalha interrompida (servidor reiniciado) possa continuar e para evitar o "reload scam" (o jogador recarregar a página ou derrubar a conexão para escapar de uma derrota).
 - **Fica para a fase 4:** conquistas no perfil (a jornada vencida já fica registrada como `won`), placar total, página de histórico e perfil, e a exclusão dos dados de jogo junto com a exclusão da conta.
 
+**Decisões do usuário para a fase 4 (2026-10-18):**
+
+- **Perfil e histórico** de qualquer jogador: visíveis **só para usuários logados**.
+- **O perfil mostra:** desafios vencidos (conquistas), insígnias das vitórias, placar por desafio e jornadas em andamento.
+- **Acesso ao perfil:** botão "Gym profile" no popup de usuário (fork do cliente), links nas páginas do desafio e o comando `/ginasio perfil [nome]`.
+
+**Resultado da fase 4 (placar, histórico, perfil, conquistas e exclusão de dados, 2026-10-18):**
+
+- **Conquistas sem tabela nova:** são as jornadas com status "vencida". Vencer de novo acumula uma conquista por vitória. Placar e insígnias também vêm das jornadas e batalhas já gravadas.
+- **Páginas:**
+  - `view-ginasios-perfil-<usuário>`: conquistas (desafio, data e insígnias), jornadas em andamento e placar por desafio (jornadas, vencidas, batalhas vencidas e perdidas), com link para o histórico;
+  - `view-ginasios-historico-<desafio>-<usuário>`: cada jornada com resultado, insígnias, batalhas vencidas e perdidas, e o total do desafio. As jornadas anteriores da página do desafio usam a mesma tabela.
+  - Visitantes veem "entre para ver"; a página carrega sozinha depois do login.
+- **Nome exibido:** o atual, se o jogador estiver conectado; senão, o userid. O banco do jogo não guarda nomes de exibição (minimização de dados).
+- **Acesso:**
+  - botão "Gym profile" no popup de usuário (`client-custom.js`, só para quem está logado);
+  - "My profile" na lista de desafios;
+  - nome do jogador como botão de perfil na página de jornadas do admin;
+  - `/ginasio perfil [nome]`.
+- **Exclusão dos dados de jogo junto com a conta:**
+  - **Login:** ao excluir a conta, grava só o userid na tabela `pending_purges`, na mesma transação. Enquanto ele estiver lá, o nome não pode ser recadastrado ("sendo liberado"), para os dados antigos não se misturarem aos de uma conta nova. API interna nova: `/internal/purges` (lista) e `/internal/purges/done` (confirma e tira da fila).
+  - **Servidor de jogo** (`custom-accounts.ts`): consulta a fila 10 s depois de iniciar e a cada minuto. Para cada conta excluída:
+    - a sessão aberta volta a visitante;
+    - o rank global (`usergroups.csv`) e os ranks de sala saem;
+    - as linhas das ladders locais saem; uma ladder que fica vazia tem o arquivo apagado, porque o `save()` do PS não grava ladder vazia e o arquivo antigo ficaria;
+    - o handler novo `onAccountPurge` (1 linha no `chat.ts`) avisa os plugins, e o Desafio de Ginásios apaga as jornadas, com etapas e batalhas em cascata;
+    - no fim, confirma ao login.
+  - O log registra só a quantidade de contas, sem os nomes. O timer fica num global para um hotpatch não criar outro.
+  - Logs e modlog do PS (nomes e IPs) continuam na pendência de revisão LGPD antes da produção.
+- **Validado:**
+  - teste de integração do login: fila, bloqueio do nome e liberação;
+  - testes de unidade do banco;
+  - e2e com dois jogadores: perfil pelo popup, conquista, jornada em andamento, placar 2/1/3/0, histórico com total, visitante bloqueado, comando;
+  - e2e de exclusão pela página `/conta`: jornadas, ladders (inclusive o arquivo que ficaria vazio), rank global e fila apagados; sessão voltou a visitante; ladder dos outros jogadores intacta.
+
 1. **Prova de conceito**, para reduzir os riscos técnicos:
    - batalha contra NPC com bot aleatório, dentro do processo;
    - ajuste no `search` e um formato gerado dinamicamente;

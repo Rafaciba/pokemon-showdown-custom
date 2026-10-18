@@ -5,6 +5,8 @@
  *   users     nome de usuário + hash da senha (sem e-mail, sem IP)
  *   sessions  hash do token de sessão + validade
  *   codes     hash de códigos de convite/redefinição + validade
+ *   pending_purges  só o userid de contas excluídas, até o servidor de jogo
+ *             apagar os dados de jogo delas e confirmar (aí a linha some)
  * Registros expirados são apagados periodicamente (purgeExpired).
  */
 import { DatabaseSync } from 'node:sqlite';
@@ -38,6 +40,13 @@ const MIGRATIONS: string[] = [
 		userid      TEXT,
 		created_at  INTEGER NOT NULL,
 		expires_at  INTEGER NOT NULL
+	) STRICT;
+	`,
+	// 2: fila de exclusão dos dados de jogo (conta excluída → servidor de jogo apaga e confirma)
+	`
+	CREATE TABLE pending_purges (
+		userid      TEXT PRIMARY KEY,
+		deleted_at  INTEGER NOT NULL
 	) STRICT;
 	`,
 ];

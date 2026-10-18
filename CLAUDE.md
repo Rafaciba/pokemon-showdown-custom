@@ -53,7 +53,7 @@ Segurança:
 - POST com `Origin` diferente de `https://{PS_HOST}` é recusado (CSRF);
 - limite de 10 falhas de senha por conta e de 30 por IP a cada 15 minutos.
 
-API interna (`/internal/invite`, `/internal/reset`): só a rede do Docker a alcança, com autenticação por token gravado no volume `login-shared`. Ela é usada pelo plugin `server/server/chat-plugins/custom-accounts.ts` (no fork), que oferece `/convite`, `/redefinirsenha` e `/conta`. As traduções desse plugin ficam em `server/translations/pt/custom-accounts.ts`.
+API interna (`/internal/invite`, `/internal/reset`, `/internal/purges`, `/internal/purges/done`): só a rede do Docker a alcança, com autenticação por token gravado no volume `login-shared`. Ela é usada pelo plugin `server/server/chat-plugins/custom-accounts.ts` (no fork), que oferece `/convite`, `/redefinirsenha` e `/conta`. As traduções desse plugin ficam em `server/translations/pt/custom-accounts.ts`.
 
 **Traduções no servidor (fluxo validado em 2026-10-17):**
 
@@ -261,13 +261,14 @@ Ambiente:
   - teste e2e validado com contas reais: login via sessão, intruso bloqueado, batalha pela ladder, `/convite` para admin e não-admin, exclusão de conta.
 
 Pendências:
-- Exclusão de conta → apagar também os dados do nome no servidor de jogo (ranking `config/ladders/*.tsv`, `usergroups.csv`, e no futuro times e insígnias). Fazer quando esses dados existirem.
+- ~~Exclusão de conta → apagar também os dados do nome no servidor de jogo~~ **Feito na fase 4 (2026-10-18):** jornadas e conquistas, ladders locais, rank global e de salas. Times ficam no navegador. Logs e modlog continuam na revisão LGPD pendente.
 - Guests (sem conta) podem assistir batalhas públicas e ver salas, mas não escolhem nome, não jogam e não falam. **Decisão do usuário (2026-10-17): manter assim.**
 
 Próximos passos:
 1. **Fase 1 (prova de conceito) concluída e validada pelo usuário no navegador em 2026-10-17.** Próximo: **fase 2** (banco de treinadores, desafios, páginas de admin, formatos gerados por desafio, recarga de formatos). Decisão: o teambuilder vai reconhecer os formatos de desafio por um **ajuste no fork do cliente**, não pelo nome do formato.
 2. **Fase 2 em andamento.** Etapas 1 (banco + regras + validação de times), 2 (painel admin do banco de treinadores, `/ginasioadmin`), 3 (desafios no painel: criar, editar, atribuir treinadores, abrir, encerrar, reabrir) 4 (um formato por desafio aberto, recarga automática dos formatos para quem está conectado) e 5 (teambuilder reconhece os formatos de desafio) concluídas em 2026-10-17. **Fase 2 concluída.**
-3. **Fase 3 (jornadas) concluída em 2026-10-17**, aguardando validação do usuário no navegador: jornadas com batalhas reais, insígnias, Elite 4 em sequência, Campeão, trava de time, limite de derrotas e eliminações, desistência, encerramento pelo admin, timer por turno e as páginas do jogador (`/ginasio`, também pelo botão "Gym Challenge" da tela principal, em `client-custom.js`) e do admin (jornadas). Decisões e resultado em `docs/arquitetura-desafio-ginasios.md`. Próximo: fase 4 (placar, histórico, perfil, conquistas e exclusão de dados com a conta). Detalhes e decisões em `docs/arquitetura-desafio-ginasios.md`.
+3. **Fase 3 (jornadas) concluída em 2026-10-17:** jornadas com batalhas reais, insígnias, Elite 4 em sequência, Campeão, trava de time, limite de derrotas e eliminações, desistência, encerramento pelo admin, timer por turno e as páginas do jogador (`/ginasio`, também pelo botão "Gym Challenge" da tela principal, em `client-custom.js`) e do admin (jornadas). Decisões e resultado em `docs/arquitetura-desafio-ginasios.md`. Commit aprovado pelo usuário em 2026-10-18.
+4. **Fase 4 concluída em 2026-10-18**, aguardando validação do usuário no navegador: perfil (`/ginasio perfil`, botão "Gym profile" no popup de usuário), histórico com placar, conquistas (jornadas vencidas) e exclusão dos dados de jogo junto com a conta (fila `pending_purges` no login, consultada pelo servidor de jogo a cada minuto). Próximo: fase 5 (IA com níveis de dificuldade). Detalhes e decisões em `docs/arquitetura-desafio-ginasios.md`.
    - Formatos de desafio: id começa com a geração (`gen9desafio...`), senão o cliente põe `gen6` na frente ao carregar os times. O teambuilder usa o formato base via `|customformats|` + Proxy em `client-custom.js`.
    - Recarga de formatos (`gym-challenge/reload.ts`): reler `sim/`, `data/` e as listas de formatos; o Dex novo só entra se todos os formatos montarem a tabela de regras.
    - Menu de formatos: os nossos (`customFormat: true` em `config/custom-formats.ts`, bit 512 no `|formats|`) aparecem primeiro; os oficiais ficam no grupo "Official Formats", fechado por padrão (`client-custom.js`).
