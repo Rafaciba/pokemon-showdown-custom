@@ -1,0 +1,14 @@
+# Log de acesso do Caddy (Liga de Desafios): rotação diária, apagado depois de 14 dias.
+# Copiar para /etc/logrotate.d/ps-custom-caddy (ver docs/deploy-vps.md, passo 12).
+/var/log/ps-custom/caddy/access.log {
+	daily
+	rotate 14
+	maxage 14
+	missingok
+	notifempty
+	compress
+	delaycompress
+	copytruncate
+	create 0600 root root
+	su root root
+}

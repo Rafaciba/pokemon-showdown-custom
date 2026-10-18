@@ -105,11 +105,12 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 | Códigos de convite e redefinição (hash) | banco do login | até o uso, 3 dias ou 24h | Sim / vencem |
 | Fila de exclusão (userid) | banco do login | até o servidor de jogo confirmar (cerca de 1 min) | Sai após a limpeza |
 | IP | memória do login (limite de tentativas) e do servidor (sessão) | 15 min / enquanto conectado | Não é gravado |
+| **Log de acesso do site** (IP, data, método, caminho sem query string, status, tamanho, user agent) | arquivo do Caddy na VPS (`/var/log/ps-custom/caddy`, só root) | **14 dias** (logrotate diário) | Não (não é ligado à conta; some sozinho) |
 | Rank e autoridade de sala | `server/config` | até a exclusão | Sim |
 | Ladder | `server/config/ladders` | até a exclusão | Sim |
 | Jornadas, insígnias e histórico | `server/databases/gym-challenge.db` | até a exclusão | Sim |
 | Estado das batalhas de ginásio em andamento (nomes, times e jogadas, sem chat) | `server/databases/gym-challenge.db` (`run_battles.input_log`) | até a batalha terminar | Sim (e as batalhas em andamento terminam com forfeit) |
-| Logs dos containers | Docker (3 × 10 MB por serviço) | por tamanho | Não (sem IP; pode haver nomes em erros) |
+| Logs dos containers | Docker (3 × 10 MB por serviço) | por tamanho | Não (sem IP: o log do Caddy filtra o IP dos avisos; pode haver nomes em erros) |
 | Logs de batalha da ladder (nomes e times) | `server/logs/AAAA-MM/...` | 30 dias | Sim |
 | **Modlog e punições** (nome e IP, só quando há moderação) | `server/logs/modlog`, `config/punishments.tsv` | **indefinida** | **Não** |
 | Times e preferências | localStorage do navegador | controle do usuário | Local |
@@ -152,6 +153,13 @@ Revisado contra o OWASP Top 10 e a LGPD ao ser feito. Detalhes em `docs/insignia
 - **A08 (integridade).** O importador para com erro se a página mudar de formato ou se uma cor não corresponder a um tipo, e o catálogo gerado passa por teste.
 - **Terceiros e LGPD.** As imagens são servidas pelo nosso domínio: o navegador do jogador não faz pedidos à Bulbapedia (a página é salva à mão pelo admin, uma vez). Nenhum dado pessoal novo: as insígnias permanentes são dados de jogo já cobertos pelo aviso de privacidade (perfil visível a usuários logados, apagado com a conta).
 - **Direitos.** As imagens são da Nintendo e ficam fora dos repositórios públicos; o rodapé do cliente já traz o aviso de projeto de fã e passou a creditar a Bulbapedia pelos dados.
+
+### Log de acesso com IP (2026-10-18)
+Achado no primeiro start na VPS: os avisos do proxy do Caddy (log padrão, guardado pelo Docker por tamanho) traziam o IP do visitante, o que contradizia o inventário e o aviso de privacidade. Decisão do usuário: **guardar os IPs por 14 dias, de todos os pedidos HTTP, para segurança**.
+- **Base legal:** legítimo interesse (art. 7º, IX), com finalidade só de segurança (identificar ataques e abusos), prazo definido e acesso restrito. O Marco Civil (art. 15, guarda de 6 meses) vale para pessoa jurídica com fins econômicos, que não é o caso do projeto.
+- **Como:** log de acesso do Caddy num arquivo (`mode 0600`, pasta só do root, fora do backup), com rotação diária e apagamento depois de 14 dias pelo logrotate do sistema (`docker/logrotate/ps-custom-caddy`), porque a rotação do Caddy é por tamanho. O log padrão (stdout) passou a apagar o IP, a porta, `X-Forwarded-For`, `Referer`, cookies, `Authorization` e a query string.
+- **Segredos:** os links de convite e de redefinição levam códigos na URL; o log de acesso grava o caminho sem a query string e sem `Referer`. O Caddy já omite cookies e `Authorization` (validado: nenhum código no arquivo depois de pedidos com `?convite=` e `Referer`).
+- **Transparência:** o aviso de privacidade (pt e en) descreve o registro, a finalidade, a base legal, o prazo e quem acessa.
 
 ## Testes desta revisão
 - **Login:** 19 testes (5 novos: aviso de privacidade, nomes reservados, anulação de códigos, bloqueio por conta e IP sem afetar outro IP e sem escapar por `X-Forwarded-For` forjado, POST de outro site sem `Origin`).

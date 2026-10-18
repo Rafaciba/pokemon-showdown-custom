@@ -118,6 +118,9 @@ services:
       - client-config:/srv/client-config:ro
       # Imagens das insígnias (fora do git; ver docs/insignias.md)
       - ./assets/badges:/srv/badges:ro
+      # Log de acesso com IP (14 dias, rotação pelo logrotate da VPS). Em produção,
+      # PS_ACCESS_LOG_DIR=/var/log/ps-custom/caddy (ver docs/deploy-vps.md)
+      - ${PS_ACCESS_LOG_DIR:-./data/caddy-logs}:/var/log/caddy
       - caddy-data:/data
       - caddy-config:/config
     depends_on:

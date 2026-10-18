@@ -8,14 +8,62 @@
 # Em "localhost" o Caddy usa automaticamente uma CA local (certificado de dev).
 # Em produção, com um domínio real, ele emite o certificado via Let's Encrypt.
 
+# Logs (decisão do usuário, 2026-10-18; ver docs/revisao-seguranca-lgpd.md):
+#   - o log padrão (stdout, guardado pelo Docker por tamanho) fica SEM IP: os avisos
+#     do proxy trazem o pedido inteiro, e o IP só deve existir no log de acesso;
+#   - o log de acesso de cada site (abaixo) guarda o IP por 14 dias, para segurança.
+{
+	log default {
+		output stdout
+		format filter {
+			wrap json
+			fields {
+				request>remote_ip delete
+				request>remote_port delete
+				request>client_ip delete
+				request>headers>X-Forwarded-For delete
+				request>headers>Referer delete
+				request>headers>Cookie delete
+				request>headers>Authorization delete
+				request>uri regexp \?.* ?
+			}
+		}
+	}
+}
+
+# Log de acesso (segurança, legítimo interesse): IP, data, método, caminho, status e
+# tamanho de cada pedido, num arquivo só do root da VPS. A rotação diária e o
+# apagamento depois de 14 dias ficam com o logrotate do sistema
+# (docker/logrotate/ps-custom-caddy), porque a rotação do Caddy é por tamanho.
+# Sem query string (links de convite e de redefinição levam códigos na URL) e sem
+# Referer (pode trazer a URL anterior com esses códigos). Cookies e Authorization o
+# Caddy já omite por padrão.
+(access_log) {
+	log {
+		output file /var/log/caddy/access.log {
+			roll_disabled
+			mode 0600
+		}
+		format filter {
+			wrap json
+			fields {
+				request>uri regexp \?.* ?
+				request>headers>Referer delete
+			}
+		}
+	}
+}
+
 # www.{domínio} só redireciona para o domínio principal (precisa do registro DNS do www;
 # ver docs/deploy-vps.md). Cookies e o login valem só no domínio principal.
 www.{$PS_HOST:localhost} {
+	import access_log
 	header Strict-Transport-Security "max-age=31536000"
 	redir https://{$PS_HOST:localhost}{uri} permanent
 }
 
 {$PS_HOST:localhost} {
+	import access_log
 	encode zstd gzip
 
 	header {

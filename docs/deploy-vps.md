@@ -262,6 +262,13 @@ LOGIN_KEY_ID=1
 CLIENT_FORCE_BUILD=0
 PS_NO_IP_CHECKS=0
 PS_ADMINS=Rafaciba
+PS_ACCESS_LOG_DIR=/var/log/ps-custom/caddy
+```
+
+`PS_ACCESS_LOG_DIR` é a pasta do log de acesso do site (com IP, guardado por 14 dias para segurança; ver o passo 12 e `docs/revisao-seguranca-lgpd.md`). Crie a pasta, só para o root:
+
+```sh
+sudo install -d -m 700 /var/log/ps-custom /var/log/ps-custom/caddy
 ```
 
 `PS_NO_IP_CHECKS` fica em `0` na VPS (decisão de 2026-10-17): a ladder não pareia jogadores do mesmo IP. Quem joga da mesma casa usa desafio direto.
@@ -277,8 +284,10 @@ mkdir -p /opt/pokemon-showdown-custom/assets/badges
 No seu computador (PowerShell), na pasta do projeto:
 
 ```powershell
-scp assets/badges/*.png ps-vps:/opt/pokemon-showdown-custom/assets/badges/
+scp -r assets/badges ps-vps:/opt/pokemon-showdown-custom/assets/
 ```
+
+Use a pasta inteira com `-r`: o PowerShell não expande `*.png` para o `scp`.
 
 Confira na VPS: `ls /opt/pokemon-showdown-custom/assets/badges | wc -l` deve mostrar 68. Sem as imagens, o jogo funciona, mas as insígnias aparecem quebradas.
 
@@ -309,7 +318,27 @@ docker compose exec login node src/cli.ts convite --nome Rafaciba
 
 Abra o link que o comando mostra, escolha a senha na página (ela nunca passa pelo terminal) e entre no jogo. Você terá o rank `~`. Os demais convites saem pelo chat, com `/convite`.
 
-## 12. Backup
+## 12. Log de acesso e backup
+
+### Log de acesso (14 dias)
+
+O Caddy grava cada acesso ao site (IP, data, caminho sem códigos, status) em `/var/log/ps-custom/caddy/access.log`. A rotação diária e o apagamento depois de 14 dias ficam com o logrotate do sistema:
+
+```sh
+cd /opt/pokemon-showdown-custom
+sudo install -m 644 docker/logrotate/ps-custom-caddy /etc/logrotate.d/ps-custom-caddy
+sudo logrotate -d /etc/logrotate.d/ps-custom-caddy 2>&1 | tail -5
+```
+
+O `-d` só simula: não deve mostrar erro. Para consultar o log (só com sudo):
+
+```sh
+sudo tail -n 20 /var/log/ps-custom/caddy/access.log
+```
+
+O log de acesso **não** entra no backup, de propósito: o backup duraria mais que os 14 dias.
+
+### Backup
 
 A HostGator **não** faz backup das VPS, então o backup é nosso. O script [scripts/vps-backup.sh](../scripts/vps-backup.sh) copia todos os dados que não podem ser recriados:
 - contas e chaves do login;
