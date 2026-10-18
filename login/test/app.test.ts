@@ -334,6 +334,7 @@ test('regras em pt e en, com o administrador', async () => {
 	assert.equal(pt.status, 200);
 	assert.match(html, /<h3>Regras<\/h3>/);
 	assert.match(html, /Desafio de Ginásios/);
+	assert.match(html, /Proibido: trapaça/);
 	assert.match(html, /<strong>admintest<\/strong>/i, 'contato: o admin de PS_ADMINS');
 	assert.match(pt.headers.get('content-security-policy') || '', /default-src 'none'/);
 	const en = await fetch(`${base}/regras`, { headers: { 'Accept-Language': 'en-US' } }).then(r => r.text());

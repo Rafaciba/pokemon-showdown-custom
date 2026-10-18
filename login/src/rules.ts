@@ -24,6 +24,39 @@ export const RULES: { [lang in Lang]: Notice } = {
 				],
 			},
 			{
+				title: 'Respeito',
+				paragraphs: [
+					'Trate todos com respeito, no chat, nas mensagens privadas e nas batalhas. Não são aceitos ofensas, assédio, discriminação ou discurso de ódio (por raça, cor, etnia, religião, gênero, orientação sexual, deficiência, origem ou qualquer outro motivo), ameaças nem conteúdo sexual ou violento.',
+					'Isso vale também para nomes de usuário, nomes de times e apelidos de Pokémon, que aparecem para os outros jogadores.',
+					'Não divulgue dados pessoais de ninguém (nome completo, endereço, telefone, fotos e afins), nem os seus.',
+				],
+			},
+			{
+				title: 'Boas práticas',
+				paragraphs: [
+					'Seja um bom jogador: cumprimente, aceite o resultado e não provoque quem perdeu. Não abandone batalhas no meio nem deixe o timer correr de propósito para irritar o adversário; se precisar sair, use o forfeit.',
+					'Não faça spam, flood ou propaganda no chat, nem fique desafiando quem já recusou.',
+					'A sua conta é só sua: não compartilhe a senha. Se achar um bug, avise o administrador em vez de usá-lo.',
+				],
+			},
+			{
+				title: 'Proibido: trapaça',
+				paragraphs: [
+					'É proibido qualquer tipo de trapaça, como:',
+					'- usar bugs ou falhas do servidor para obter vantagem;',
+					'- derrubar a conexão ou recarregar a página de propósito para escapar de uma derrota;',
+					'- usar programas, scripts ou bots para jogar no seu lugar;',
+					'- combinar resultados ou usar outra conta para manipular a ladder ou os desafios;',
+					'- tentar invadir, sobrecarregar ou atrapalhar o servidor ou a conta de outra pessoa.',
+				],
+			},
+			{
+				title: 'Se as regras não forem cumpridas',
+				paragraphs: [
+					'Conforme a gravidade, o administrador pode advertir, silenciar, bloquear, anular resultados (por exemplo, encerrar uma jornada obtida com trapaça) ou remover o acesso ao servidor.',
+				],
+			},
+			{
 				title: 'Formatos oficiais e ladder',
 				paragraphs: [
 					'Os formatos oficiais do Pokémon Showdown seguem as regras da Smogon. As regras de um formato aparecem com /formathelp NOME DO FORMATO no chat.',
@@ -77,6 +110,39 @@ export const RULES: { [lang in Lang]: Notice } = {
 				paragraphs: [
 					'A casual Pokémon battle server for friends. Only account holders can play, and accounts are created with an invite from the administrator ({admin}). Without an account you can watch public battles, but you cannot play or chat.',
 					'Questions, problems or requests: send a private message to the administrator ({admin}) in the game. The administrator can moderate chat and battles with the Pokémon Showdown tools (warn, mute, lock).',
+				],
+			},
+			{
+				title: 'Respect',
+				paragraphs: [
+					'Treat everyone with respect, in the chat, in private messages and in battles. Insults, harassment, discrimination or hate speech (based on race, colour, ethnicity, religion, gender, sexual orientation, disability, origin or any other reason), threats, and sexual or violent content are not allowed.',
+					'This also applies to usernames, team names and Pokémon nicknames, which other players can see.',
+					'Do not share anyone\'s personal data (full name, address, phone number, photos and the like), including your own.',
+				],
+			},
+			{
+				title: 'Good practices',
+				paragraphs: [
+					'Be a good sport: greet your opponent, accept the result and do not taunt whoever lost. Do not abandon battles midway or let the timer run on purpose to annoy your opponent; if you need to leave, forfeit.',
+					'Do not spam, flood or advertise in the chat, and do not keep challenging someone who has already declined.',
+					'Your account is yours alone: do not share your password. If you find a bug, tell the administrator instead of using it.',
+				],
+			},
+			{
+				title: 'Forbidden: cheating',
+				paragraphs: [
+					'Any kind of cheating is forbidden, such as:',
+					'- using bugs or server flaws to gain an advantage;',
+					'- dropping your connection or reloading the page on purpose to escape a loss;',
+					'- using programs, scripts or bots to play for you;',
+					'- fixing results or using another account to manipulate the ladder or the challenges;',
+					'- trying to break into, overload or disrupt the server or someone else\'s account.',
+				],
+			},
+			{
+				title: 'If the rules are broken',
+				paragraphs: [
+					'Depending on how serious it is, the administrator can warn, mute, lock, void results (for example, close a journey won by cheating) or remove access to the server.',
 				],
 			},
 			{
