@@ -112,6 +112,7 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 | Logs de batalha da ladder (nomes e times) | `server/logs/AAAA-MM/...` | 30 dias | Sim |
 | **Modlog e punições** (nome e IP, só quando há moderação) | `server/logs/modlog`, `config/punishments.tsv` | **indefinida** | **Não** |
 | Times e preferências | localStorage do navegador | controle do usuário | Local |
+| Idioma escolhido (`pt`/`en`) | localStorage, cookie `ps_lang` (1 ano) e memória do servidor de jogo enquanto conectado | controle do usuário | Local (não identifica ninguém) |
 
 Batalhas contra NPC não geram log (`logchallenges` desligado). O chat não é registrado (`logchat` desligado).
 
@@ -120,6 +121,18 @@ Batalhas contra NPC não geram log (`logchallenges` desligado). O chat não é r
 2. **Logs de batalha da ladder: 30 dias.** Uma limpeza diária apaga os dias mais antigos, e os logs em que o jogador aparece são apagados junto com a conta (`custom-accounts.ts`). O modlog continua sem prazo definido (pendência).
 3. **Consulta do teambuilder à Smogon: desativada** (`client-custom.js`). Ele só deixa de mostrar os links de análises dos formatos oficiais.
 4. **Sprites e sons no próprio servidor: no deploy da VPS.** Até lá, passam pelo proxy sem dados do jogador. Achado durante a verificação: as folhas de estilo e o logo tinham endereços fixos de `play.pokemonshowdown.com`, buscados direto pelo navegador. Agora são do mesmo domínio e passam pelo proxy. Verificado por e2e: nenhum pedido direto a outros domínios na tela principal, no teambuilder e durante as batalhas.
+
+### Tradução pt-BR (2026-10-18)
+Revisada contra o OWASP Top 10 ao ser feita. Detalhes em `docs/traducao-pt-br.md`.
+- **A03 (XSS).** A camada da interface clássica (`client-i18n.js`) troca textos só como texto (`nodeValue`/`setAttribute`):
+  - o único `innerHTML` vem das entradas `html` do nosso dicionário, que são fixas;
+  - valores capturados pelos padrões entram como texto;
+  - os selos de tipo são imagens montadas por DOM, a partir de uma lista fixa de tipos;
+  - mensagens escritas por usuários (`chatmessage-*`), caixas `.infobox`, nomes e campos de texto ficam de fora (validado por e2e: uma mensagem igual a um texto do dicionário não é traduzida);
+  - as traduções de descrições não têm `<` (o tooltip de golpe do PS insere a descrição sem escapar).
+- **A05/A04 (desempenho).** Padrões só valem para textos de até 300 caracteres; as entradas `html` só são comparadas quando o começo do texto bate.
+- **Cookie `ps_lang`:** só `pt` ou `en`, validado no login (`parseLang`), SameSite=Lax e Secure. Não é HttpOnly porque o cliente também o grava, e não é sensível.
+- **LGPD:** o aviso de privacidade passou a citar o idioma guardado no navegador e no cookie.
 
 ## Testes desta revisão
 - **Login:** 19 testes (5 novos: aviso de privacidade, nomes reservados, anulação de códigos, bloqueio por conta e IP sem afetar outro IP e sem escapar por `X-Forwarded-For` forjado, POST de outro site sem `Origin`).

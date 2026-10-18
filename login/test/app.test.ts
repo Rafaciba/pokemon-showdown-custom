@@ -328,6 +328,21 @@ test('aviso de privacidade em pt e en, com o administrador', async () => {
 	assert.match(account, /href="\/privacidade"/);
 });
 
+test('idioma escolhido: ?lang grava o cookie ps_lang, que vale mais que o navegador', async () => {
+	const chosen = await fetch(`${base}/regras?lang=en`, { headers: { 'Accept-Language': 'pt-BR' } });
+	assert.match(await chosen.text(), /<h3>Rules<\/h3>/);
+	const cookie = chosen.headers.get('set-cookie') || '';
+	assert.match(cookie, /^ps_lang=en; Path=\/; Max-Age=31536000; SameSite=Lax/);
+	assert.doesNotMatch(cookie, /HttpOnly/, 'o cliente também grava este cookie');
+	const withCookie = await fetch(`${base}/cadastro`, { headers: { 'Accept-Language': 'pt-BR', Cookie: 'ps_lang=en' } });
+	const html = await withCookie.text();
+	assert.match(html, /Sign up/);
+	assert.match(html, /<a href="\?lang=pt" lang="pt-BR"/, 'link para trocar o idioma');
+	const invalid = await fetch(`${base}/regras?lang=xx`, { headers: { 'Accept-Language': 'pt-BR', Cookie: 'ps_lang=<b>' } });
+	assert.match(await invalid.text(), /<h3>Regras<\/h3>/);
+	assert.equal(invalid.headers.get('set-cookie'), null);
+});
+
 test('regras em pt e en, com o administrador', async () => {
 	const pt = await fetch(`${base}/regras`, { headers: { 'Accept-Language': 'pt-BR' } });
 	const html = await pt.text();

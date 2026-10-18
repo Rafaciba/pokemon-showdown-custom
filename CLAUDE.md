@@ -14,7 +14,12 @@ Regra de trabalho combinada com o usuário: **não inventar nem inferir requisit
 
 - Código (identificadores): inglês.
 - Comentários, documentação e mensagens de commit: **português**.
-- Interface do jogo: pt-BR e inglês. O PS já tem traduções pt-BR em `server/translations/` e `client/translations/`.
+- Interface do jogo: pt-BR e inglês, escolhidos pelo botão com o globo no topo do cliente. Na primeira visita vale o idioma do navegador. **Feito em 2026-10-18**; como funciona, as decisões e o passo a passo para traduzir textos novos estão em `docs/traducao-pt-br.md`.
+  - Decisões: nomes de Pokémon, golpes, habilidades, itens e naturezas em inglês; tipos como o **selo do tipo** (nos textos, "tipo Fire"); atributos por extenso em português e abreviações em inglês; descrições traduzidas.
+  - **Regra:** todo texto novo visível ao jogador precisa da versão pt-BR:
+    - no servidor, `TL` e os catálogos;
+    - no login, `i18n.ts`;
+    - na interface clássica, o dicionário `client-i18n-pt.js`.
 
 ## Arquitetura
 
@@ -198,7 +203,7 @@ Terceira rodada (2026-10-17):
 - **Elite 4 e Campeão em sequência direta**, como nos jogos: perder em qualquer ponto volta ao primeiro membro da Elite 4.
 - **Nível de IA por treinador em cada desafio**, não no treinador: o mesmo treinador pode ser Fácil num desafio e Difícil em outro. A dificuldade é a qualidade das escolhas da IA. O nível mais fácil é o bot aleatório padrão. A **dificuldade base do desafio é o mínimo** para todos os seus treinadores. O que cada nível faz será definido depois.
 - **Aviso de projeto de fã** no rodapé do cliente: sem fins lucrativos, direitos das imagens da Nintendo, Creatures, Game Freak e The Pokémon Company. Feito no fork do cliente (`index-old.html`, `index-new.html`, `src/panel-mainmenu.tsx`) e nas páginas de conta.
-- **Achado:** o cliente do PS **não tem tradução pt-BR** (só de, es, fr, it, ja, ko, zh). As traduções pt existentes são só do servidor. O requisito de interface em pt-BR exige criar essa tradução. **Decisão do usuário (2026-10-17): fica para depois**, não é prioridade agora.
+- **Achado:** o cliente do PS **não tem tradução pt-BR** (só de, es, fr, it, ja, ko, zh). As traduções pt existentes são só do servidor. O requisito de interface em pt-BR exige criar essa tradução. Decisão do usuário (2026-10-17): fica para depois. **Feita em 2026-10-18** (ver `docs/traducao-pt-br.md`).
 
 **Identidade visual (2026-10-17):** todas as telas, inclusive as nossas (painel admin, páginas de conta), seguem a **identidade visual oficial do PS**. O cliente deles é a base, e as alterações necessárias ficam no nosso fork, com a mesma premissa do servidor.
 
@@ -281,4 +286,5 @@ Próximos passos:
    - Recarga de formatos (`gym-challenge/reload.ts`): reler `sim/`, `data/` e as listas de formatos; o Dex novo só entra se todos os formatos montarem a tabela de regras.
    - Menu de formatos: os nossos (`customFormat: true` em `config/custom-formats.ts`, bit 512 no `|formats|`) aparecem primeiro; os oficiais ficam no grupo "Official Formats", fechado por padrão (`client-custom.js`).
    - Formulários de página: o cliente clássico troca o formulário enviado por "Submitted!" e só limpa marcadores `{a-z}`. Ver "Rascunhos de formulário" e `fieldKey` no plugin.
+   - **Tradução pt-BR do cliente concluída em 2026-10-18.** Inclui o botão de idioma, os textos de batalha, os catálogos e a camada da interface clássica (`client-i18n.js`). As ferramentas ficam em `scripts/traducao/`.
    - Os `CRASH: EPIPE` no log (e o aviso "The main process crashed" no Lobby e na Staff) **eram falha real**, não ruído de reinício. Rodar os testes dentro do container `server` chamava `Repl.cleanup`, que conectava nos sockets REPL vivos do servidor e derrubava o servidor. Corrigido em 2026-10-18 com `repl = false` em `docker/server/config.js`.

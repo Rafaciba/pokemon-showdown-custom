@@ -24,7 +24,16 @@ const EXTRA_STYLE = `
 .ps-popup p.success { font-weight: bold; color: #228822; }
 .ps-popup .credits { color: #555555; text-align: center; }
 .ps-popup form.inline { display: inline; }
+.ps-popup .langswitch { text-align: right; margin: 0; }
 `;
+
+/** Troca de idioma (o mesmo cookie do botão de idioma do cliente). */
+function langSwitch(lang: Lang): string {
+	const link = (code: Lang, label: string, htmlLang: string) => (code === lang ?
+		`<strong aria-current="true">${label}</strong>` :
+		`<a href="?lang=${code}" lang="${htmlLang}" hreflang="${htmlLang}">${label}</a>`);
+	return `<p class="langswitch"><small>${link('pt', 'Português', 'pt-BR')} · ${link('en', 'English', 'en')}</small></p>`;
+}
 
 function layout(lang: Lang, title: string, body: string): string {
 	return `<!DOCTYPE html>
@@ -41,6 +50,7 @@ function layout(lang: Lang, title: string, body: string): string {
 <body>
 <div class="ps-overlay">
 <div class="ps-popup" role="main">
+${langSwitch(lang)}
 ${body}
 <p class="credits"><small>${e(t(lang, 'credits'))}
 <a href="https://pokemonshowdown.com/credits">Pokémon Showdown</a> · <a href="https://www.smogon.com/">Smogon</a><br>

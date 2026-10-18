@@ -138,7 +138,21 @@ export function t(lang: Lang, key: MessageKey, vars: Record<string, string> = {}
 	return messages[key][lang].replace(/\{(\w+)\}/g, (match, name: string) => vars[name] ?? match);
 }
 
-export function detectLang(acceptLanguage: string | undefined): Lang {
+/** Cookie com o idioma escolhido no cliente (botão de idioma) ou nos links das páginas. */
+export const LANG_COOKIE = 'ps_lang';
+
+export function parseLang(value: string | undefined | null): Lang | null {
+	return value === 'pt' || value === 'en' ? value : null;
+}
+
+/** Idioma escolhido (cookie) ou, sem escolha, o do navegador (pt* → pt-BR, demais → en). */
+export function detectLang(acceptLanguage: string | undefined, chosen?: string): Lang {
+	const lang = parseLang(chosen);
+	if (lang) return lang;
 	const first = acceptLanguage?.split(',')[0]?.trim().toLowerCase() ?? '';
 	return first.startsWith('pt') ? 'pt' : 'en';
+}
+
+export function langCookie(lang: Lang, secure: boolean): string {
+	return [`${LANG_COOKIE}=${lang}`, 'Path=/', 'Max-Age=31536000', 'SameSite=Lax', ...(secure ? ['Secure'] : [])].join('; ');
 }

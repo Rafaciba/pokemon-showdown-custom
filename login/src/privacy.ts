@@ -40,7 +40,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 					'Jogo: a sua posição no ranking (ladder), um eventual cargo de moderação e, no Desafio de Ginásios, as suas jornadas, insígnias e conquistas. O seu perfil e histórico no Desafio de Ginásios ficam visíveis para os outros usuários logados.',
 					'Registros de batalhas da ladder: nomes dos jogadores e times usados, guardados por 30 dias. As batalhas são públicas enquanto acontecem.',
 					'Registros de moderação: só se houver uma punição (por exemplo, um bloqueio), com o nome e o IP de quem foi punido, guardados enquanto forem necessários para a segurança do servidor.',
-					'Times e preferências ficam só no seu navegador; não são enviados ao servidor.',
+					'Times e preferências ficam só no seu navegador; não são enviados ao servidor. O idioma escolhido também fica num cookie (ps_lang), só para as páginas de conta abrirem no mesmo idioma do jogo, e é informado ao servidor de jogo enquanto você está conectado.',
 				],
 			},
 			{
@@ -94,7 +94,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 					'Game: your ladder ranking, any moderation rank and, in the Gym Challenge, your journeys, badges and achievements. Your Gym Challenge profile and history are visible to other logged-in users.',
 					'Ladder battle logs: player names and the teams used, kept for 30 days. Battles are public while they happen.',
 					'Moderation records: only if there is a punishment (for example, a lock), with the name and IP of the punished user, kept while needed for the server\'s security.',
-					'Teams and preferences stay in your browser only; they are not sent to the server.',
+					'Teams and preferences stay in your browser only; they are not sent to the server. Your chosen language is also kept in a cookie (ps_lang), only so that the account pages open in the same language as the game, and it is sent to the game server while you are connected.',
 				],
 			},
 			{

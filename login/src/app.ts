@@ -17,7 +17,7 @@ import type { LoginConfig } from './config.ts';
 import { buildAssertion, type AssertionContext } from './assertion.ts';
 import { RateLimiter } from './rate-limit.ts';
 import { toID, validateUserid } from './util.ts';
-import { t, detectLang, type Lang, type MessageKey } from './i18n.ts';
+import { t, detectLang, langCookie, parseLang, LANG_COOKIE, type Lang, type MessageKey } from './i18n.ts';
 import {
 	authenticate, changePassword, completePurge, deleteAccount, getUser, listPendingPurges, register, resetPassword,
 	normalizeUsername, type User,
@@ -324,7 +324,8 @@ export function createApp(deps: AppDeps) {
 		const ip = (Array.isArray(forwarded) ? forwarded.join(',') : forwarded)?.split(',').pop()?.trim() ||
 			req.socket.remoteAddress || 'unknown';
 		const ctx: RequestContext = {
-			req, res, url, params: {}, ip, lang: detectLang(req.headers['accept-language']), session: null, cookies: [],
+			req, res, url, params: {}, ip, session: null, cookies: [],
+			lang: detectLang(req.headers['accept-language'], readCookie(req.headers.cookie, LANG_COOKIE)),
 		};
 
 		if (req.method === 'GET' && path === '/healthz') return send(ctx, 200, 'ok', 'text/plain; charset=utf-8');
@@ -386,6 +387,12 @@ export function createApp(deps: AppDeps) {
 				return send(ctx, 429, t(ctx.lang, 'tooManyRequests'), 'text/plain; charset=utf-8');
 			}
 			const [, page, sub = ''] = pageMatch;
+			// Links "Português · English" das páginas: ?lang=pt|en grava a escolha no cookie
+			const chosenLang = req.method === 'GET' ? parseLang(url.searchParams.get('lang')) : null;
+			if (chosenLang) {
+				ctx.lang = chosenLang;
+				ctx.cookies.push(langCookie(chosenLang, config.cookieSecure));
+			}
 			if (page === 'privacidade' || page === 'regras') {
 				if (sub) return send(ctx, 404, 'not found', 'text/plain; charset=utf-8');
 				// Controlador (LGPD) e contato: o primeiro admin de PS_ADMINS (nome como foi cadastrado)

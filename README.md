@@ -49,6 +49,10 @@ Depois abra https://ps.localhost. Os detalhes estão em [docs/ambiente-local.md]
 
 Para subir numa VPS (Ubuntu 22.04 limpo), siga [docs/deploy-vps.md](docs/deploy-vps.md).
 
+## Idiomas
+
+O jogo funciona em português do Brasil e em inglês. O botão com o globo, no topo do cliente, troca o idioma; na primeira visita vale o idioma do navegador. A tradução e as ferramentas para traduzir textos novos estão em [docs/traducao-pt-br.md](docs/traducao-pt-br.md).
+
 ## Privacidade (LGPD)
 
 A conta guarda apenas o **nome de usuário** e o **hash da senha**. Não coletamos e-mail, e o IP não vai para os registros (só fica em memória, para a conexão e o limite de tentativas de senha). Logs de batalha da ladder são apagados depois de 30 dias, e excluir a conta apaga todos os dados de jogo.
