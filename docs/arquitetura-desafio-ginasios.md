@@ -377,6 +377,50 @@ A prova de conceito foi validada com um teste de ponta a ponta pelo fluxo real: 
   - e2e com dois jogadores: perfil pelo popup, conquista, jornada em andamento, placar 2/1/3/0, histórico com total, visitante bloqueado, comando;
   - e2e de exclusão pela página `/conta`: jornadas, ladders (inclusive o arquivo que ficaria vazio), rank global e fila apagados; sessão voltou a visitante; ladder dos outros jogadores intacta.
 
+**Níveis de IA definidos pelo usuário (2026-10-18):**
+
+- **Aleatório:** o bot padrão do PS, mantido como o nível mais fácil.
+- **Fácil:** foca só em dar dano; pode trocar de Pokémon durante a batalha se achar adequado.
+- **Médio:** usa golpes super-efetivos, troca para tipos favoráveis e usa golpes defensivos.
+- **Difícil:** o Médio, mais golpes que causam status e hazards, e trocas melhores (avalia se valem a pena e os tipos).
+- **Mestre (para depois):** as melhores habilidades e aprende com as batalhas que joga e assiste na plataforma; depende de um modelo (LLM ou similar), por isso fica para outro momento.
+
+**Resultado da fase 5 (IA com níveis, 2026-10-18):**
+
+- **Como a IA vê a batalha** (`battle-view.ts`): como um espectador. O próprio time vem completo no pedido do simulador; do adversário, só o que já apareceu no log (espécie, HP em %, status, golpes usados, boosts, Substitute, hazards e telas, prévia de times). **Correção:** o log que o `NpcBattle` entregava à IA incluía as linhas privadas do jogador, que vêm depois de cada `|split|` (por exemplo, o HP exato). Agora só a versão pública entra.
+- **IA heurística** (`heuristic-ai.ts`), um conjunto de regras por nível (`LevelRules`):
+  - **Fácil:** escolhe o golpe com mais dano bruto (poder × bônus de mesmo tipo), sem olhar a efetividade de tipo. Troca quando não tem golpe de dano útil, ou, às vezes, com 25% de HP ou menos e alguém com metade do HP ou mais no banco. Na troca forçada, entra o mais saudável. Mantém a ordem do time.
+  - **Médio:** estima o dano (fórmula do jogo, com atributos estimados do adversário, efetividade, imunidades por tipo e por habilidade possível, precisão) e prefere nocautear. Troca quando o adversário tem vantagem de tipo, não dá para nocauteá-lo agora e há no banco alguém neutro ou resistente com HP razoável e confronto claramente melhor. Golpes defensivos: cura com HP baixo, Protect e similares (sem repetir) quando o adversário está envenenado/queimado ou com HP crítico, e telas no começo. Escolhe o Pokémon inicial pelo confronto com a prévia do time adversário.
+  - **Difícil:** o Médio, mais:
+    - hazards enquanto o adversário tem vários Pokémon;
+    - status, respeitando imunidades de tipo, pó contra tipo Planta, Thunder Wave contra tipo Terra, a Sleep Clause e o Substitute;
+    - trocas que contam o dano dos hazards do próprio lado, o golpe que quem entra vai receber e os golpes já revelados pelo adversário;
+    - troca diante de um adversário com boosts;
+    - noção de velocidade: quem é mais rápido e nocauteia; status e hazards valem pouco se vai ser nocauteado neste turno;
+    - **buffs e debuffs** (pedido do usuário em 2026-10-18):
+      - buff próprio (Swords Dance, Nasty Plot, Dragon Dance, Calm Mind, Shell Smash…) só com HP alto e o adversário causando pouco dano por turno, e só no atributo que ajuda: o do golpe principal, velocidade se for mais lento, defesa contra o tipo de golpe do adversário. Vale menos com o atributo em +2 e nada a partir de +4;
+      - debuff (Screech, Charm, Scary Face, Fake Tears…) quando corta a ameaça do adversário ou aumenta o próprio dano;
+      - contra um adversário com buffs acumulados: Haze, Clear Smog e golpes que forçam a troca (Roar, Whirlwind, Dragon Tail, Circle Throw);
+      - se der para nocautear agora, ataca em vez de buffar;
+      - com buffs acumulados, só troca se for ser nocauteado antes de agir.
+  - **Todos os níveis heurísticos** usam a Megaevolução quando disponível. Escolha recusada pelo simulador: a IA escolhe de novo sem trocar (depois de três recusas, o `NpcBattle` usa a jogada padrão). Batalhas em dupla usam a jogada padrão por enquanto.
+- **Painel admin:** os níveis aparecem nas opções de dificuldade (base do desafio e de cada treinador). A dificuldade base continua sendo o mínimo.
+- **Banco de testes** (`server/tools/gym-challenge/ai-benchmark.js`): batalhas completas no simulador, IA contra IA, com times aleatórios iguais para os dois lados (Random Battle), alternando os lados. Aceita variantes para calibrar (`hard-hazards`, `medium+statusMoves`...).
+- **Resultados** (taxa de vitória do primeiro; 300 batalhas por confronto, e 2000 no Difícil x Médio):
+
+  | Confronto | Vitórias |
+  |---|---|
+  | Fácil x Aleatório | 59–63% |
+  | Médio x Aleatório | 92% |
+  | Difícil x Aleatório | 92,6% |
+  | Médio x Fácil | 92% |
+  | Difícil x Fácil | 90,6% |
+  | Difícil x Médio | 55,6% (2000 batalhas; margem de ±2,2) |
+  | Difícil x Difícil sem buffs/debuffs | 54,3% (2000 batalhas) |
+
+  O que mais pesa é trocar bem: o Médio sem trocas ganha só 25% do Médio normal. No Difícil, cada regra a mais acrescenta 1 a 3 pontos contra o Médio. Contra outra IA, que quase não troca, hazards e status valem pouco; contra pessoas, que trocam bastante, eles devem pesar mais. Dois ajustes testados e descartados por piorarem o resultado: trocar diante de um adversário mais rápido que nocauteia, e trocar quando o ativo quase não causa dano.
+- **Validado:** testes de unidade das decisões (11 cenários, incluindo buffs, debuffs e Haze) e batalhas reais no servidor (Brock no Difícil usou Stealth Rock e golpes de dano; Misty no Médio).
+
 1. **Prova de conceito**, para reduzir os riscos técnicos:
    - batalha contra NPC com bot aleatório, dentro do processo;
    - ajuste no `search` e um formato gerado dinamicamente;
