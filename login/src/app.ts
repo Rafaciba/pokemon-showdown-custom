@@ -27,7 +27,7 @@ import {
 	SESSION_COOKIE, type ActiveSession,
 } from './sessions.ts';
 import { issueCode, revokeCodes, INVITE_TTL_SECONDS, RESET_TTL_SECONDS } from './codes.ts';
-import { renderAccount, renderPrivacy, renderRegister, renderReset, type PageMessage } from './pages.ts';
+import { renderAccount, renderPrivacy, renderRegister, renderReset, renderRules, type PageMessage } from './pages.ts';
 
 const MAX_BODY_BYTES = 16 * 1024;
 // O CSS e as imagens vêm do próprio cliente (mesmo domínio); nada de script
@@ -331,7 +331,7 @@ export function createApp(deps: AppDeps) {
 
 		const isClientAction = /^\/~~[^/]+\/action\.php$/.test(path) || /^\/api\/[a-z]+\/?$/.test(path);
 		const isServerAction = path === '/action.php';
-		const pageMatch = /^\/(cadastro|redefinir|conta|privacidade)(?:\/(sair|senha|excluir))?\/?$/.exec(path);
+		const pageMatch = /^\/(cadastro|redefinir|conta|privacidade|regras)(?:\/(sair|senha|excluir))?\/?$/.exec(path);
 		const isInternal = path.startsWith('/internal/');
 		if (!isClientAction && !isServerAction && !pageMatch && !isInternal) {
 			return send(ctx, 404, 'not found', 'text/plain; charset=utf-8');
@@ -386,11 +386,13 @@ export function createApp(deps: AppDeps) {
 				return send(ctx, 429, t(ctx.lang, 'tooManyRequests'), 'text/plain; charset=utf-8');
 			}
 			const [, page, sub = ''] = pageMatch;
-			if (page === 'privacidade') {
-				// Controlador: o primeiro admin de PS_ADMINS (nome como foi cadastrado)
+			if (page === 'privacidade' || page === 'regras') {
+				if (sub) return send(ctx, 404, 'not found', 'text/plain; charset=utf-8');
+				// Controlador (LGPD) e contato: o primeiro admin de PS_ADMINS (nome como foi cadastrado)
 				const [adminId] = config.reservedNames;
 				const adminName = adminId ? (getUser(db, adminId)?.username || adminId) : 'admin';
-				return sendPage(ctx, renderPrivacy(ctx.lang, adminName));
+				const render = page === 'regras' ? renderRules : renderPrivacy;
+				return sendPage(ctx, render(ctx.lang, adminName));
 			}
 			if (page === 'cadastro') return sendPage(ctx, await registerPage(ctx));
 			if (page === 'redefinir') return sendPage(ctx, await resetPage(ctx));

@@ -9,7 +9,8 @@
 import { t, type Lang, type MessageKey } from './i18n.ts';
 import { escapeHTML as e } from './util.ts';
 import type { User } from './accounts.ts';
-import { PRIVACY } from './privacy.ts';
+import { PRIVACY, type Notice } from './privacy.ts';
+import { RULES } from './rules.ts';
 
 export interface PageMessage {
 	kind: 'error' | 'success';
@@ -142,7 +143,15 @@ ${field('password', t(lang, 'fieldPassword'), 'password', 'current-password', { 
 
 /** Aviso de privacidade (LGPD), em pt ou en conforme o navegador. */
 export function renderPrivacy(lang: Lang, adminName: string): string {
-	const notice = PRIVACY[lang];
+	return renderNotice(lang, PRIVACY[lang], adminName);
+}
+
+/** Regras do servidor e dos modos de jogo, em pt ou en conforme o navegador. */
+export function renderRules(lang: Lang, adminName: string): string {
+	return renderNotice(lang, RULES[lang], adminName);
+}
+
+function renderNotice(lang: Lang, notice: Notice, adminName: string): string {
 	const admin = `<strong>${e(adminName)}</strong>`;
 	const text = (paragraph: string) => e(paragraph).split('{admin}').join(admin);
 	const sections = notice.sections.map(section => `<p><strong>${e(section.title)}</strong></p>\n` +

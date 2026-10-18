@@ -40,9 +40,18 @@
 
 	# Login server próprio: contrato do action.php oficial + páginas de conta.
 	# (A API /internal/* do login NÃO é roteada: só a rede do Docker a alcança.)
-	@login path_regexp login ^/(~~[^/]+/action\.php|api(/.*)?|cadastro|redefinir|privacidade|conta(/(sair|senha|excluir))?)/?$
+	@login path_regexp login ^/(~~[^/]+/action\.php|api(/.*)?|cadastro|redefinir|privacidade|regras|conta(/(sair|senha|excluir))?)/?$
 	handle @login {
 		reverse_proxy login:9000
+	}
+
+	# O /rules do PS aponta para https://{host}/rules (em pt, /pages/rules-pt): as
+	# regras do servidor são as nossas, em /regras. Sem isto, /rules abriria o cliente
+	# numa sala chamada "rules".
+	@rules path /rules /rules/ /pages/rules-pt
+	handle @rules {
+		# O "*" é obrigatório: sem ele, o Caddy lê /regras como filtro de caminho
+		redir * /regras 301
 	}
 
 	# PROVISÓRIO: sprites e áudio não estão no repositório do cliente.

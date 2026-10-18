@@ -47,6 +47,8 @@ docker compose up -d
 
 Depois abra https://ps.localhost. Os detalhes estão em [docs/ambiente-local.md](docs/ambiente-local.md).
 
+Para subir numa VPS (Ubuntu 22.04 limpo), siga [docs/deploy-vps.md](docs/deploy-vps.md).
+
 ## Privacidade (LGPD)
 
 A conta guarda apenas o **nome de usuário** e o **hash da senha**. Não coletamos e-mail, e o IP não vai para os registros (só fica em memória, para a conexão e o limite de tentativas de senha). Logs de batalha da ladder são apagados depois de 30 dias, e excluir a conta apaga todos os dados de jogo.

@@ -13,8 +13,15 @@ interface Section {
 	paragraphs: string[];
 }
 
+/** Página de texto (aviso de privacidade, regras) em seções. */
+export interface Notice {
+	title: string;
+	updated: string;
+	sections: Section[];
+}
+
 /** Textos do aviso; {admin} vira o nome do administrador. */
-export const PRIVACY: { [lang in Lang]: { title: string, updated: string, sections: Section[] } } = {
+export const PRIVACY: { [lang in Lang]: Notice } = {
 	pt: {
 		title: 'Aviso de privacidade',
 		updated: 'Atualizado em 18/10/2026.',

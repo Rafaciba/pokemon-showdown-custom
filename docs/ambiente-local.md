@@ -72,6 +72,8 @@ O código aparece só para quem gerou. Envie-o em particular.
 - `/cadastro`: criar conta com convite.
 - `/redefinir`: usar o código de redefinição de senha.
 - `/conta`: trocar a senha, sair ou **excluir a conta** (com aviso de que tudo será apagado). No jogo, `/conta` mostra o link.
+- `/privacidade`: aviso de privacidade (LGPD).
+- `/regras`: regras do servidor e do Desafio de Ginásios. O `/rules` do PS e o link "Rules" do rodapé apontam para ela.
 
 Trocar a senha também funciona pela opção "Password..." do próprio cliente.
 

@@ -6,6 +6,8 @@ Política da organização: **sempre observar a LGPD e boas práticas de seguran
 
 Regra de trabalho combinada com o usuário: **não inventar nem inferir requisitos**. Quando algo estiver ambíguo, perguntar.
 
+**Regras (pedido do usuário, 2026-10-18):** a página `/regras` (`login/src/rules.ts`, pt e en) traz as regras do servidor e dos nossos modos. **Todo modo de jogo novo, e toda mudança de regra de um modo existente, precisa atualizar essa página** (e a data). O `/rules` do PS e o link "Rules" do rodapé apontam para ela.
+
 **Segurança:** toda mudança relevante deve ser revista contra o **OWASP Top 10** e a LGPD. A revisão completa de 2026-10-18 (achados, correções e pendências) está em `docs/revisao-seguranca-lgpd.md`, que serve de checklist.
 
 ## Idiomas
@@ -125,6 +127,9 @@ D:\Workspace\pokemon-showdown\   ← repo "plataforma" → github: Rafaciba/poke
 - Os formatos oficiais da Smogon continuam disponíveis junto com os nossos. O admin pode desabilitar modos e formatos.
 - Os times ficam no navegador (localStorage, como no PS original). A **base deve ficar pronta** para sincronizar entre dispositivos no futuro.
 - Ambiente local em **Docker** (Docker Desktop no Windows). Deploy final em **VPS na Hostgator**. Antes do deploy, confirmar acesso root, suporte a Docker e RAM (2 GB servem para poucos usuários).
+  - Pesquisa de 2026-10-18: a VPS NVMe da HostGator atende (root, Ubuntu 22.04, datacenter no Brasil, sem backup incluso). Recomendado o plano de 2 vCPU e 4 GB, com "SO simples" e Docker instalado por nós.
+  - Tutorial em `docs/deploy-vps.md`; backup criptografado com age em `scripts/vps-backup.sh`.
+  - O nome e o domínio ainda estão em aberto.
 - Dar créditos visíveis ao Pokémon Showdown e à Smogon (README e interface).
 
 ## Modo: Desafio de Ginásios (requisitos do usuário)
