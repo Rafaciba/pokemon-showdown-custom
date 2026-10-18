@@ -68,10 +68,10 @@ export const RULES: { [lang in Lang]: Notice } = {
 				paragraphs: [
 					'Cada desafio tem os seus ginásios, regras e formato próprios, mostrados na página do desafio (botão "Gym Challenge" na tela principal ou /ginasio). Os líderes, a Elite 4 e o Campeão são controlados pelo computador.',
 					'Cada tentativa é uma jornada. Você tem uma jornada ativa por desafio, mas pode jogar vários desafios ao mesmo tempo. Para batalhar, escolha o formato "[Desafio] nome do desafio" e clique em "Battle!".',
-					'Vencer um líder dá a insígnia dele. Na ordem livre, você escolhe na página do desafio o próximo ginásio; sem escolha, enfrenta o primeiro ainda não vencido. Se o desafio tiver ordem fixa, os ginásios seguem essa ordem.',
+					'Vencer um líder dá a insígnia do ginásio dele, com o nome e a imagem de uma insígnia dos jogos escolhida pelo administrador (sem escolha, ela aparece como o ícone do tipo do ginásio). Na ordem livre, você escolhe na página do desafio o próximo ginásio; sem escolha, enfrenta o primeiro ainda não vencido. Se o desafio tiver ordem fixa, os ginásios seguem essa ordem.',
 					'Em desafios com tipos sorteados, os tipos dos ginásios são sorteados no começo de cada jornada.',
 					'Para enfrentar a Elite 4 (ou o Campeão, se o desafio não tiver Elite 4), é preciso ter todas as insígnias. A Elite 4 e o Campeão são enfrentados em sequência, como nos jogos: perder para qualquer um deles faz voltar ao primeiro membro da Elite 4.',
-					'Vencer o Campeão vence o desafio, e a conquista vai para o seu perfil. Vencer o mesmo desafio de novo acumula conquistas.',
+					'Vencer o Campeão vence o desafio: a conquista e as insígnias da jornada vão para o seu perfil como insígnias permanentes, com o nome da insígnia, o líder, o desafio e a data da vitória no ginásio. Vencer o mesmo desafio de novo acumula conquistas e insígnias.',
 				],
 			},
 			{
@@ -159,10 +159,10 @@ export const RULES: { [lang in Lang]: Notice } = {
 				paragraphs: [
 					'Each challenge has its own gyms, rules and format, shown on the challenge page ("Gym Challenge" button on the main menu, or /ginasio). Gym leaders, the Elite 4 and the Champion are controlled by the computer.',
 					'Each attempt is a journey. You can have one active journey per challenge, and play several challenges at the same time. To battle, pick the "[Desafio] challenge name" format and click "Battle!".',
-					'Beating a gym leader earns their badge. In free order, you pick the next gym on the challenge page; otherwise you face the first gym you have not beaten yet. If the challenge has a fixed order, gyms follow that order.',
+					'Beating a gym leader earns the badge of their gym, with the name and image of a badge from the games chosen by the administrator (without one, it shows as the icon of the gym type). In free order, you pick the next gym on the challenge page; otherwise you face the first gym you have not beaten yet. If the challenge has a fixed order, gyms follow that order.',
 					'In challenges with random types, gym types are drawn at the start of each journey.',
 					'To face the Elite 4 (or the Champion, if the challenge has no Elite 4) you need every badge. The Elite 4 and the Champion are fought in a row, as in the games: losing to any of them sends you back to the first Elite 4 member.',
-					'Beating the Champion wins the challenge, and the achievement goes to your profile. Winning the same challenge again adds another achievement.',
+					'Beating the Champion wins the challenge: the achievement and the badges of the journey go to your profile as permanent badges, with the badge name, the gym leader, the challenge and the date of the gym win. Winning the same challenge again adds another achievement and more badges.',
 				],
 			},
 			{

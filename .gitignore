@@ -9,6 +9,10 @@
 *.pem
 *.key
 
+# Imagens das insígnias (da Nintendo; geradas por scripts/insignias/importar.cjs e
+# copiadas para a VPS à parte, ver docs/insignias.md)
+/assets/badges/
+
 # Dados locais (bancos SQLite, volumes do Docker)
 /data/
 *.db

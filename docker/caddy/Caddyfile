@@ -84,6 +84,19 @@ www.{$PS_HOST:localhost} {
 		}
 	}
 
+	# Imagens das insígnias do Desafio de Ginásios (assets/badges, fora do git; ver
+	# docs/insignias.md). Nomes fixos por id: podem ficar em cache por um dia.
+	@badges path_regexp badges ^/badges/[a-z0-9-]+\.png$
+	handle @badges {
+		uri strip_prefix /badges
+		root * /srv/badges
+		header Cache-Control "public, max-age=86400"
+		file_server
+	}
+	handle /badges/* {
+		respond 404
+	}
+
 	# Config do cliente gerada no build (volume client-config). No repositório,
 	# play.pokemonshowdown.com/config/* são symlinks para ../../config/, que no
 	# Windows viram arquivos de texto; por isso servimos direto do volume.

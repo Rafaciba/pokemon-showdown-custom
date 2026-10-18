@@ -144,6 +144,15 @@ Revisado contra o OWASP Top 10 e a LGPD ao ser feito. Detalhes em `docs/arquitet
 - **Exclusão de conta.** As batalhas em andamento da conta terminam com forfeit antes de o nome ser liberado. Uma conta nova com o mesmo nome não assume mais essas batalhas (achado nos testes e corrigido).
 - **LGPD.** As mensagens de chat saem do estado antes de gravar, o estado é apagado no fim da batalha e junto com a conta, e os avisos de privacidade e de exclusão de conta foram atualizados.
 
+### Insígnias (2026-10-18)
+Revisado contra o OWASP Top 10 e a LGPD ao ser feito. Detalhes em `docs/insignias.md` e na arquitetura.
+- **A01 (acesso).** Só o admin escolhe insígnias (o mesmo comando já restrito do painel). O jogador só vê.
+- **A03 (injeção/XSS).** O valor enviado pelo formulário só é aceito se for um id do catálogo (testado com um comando forjado). Nomes e imagens vêm do catálogo gerado e são escapados no HTML; o nome do arquivo da imagem também passa por `encodeURIComponent`.
+- **A05 (configuração).** O Caddy só serve `/badges/<id>.png` com nomes `[a-z0-9-]+`, de uma pasta montada somente leitura; qualquer outro caminho em `/badges/` dá 404.
+- **A08 (integridade).** O importador para com erro se a página mudar de formato ou se uma cor não corresponder a um tipo, e o catálogo gerado passa por teste.
+- **Terceiros e LGPD.** As imagens são servidas pelo nosso domínio: o navegador do jogador não faz pedidos à Bulbapedia (a página é salva à mão pelo admin, uma vez). Nenhum dado pessoal novo: as insígnias permanentes são dados de jogo já cobertos pelo aviso de privacidade (perfil visível a usuários logados, apagado com a conta).
+- **Direitos.** As imagens são da Nintendo e ficam fora dos repositórios públicos; o rodapé do cliente já traz o aviso de projeto de fã e passou a creditar a Bulbapedia pelos dados.
+
 ## Testes desta revisão
 - **Login:** 19 testes (5 novos: aviso de privacidade, nomes reservados, anulação de códigos, bloqueio por conta e IP sem afetar outro IP e sem escapar por `X-Forwarded-For` forjado, POST de outro site sem `Origin`).
 - **Servidor:** 2541 testes, incluindo os nomes proibidos e a retenção dos logs de batalha.

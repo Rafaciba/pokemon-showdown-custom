@@ -116,6 +116,8 @@ services:
       - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - ./client:/srv/client:ro
       - client-config:/srv/client-config:ro
+      # Imagens das insígnias (fora do git; ver docs/insignias.md)
+      - ./assets/badges:/srv/badges:ro
       - caddy-data:/data
       - caddy-config:/config
     depends_on:

@@ -11,6 +11,8 @@ Este projeto só existe graças ao trabalho do **Pokémon Showdown** e da comuni
 - [smogon/pokemon-showdown](https://github.com/smogon/pokemon-showdown): servidor de jogo e simulador de batalhas (licença MIT)
 - [smogon/pokemon-showdown-client](https://github.com/smogon/pokemon-showdown-client): cliente web (licença AGPL-3.0)
 
+Os nomes, líderes, tipos e imagens das insígnias do Desafio de Ginásios vêm da [Bulbapedia](https://bulbapedia.bulbagarden.net/wiki/Badge) (as imagens não ficam no repositório; ver [docs/insignias.md](docs/insignias.md)).
+
 Pokémon Showdown foi criado por Guangcong Luo (Zarel) e é mantido por seus contribuidores. Pokémon e todos os nomes relacionados são marcas registradas de Nintendo, Game Freak e The Pokémon Company. Este é um projeto de fãs, sem fins lucrativos e sem afiliação com essas empresas.
 
 ## Estrutura

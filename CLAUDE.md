@@ -200,7 +200,7 @@ Respostas às questões restantes (2026-10-17):
 3. O nível de IA do desafio é o **padrão**, e os treinadores **podem estar acima**. A base não substitui o nível específico do treinador.
 4. **Timer:** o admin escolhe, por desafio, entre **limite de tempo por turno** e **tempo livre** (sem limite nenhum). Nos dois casos, o **tempo total da batalha não é limitado**.
 5. Na trava de time, **trocar apelido ou ordem dos Pokémon é permitido**. O resto precisa ser idêntico.
-6. Insígnias: os **ícones de tipo do PS servem de placeholder**. Depois serão trocados por **imagens das insígnias dos jogos oficiais**.
+6. Insígnias: os **ícones de tipo do PS servem de placeholder**. Depois serão trocados por **imagens das insígnias dos jogos oficiais**. **Feito em 2026-10-18**: catálogo da Bulbapedia, escolha por treinador em cada desafio, insígnias permanentes no perfil (ver `docs/insignias.md` e a seção "Insígnias" da arquitetura). O ícone de tipo continua como reserva quando o admin não escolhe a insígnia.
 
 Terceira rodada (2026-10-17):
 
@@ -293,5 +293,6 @@ Próximos passos:
    - Formulários de página: o cliente clássico troca o formulário enviado por "Submitted!" e só limpa marcadores `{a-z}`. Ver "Rascunhos de formulário" e `fieldKey` no plugin.
    - **Tradução pt-BR do cliente concluída em 2026-10-18.** Inclui o botão de idioma, os textos de batalha, os catálogos e a camada da interface clássica (`client-i18n.js`). As ferramentas ficam em `scripts/traducao/`.
    - **Save state das batalhas do Desafio de Ginásios concluído em 2026-10-18.** A batalha é salva a cada jogada, fica suspensa se a sala some e reabre sozinha quando o jogador entra com a conta. A exclusão de conta encerra com forfeit as batalhas em andamento. Decisões e funcionamento em `docs/arquitetura-desafio-ginasios.md`, seção "Save state das batalhas".
+   - **Insígnias concluídas em 2026-10-18.** O catálogo (`badge-catalog.ts`) é gerado por `scripts/insignias/importar.cjs` a partir da página da Bulbapedia salva à mão. As imagens ficam em `assets/badges/`, **fora do git** (são da Nintendo), servidas pelo Caddy em `/badges/`, copiadas para a VPS por `scp` e incluídas no backup.
    - Os catálogos `data/text/pt/{moves,abilities,items}.ts` usam `Partial<...>`: o `name` fica de fora e cai no inglês. O gerador (`scripts/traducao/comum.cjs`) escreve esse tipo, e o `tsc` do servidor passa sem erros.
    - Os `CRASH: EPIPE` no log (e o aviso "The main process crashed" no Lobby e na Staff) **eram falha real**, não ruído de reinício. Rodar os testes dentro do container `server` chamava `Repl.cleanup`, que conectava nos sockets REPL vivos do servidor e derrubava o servidor. Corrigido em 2026-10-18 com `repl = false` em `docker/server/config.js`.

@@ -5,7 +5,8 @@
 #   - login: banco de contas (login.db) e chaves RSA (volume login-data);
 #   - servidor de jogo: databases/*.db (jornadas, conquistas) e config/ (ranks,
 #     salas, ladders, punições), sem o config.js, que é gerado a cada start;
-#   - o .env.
+#   - o .env;
+#   - as imagens das insígnias (assets/badges, fora do git).
 #
 # Fica de fora, de propósito (LGPD, minimização):
 #   - logs/ (logs de batalha têm retenção de 30 dias; um backup esticaria esse prazo);
@@ -51,6 +52,11 @@ cp -a "$APP_DIR/server/config" "$work/server/config"
 rm -f "$work/server/config/config.js"
 
 cp "$APP_DIR/.env" "$work/env"
+
+if [ -d "$APP_DIR/assets/badges" ]; then
+	mkdir -p "$work/assets"
+	cp -a "$APP_DIR/assets/badges" "$work/assets/badges"
+fi
 
 mkdir -p "$BACKUP_DIR"
 out="$BACKUP_DIR/ps-custom-$stamp.tar.gz.age"

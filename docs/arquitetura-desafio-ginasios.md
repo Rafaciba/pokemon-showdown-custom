@@ -443,6 +443,25 @@ Objetivo (usuário): uma batalha interrompida continua de onde parou, e fechar a
 - testes: banco (salvar, apagar no resultado, listar), chat fora do estado, batalha real salva a cada decisão, retomada no mesmo turno com o NPC jogando em seguida, forfeit das batalhas da conta excluída;
 - e2e com o servidor de verdade (simulador em subprocessos): batalha no turno 3, `docker compose restart server`, batalha reaberta sozinha no turno 3 com o histórico e o aviso, turno seguinte jogado, reload da página sem perder a batalha, desistência como derrota e estado apagado no banco.
 
+### Insígnias (2026-10-18)
+
+Substitui o placeholder (ícone de tipo) pelas insígnias dos jogos. Catálogo, imagens e importação em `docs/insignias.md`.
+
+**Decisões do usuário:**
+- **Fonte:** Bulbapedia (nome, região, líderes, tipo e imagem); as imagens ficam fora do git.
+- **Associação:** a insígnia é escolhida para o **treinador em cada desafio**, ao montar o desafio (ginásios fixos e treinadores do sorteio). O mesmo treinador pode dar insígnias diferentes em desafios diferentes.
+- **Escolha no painel:** as insígnias do tipo do treinador aparecem primeiro, mas qualquer uma pode ser escolhida. A Trio Badge não tem tipo fixo (vale para Grass, Fire e Water).
+- **Sem escolha:** o ícone do tipo é a reserva, com o nome "insígnia do tipo X"; o desafio abre normalmente.
+- **Onde aparece:** painel admin, página da jornada, histórico de jornadas, aviso na sala da batalha e perfil.
+- **Perfil:** as insígnias **permanentes** são as das jornadas vencidas (as insígnias são da jornada e passam ao perfil quando o desafio é vencido), com nome da insígnia, líder, desafio e **data da vitória no ginásio**. Vencer de novo acumula.
+
+**Como funciona:**
+- **Dados** (migração 4): `badge_id` em `challenge_stages` e `challenge_pool`; `badge_id`, `badge_name` e `badge_image` em `run_stages`, uma cópia feita quando a jornada começa (como o time e o nome do treinador), para que mudanças no desafio ou no catálogo não alterem jornadas em andamento. A coluna `trainers.badge_image`, que nunca foi usada, saiu.
+- **Código:** `badge-catalog.ts` (gerado), `badges.ts` (busca, ordem do seletor, imagem com reserva), painel em `admin.ts`, exibição em `player.ts` e aviso em `runs.ts`.
+- **Aviso na sala:** com insígnia, "X earned the Boulder Badge! (1/2)" com a imagem; sem insígnia, o aviso antigo com o tipo. Os dois têm padrões distintos no dicionário do cliente.
+
+**Validado:** testes (catálogo, ordem do seletor, reserva, cópia na jornada, banco) e e2e no navegador: painel com imagens, insígnia forjada recusada, sorteio; aviso com nome e imagem, reserva com o tipo, página da jornada, histórico e perfil (nome, líder, desafio e data), em inglês e em português.
+
 1. **Prova de conceito**, para reduzir os riscos técnicos:
    - batalha contra NPC com bot aleatório, dentro do processo;
    - ajuste no `search` e um formato gerado dinamicamente;

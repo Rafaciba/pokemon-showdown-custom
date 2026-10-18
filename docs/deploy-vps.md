@@ -266,6 +266,22 @@ PS_ADMINS=Rafaciba
 
 `PS_NO_IP_CHECKS` fica em `0` na VPS (decisão de 2026-10-17): a ladder não pareia jogadores do mesmo IP. Quem joga da mesma casa usa desafio direto.
 
+### Imagens das insígnias
+
+As imagens das insígnias não ficam no git (ver [insignias.md](insignias.md)). Gere-as no seu computador com o importador (passos 1 a 3 de "Como importar" em `docs/insignias.md`) e copie para a VPS. Na VPS:
+
+```sh
+mkdir -p /opt/pokemon-showdown-custom/assets/badges
+```
+
+No seu computador (PowerShell), na pasta do projeto:
+
+```powershell
+scp assets/badges/*.png ps-vps:/opt/pokemon-showdown-custom/assets/badges/
+```
+
+Confira na VPS: `ls /opt/pokemon-showdown-custom/assets/badges | wc -l` deve mostrar 68. Sem as imagens, o jogo funciona, mas as insígnias aparecem quebradas.
+
 ## 10. Primeiro start
 
 ```sh
@@ -299,7 +315,8 @@ A HostGator **não** faz backup das VPS, então o backup é nosso. O script [scr
 - contas e chaves do login;
 - jornadas e conquistas;
 - ranks, salas, ladders e punições;
-- o `.env`.
+- o `.env`;
+- as imagens das insígnias, que ficam fora do git.
 
 O arquivo sai **criptografado** com `age` para uma chave pública. A chave privada fica só no seu computador, então quem invadir a VPS não consegue abrir os backups.
 
@@ -357,6 +374,7 @@ Não use `age ... | tar ...` no Windows PowerShell 5.1: ele trata o que passa pe
    cp /tmp/restore/env .env && chmod 600 .env
    cp -a /tmp/restore/server/config/. server/config/
    mkdir -p server/databases && cp /tmp/restore/server/databases/*.db server/databases/
+   mkdir -p assets && cp -a /tmp/restore/assets/badges assets/
    docker compose create            # cria os volumes sem iniciar nada
    sudo cp -a /tmp/restore/login/. /var/lib/docker/volumes/pokemon-showdown-custom_login-data/_data/
    rm -rf /tmp/restore /tmp/backup.tar.gz
@@ -381,7 +399,9 @@ docker compose restart server
 
 Se a mudança mexeu em formatos ou mods que o teambuilder precisa enxergar, troque a 5ª linha por `CLIENT_FORCE_BUILD=1 docker compose run --rm client-build`. Se mexeu só no `login/`, basta `docker compose restart login`.
 
-Reiniciar o `server` interrompe as batalhas em andamento: a batalha de jornada é anulada, sem contar nem vitória nem derrota. Prefira horários vazios.
+Reiniciar o `server` interrompe as batalhas em andamento. As batalhas do Desafio de Ginásios ficam salvas e reabrem do mesmo ponto quando o jogador entra de novo; as batalhas entre jogadores são perdidas. Prefira horários vazios.
+
+Se o catálogo de insígnias mudou (reimportação), copie as imagens novas como no passo 9.
 
 **Não rode os testes na VPS.** Eles são para o ambiente local.
 
