@@ -93,9 +93,10 @@ const messages = {
 	linkPlay: { pt: 'Ir para o jogo', en: 'Go to the game' },
 	privacyTitle: { pt: 'Privacidade', en: 'Privacy' },
 	privacyText: {
-		pt: 'Guardamos apenas o seu nome de usuário e um hash da sua senha (a senha em si nunca é armazenada). Não pedimos e-mail e não guardamos seu IP. Você pode excluir sua conta a qualquer momento em /conta.',
-		en: 'We only store your username and a hash of your password (the password itself is never stored). We do not ask for an e-mail address and do not store your IP. You can delete your account at any time at /conta.',
+		pt: 'A conta guarda apenas o seu nome de usuário e um hash da sua senha (a senha em si nunca é armazenada). Não pedimos e-mail. Você pode excluir sua conta e todos os seus dados a qualquer momento em /conta.',
+		en: 'Your account only stores your username and a hash of your password (the password itself is never stored). We do not ask for an e-mail address. You can delete your account and all your data at any time at /conta.',
 	},
+	privacyLink: { pt: 'Aviso de privacidade completo', en: 'Full privacy notice' },
 	registered: {
 		pt: 'Conta criada! Você já está logado: abra o jogo para jogar.',
 		en: 'Account created! You are logged in: open the game to play.',

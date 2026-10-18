@@ -49,7 +49,9 @@ Depois abra https://ps.localhost. Os detalhes estão em [docs/ambiente-local.md]
 
 ## Privacidade (LGPD)
 
-A conta guarda apenas o **nome de usuário** e o **hash da senha**. Não coletamos e-mail nem guardamos IP.
+A conta guarda apenas o **nome de usuário** e o **hash da senha**. Não coletamos e-mail, e o IP não vai para os registros (só fica em memória, para a conexão e o limite de tentativas de senha). Logs de batalha da ladder são apagados depois de 30 dias, e excluir a conta apaga todos os dados de jogo.
+
+O aviso de privacidade completo fica em `/privacidade` (código em [login/src/privacy.ts](login/src/privacy.ts)). A revisão de segurança e LGPD, com o inventário de dados, está em [docs/revisao-seguranca-lgpd.md](docs/revisao-seguranca-lgpd.md).
 
 O cadastro só é feito por convite.
 

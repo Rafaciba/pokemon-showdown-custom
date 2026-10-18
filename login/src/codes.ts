@@ -49,6 +49,11 @@ export function issueCode(db: Database, kind: CodeKind, userid: string | null, t
 	return { code, expiresAt };
 }
 
+/** Invalida os códigos pendentes de um tipo para a conta (ex.: redefinições antigas). */
+export function revokeCodes(db: Database, kind: CodeKind, userid: string) {
+	db.prepare('DELETE FROM codes WHERE kind = ? AND userid = ?').run(kind, userid);
+}
+
 /** Consulta um código válido sem consumi-lo. */
 export function findCode(db: Database, kind: CodeKind, code: string): { userid: string | null } | null {
 	if (normalizeCode(code).length !== GROUPS * GROUP_SIZE) return null;

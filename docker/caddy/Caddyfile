@@ -15,6 +15,10 @@
 		X-Content-Type-Options nosniff
 		Referrer-Policy strict-origin-when-cross-origin
 		X-Frame-Options SAMEORIGIN
+		# Só HTTPS por 1 ano (o Caddy já redireciona HTTP; isto evita o primeiro acesso em HTTP)
+		Strict-Transport-Security "max-age=31536000"
+		# O cliente não usa câmera, microfone, localização etc.
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
 		-Server
 	}
 
@@ -36,21 +40,31 @@
 
 	# Login server próprio: contrato do action.php oficial + páginas de conta.
 	# (A API /internal/* do login NÃO é roteada: só a rede do Docker a alcança.)
-	@login path_regexp login ^/(~~[^/]+/action\.php|api(/.*)?|cadastro|redefinir|conta(/(sair|senha|excluir))?)/?$
+	@login path_regexp login ^/(~~[^/]+/action\.php|api(/.*)?|cadastro|redefinir|privacidade|conta(/(sair|senha|excluir))?)/?$
 	handle @login {
 		reverse_proxy login:9000
 	}
 
 	# PROVISÓRIO: sprites e áudio não estão no repositório do cliente.
-	# Enquanto não hospedamos esses arquivos, buscamos no site oficial.
-	# O pokedex-mini(-bw).js descreve esses sprites (números dos ícones e tamanhos
-	# das animações) e só é gerado pelo build quando os sprites estão no disco
-	# (build-tools/build-minidex); sem ele, ícones desenhados antes do pokedex.js
-	# carregar ficam como "?".
-	@remoteassets path /sprites/* /audio/* /data/pokedex-mini.js /data/pokedex-mini-bw.js
+	# Enquanto não hospedamos esses arquivos, buscamos no site oficial (só imagens e
+	# sons; o pokedex-mini(-bw).js, que é JavaScript, é baixado uma vez no build do
+	# cliente e servido localmente, ver docker/client/build.sh).
+	#
+	# Segurança e LGPD: o pedido sai do nosso domínio para um terceiro. Nada que
+	# identifique o jogador vai junto: sem cookie de sessão, sem IP (X-Forwarded-*),
+	# sem Referer; e nenhum cookie do terceiro volta para o nosso domínio.
+	@remoteassets path /sprites/* /audio/*
 	handle @remoteassets {
 		reverse_proxy https://play.pokemonshowdown.com {
 			header_up Host {upstream_hostport}
+			header_up -Cookie
+			header_up -Authorization
+			header_up -Referer
+			header_up -X-Forwarded-For
+			header_up -X-Forwarded-Host
+			header_up -X-Forwarded-Proto
+			header_up -Via
+			header_down -Set-Cookie
 		}
 	}
 

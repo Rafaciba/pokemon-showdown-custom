@@ -27,6 +27,12 @@ export class RateLimiter {
 		return entry.count <= this.limit;
 	}
 
+	/** Desfaz um registro (ex.: a tentativa de senha deu certo). */
+	forgive(key: string) {
+		const entry = this.hits.get(key);
+		if (entry && entry.count > 0) entry.count--;
+	}
+
 	/** Consulta sem registrar: true se a chave já estourou o limite na janela atual. */
 	isLimited(key: string): boolean {
 		const entry = this.hits.get(key);

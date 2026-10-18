@@ -6,6 +6,8 @@ Política da organização: **sempre observar a LGPD e boas práticas de seguran
 
 Regra de trabalho combinada com o usuário: **não inventar nem inferir requisitos**. Quando algo estiver ambíguo, perguntar.
 
+**Segurança:** toda mudança relevante deve ser revista contra o **OWASP Top 10** e a LGPD. A revisão completa de 2026-10-18 (achados, correções e pendências) está em `docs/revisao-seguranca-lgpd.md`, que serve de checklist.
+
 ## Idiomas
 
 - Código (identificadores): inglês.
@@ -274,4 +276,4 @@ Próximos passos:
    - Recarga de formatos (`gym-challenge/reload.ts`): reler `sim/`, `data/` e as listas de formatos; o Dex novo só entra se todos os formatos montarem a tabela de regras.
    - Menu de formatos: os nossos (`customFormat: true` em `config/custom-formats.ts`, bit 512 no `|formats|`) aparecem primeiro; os oficiais ficam no grupo "Official Formats", fechado por padrão (`client-custom.js`).
    - Formulários de página: o cliente clássico troca o formulário enviado por "Submitted!" e só limpa marcadores `{a-z}`. Ver "Rascunhos de formulário" e `fieldKey` no plugin.
-   - Ruído conhecido: ao reiniciar o container `server`, o log mostra `CRASH: EPIPE/ECONNRESET` dos subprocessos encerrados junto. Não é falha. Na VPS, avaliar um encerramento mais limpo.
+   - Os `CRASH: EPIPE` no log (e o aviso "The main process crashed" no Lobby e na Staff) **eram falha real**, não ruído de reinício. Rodar os testes dentro do container `server` chamava `Repl.cleanup`, que conectava nos sockets REPL vivos do servidor e derrubava o servidor. Corrigido em 2026-10-18 com `repl = false` em `docker/server/config.js`.

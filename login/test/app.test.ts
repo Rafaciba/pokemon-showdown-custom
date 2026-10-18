@@ -30,7 +30,7 @@ before(async () => {
 	tmp = mkdtempSync(join(tmpdir(), 'login-test-'));
 	const config: LoginConfig = {
 		port: 0, privateKeyDir: join(tmp, 'private'), sharedDir: join(tmp, 'shared'), databasePath: ':memory:',
-		keyId: 1, serverHost: HOST, publicOrigin: ORIGIN, cookieSecure: true,
+		keyId: 1, serverHost: HOST, publicOrigin: ORIGIN, cookieSecure: true, reservedNames: new Set(['admintest']),
 	};
 	db = openDatabase(':memory:');
 	const privateKey = ensureKeyPair(config.privateKeyDir, config.sharedDir);
@@ -57,8 +57,13 @@ after(() => {
 
 interface Reply { status: number, text: string, cookie: string | null, json: any }
 
-async function post(path: string, form: Record<string, string>, opts: { cookie?: string, origin?: string | null } = {}): Promise<Reply> {
-	const headers: Record<string, string> = { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept-Language': 'pt-BR' };
+async function post(
+	path: string, form: Record<string, string>,
+	opts: { cookie?: string, origin?: string | null, headers?: Record<string, string> } = {}
+): Promise<Reply> {
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/x-www-form-urlencoded', 'Accept-Language': 'pt-BR', ...opts.headers,
+	};
 	if (opts.origin !== null) headers.Origin = opts.origin ?? ORIGIN;
 	if (opts.cookie) headers.Cookie = opts.cookie;
 	const res = await fetch(base + path, { method: 'POST', headers, body: new URLSearchParams(form) });
@@ -263,6 +268,64 @@ test('exclusão de conta entra na fila de dados de jogo até o servidor confirma
 	assert.ok(!(await pending()).includes('forrest'));
 	const again = await post('/cadastro', { invite, username: 'Forrest', password: 'outra-senha-1', confirm: 'outra-senha-1' });
 	assert.match(again.text, /Conta criada/);
+});
+
+test('nomes de admin só com convite reservado', async () => {
+	const open = await newInvite();
+	const blocked = await post('/cadastro', { invite: open, username: 'AdminTest', password: 'senha-forte-1', confirm: 'senha-forte-1' });
+	assert.match(blocked.text, /reservado/);
+	const reserved = await newInvite('AdminTest');
+	const ok = await post('/cadastro', { invite: reserved, username: 'AdminTest', password: 'senha-forte-1', confirm: 'senha-forte-1' });
+	assert.match(ok.text, /Conta criada/);
+});
+
+test('troca de senha e novo código anulam códigos de redefinição antigos', async () => {
+	const session = await registerUser('Clemont', 'luxray-forte1');
+	const first = (await internal('/internal/reset', { username: 'Clemont' })).json.code;
+	const second = (await internal('/internal/reset', { username: 'Clemont' })).json.code;
+	const old = await post('/redefinir', { code: first, username: 'Clemont', password: 'nova-senha-01', confirm: 'nova-senha-01' });
+	assert.match(old.text, /inválido|expirado/, 'código anterior anulado pelo novo');
+	await action('changepassword', { oldpassword: 'luxray-forte1', password: 'outra-senha-1', cpassword: 'outra-senha-1' }, session);
+	const after = await post('/redefinir', { code: second, username: 'Clemont', password: 'nova-senha-01', confirm: 'nova-senha-01' });
+	assert.match(after.text, /inválido|expirado/, 'código anulado pela troca de senha');
+});
+
+test('bloqueio por tentativas não afeta a conta a partir de outro IP', async () => {
+	await registerUser('Bonnie', 'dedenne-01x');
+	const attacker = { 'X-Forwarded-For': '203.0.113.7' };
+	for (let i = 0; i < 10; i++) {
+		await post('/~~custom/action.php', { act: 'login', name: 'Bonnie', pass: `errada-${i}`, challstr: CHALLSTR }, { headers: attacker });
+	}
+	const blocked = await post('/~~custom/action.php', { act: 'login', name: 'Bonnie', pass: 'dedenne-01x', challstr: CHALLSTR }, { headers: attacker });
+	assert.equal(blocked.json.actionsuccess, false, 'o IP do atacante fica bloqueado');
+	const owner = await post('/~~custom/action.php', { act: 'login', name: 'Bonnie', pass: 'dedenne-01x', challstr: CHALLSTR },
+		{ headers: { 'X-Forwarded-For': '198.51.100.20' } });
+	assert.equal(owner.json.actionsuccess, true, 'a dona da conta entra a partir do próprio IP');
+	// Só a última entrada do X-Forwarded-For (a do proxy) conta: forjar a primeira não escapa do bloqueio
+	const spoofed = await post('/~~custom/action.php', { act: 'login', name: 'Bonnie', pass: 'dedenne-01x', challstr: CHALLSTR },
+		{ headers: { 'X-Forwarded-For': '198.51.100.99, 203.0.113.7' } });
+	assert.equal(spoofed.json.actionsuccess, false);
+});
+
+test('POST sem Origin vindo de outro site é recusado', async () => {
+	const res = await post('/~~custom/action.php', { act: 'upkeep' }, { origin: null, headers: { 'Sec-Fetch-Site': 'cross-site' } });
+	assert.equal(res.status, 403);
+	const sameSite = await post('/~~custom/action.php', { act: 'upkeep' }, { origin: null, headers: { 'Sec-Fetch-Site': 'same-origin' } });
+	assert.equal(sameSite.status, 200);
+});
+
+test('aviso de privacidade em pt e en, com o administrador', async () => {
+	const pt = await fetch(`${base}/privacidade`, { headers: { 'Accept-Language': 'pt-BR' } });
+	const html = await pt.text();
+	assert.equal(pt.status, 200);
+	assert.match(html, /Aviso de privacidade/);
+	assert.match(html, /<strong>admintest<\/strong>/i, 'controlador: o admin de PS_ADMINS');
+	assert.match(html, /30 dias/);
+	assert.match(pt.headers.get('content-security-policy') || '', /default-src 'none'/);
+	const en = await fetch(`${base}/privacidade`, { headers: { 'Accept-Language': 'en-US' } }).then(r => r.text());
+	assert.match(en, /Privacy notice/);
+	const account = await fetch(`${base}/cadastro`, { headers: { 'Accept-Language': 'pt-BR' } }).then(r => r.text());
+	assert.match(account, /href="\/privacidade"/);
 });
 
 test('limite de tentativas de senha por conta', async () => {

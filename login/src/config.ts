@@ -24,7 +24,11 @@ export interface LoginConfig {
 	publicOrigin: string;
 	/** Cookie com flag Secure (sempre true atrás do Caddy com HTTPS). */
 	cookieSecure: boolean;
+	/** Nomes (userids) que só podem ser cadastrados com convite reservado: os admins (PS_ADMINS). */
+	reservedNames: ReadonlySet<string>;
 }
+
+import { toID } from './util.ts';
 
 function requireInt(name: string, fallback: number): number {
 	const raw = process.env[name];
@@ -47,5 +51,6 @@ export function loadConfig(): LoginConfig {
 		serverHost,
 		publicOrigin: `https://${serverHost}`,
 		cookieSecure: process.env.LOGIN_COOKIE_INSECURE !== '1',
+		reservedNames: new Set((process.env.PS_ADMINS || '').split(',').map(toID).filter(Boolean)),
 	};
 }

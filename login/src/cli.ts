@@ -11,7 +11,7 @@
  */
 import { loadConfig } from './config.ts';
 import { openDatabase } from './db.ts';
-import { issueCode, countPendingCodes, INVITE_TTL_SECONDS, RESET_TTL_SECONDS } from './codes.ts';
+import { issueCode, countPendingCodes, revokeCodes, INVITE_TTL_SECONDS, RESET_TTL_SECONDS } from './codes.ts';
 import { getUser, normalizeUsername } from './accounts.ts';
 import { t } from './i18n.ts';
 import { toID } from './util.ts';
@@ -47,6 +47,7 @@ case 'convite': {
 case 'redefinir': {
 	const user = getUser(db, toID(args[0]));
 	if (!user) fail('usuário não encontrado.');
+	revokeCodes(db, 'reset', user.userid); // só o código mais recente vale
 	const { code, expiresAt } = issueCode(db, 'reset', user.userid, RESET_TTL_SECONDS);
 	console.log(`Código de redefinição para ${user.username}: ${code}`);
 	console.log(`Válido até: ${formatDate(expiresAt)} (uso único)`);

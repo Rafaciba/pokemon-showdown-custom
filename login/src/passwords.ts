@@ -4,9 +4,11 @@
  */
 import { scrypt, randomBytes, timingSafeEqual, type ScryptOptions } from 'node:crypto';
 
+// OWASP (Password Storage Cheat Sheet): N=2^15, r=8, p=3 é uma das configurações
+// mínimas recomendadas, com 32 MiB por hash (N=2^17 com p=1 exigiria 128 MiB)
 const N = 2 ** 15;
 const R = 8;
-const P = 1;
+const P = 3;
 const KEY_LENGTH = 64;
 const SALT_BYTES = 16;
 
@@ -39,7 +41,13 @@ export async function verifyPassword(password: string, stored: string): Promise<
 }
 
 /** Hash usado só para equalizar o tempo de resposta quando o usuário não existe. */
-export const DUMMY_HASH = 'scrypt$32768$8$1$AAAAAAAAAAAAAAAAAAAAAA==$' + Buffer.alloc(KEY_LENGTH).toString('base64');
+export const DUMMY_HASH = `scrypt$${N}$${R}$${P}$AAAAAAAAAAAAAAAAAAAAAA==$` + Buffer.alloc(KEY_LENGTH).toString('base64');
+
+/** O hash foi feito com parâmetros antigos? (refeito no próximo login bem-sucedido) */
+export function needsRehash(stored: string): boolean {
+	const [, n, r, p] = stored.split('$');
+	return Number(n) !== N || Number(r) !== R || Number(p) !== P;
+}
 
 /** Retorna a chave de mensagem de erro, ou null se a senha é aceitável. */
 export function checkPasswordPolicy(password: string, userid: string): 'passwordTooShort' | 'passwordTooLong' | 'passwordIsName' | null {

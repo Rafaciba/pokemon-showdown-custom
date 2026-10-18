@@ -26,8 +26,8 @@ import {
 	createSession, getSession, deleteSession, deleteOtherSessions, sessionCookie, clearSessionCookie, readCookie,
 	SESSION_COOKIE, type ActiveSession,
 } from './sessions.ts';
-import { issueCode, INVITE_TTL_SECONDS, RESET_TTL_SECONDS } from './codes.ts';
-import { renderAccount, renderRegister, renderReset, type PageMessage } from './pages.ts';
+import { issueCode, revokeCodes, INVITE_TTL_SECONDS, RESET_TTL_SECONDS } from './codes.ts';
+import { renderAccount, renderPrivacy, renderRegister, renderReset, type PageMessage } from './pages.ts';
 
 const MAX_BODY_BYTES = 16 * 1024;
 // O CSS e as imagens vêm do próprio cliente (mesmo domínio); nada de script
@@ -64,19 +64,25 @@ export function createApp(deps: AppDeps) {
 	// Limites em memória (o IP nunca é persistido)
 	const requestLimiter = new RateLimiter(deps.limits?.requestsPerMinute ?? 120, 60_000);
 	const formLimiter = new RateLimiter(deps.limits?.formsPerMinute ?? 20, 60_000);
-	// Falhas de senha: por conta e por IP, janela de 15 min
+	// Falhas de senha, janela de 15 min: por conta + IP (assim ninguém bloqueia a conta
+	// de outra pessoa a partir do próprio IP) e por IP (tentativas em várias contas)
 	const failuresByUser = new RateLimiter(10, 15 * 60_000);
 	const failuresByIp = new RateLimiter(30, 15 * 60_000);
+	const userKey = (ctx: RequestContext, userid: string) => `${userid}|${ctx.ip}`;
 
 	const signedAssertion = (ctx: RequestContext, userid: string, userType: '1' | '2') =>
 		buildAssertion(deps.assertion, ctx.params.challstr || ctx.params.challenge || '', userid, userType, ctx.lang);
 
 	function loginBlocked(ctx: RequestContext, userid: string): boolean {
-		return failuresByUser.isLimited(userid) || failuresByIp.isLimited(ctx.ip);
+		return failuresByUser.isLimited(userKey(ctx, userid)) || failuresByIp.isLimited(ctx.ip);
 	}
-	function recordFailure(ctx: RequestContext, userid: string) {
-		failuresByUser.allow(userid);
+	function recordAttempt(ctx: RequestContext, userid: string) {
+		failuresByUser.allow(userKey(ctx, userid));
 		failuresByIp.allow(ctx.ip);
+	}
+	function forgiveAttempt(ctx: RequestContext, userid: string) {
+		failuresByUser.forgive(userKey(ctx, userid));
+		failuresByIp.forgive(ctx.ip);
 	}
 
 	function startSession(ctx: RequestContext, user: User): string {
@@ -89,11 +95,11 @@ export function createApp(deps: AppDeps) {
 	async function checkedAuthenticate(ctx: RequestContext, name: string, password: string): Promise<User | MessageKey> {
 		const userid = toID(name);
 		if (loginBlocked(ctx, userid)) return 'tooManyLoginAttempts';
+		// Conta a tentativa antes do scrypt (assíncrono): pedidos em paralelo não passam do limite
+		recordAttempt(ctx, userid);
 		const user = await authenticate(db, name, password);
-		if (!user) {
-			recordFailure(ctx, userid);
-			return 'wrongPassword';
-		}
+		if (!user) return 'wrongPassword';
+		forgiveAttempt(ctx, userid);
 		return user;
 	}
 
@@ -174,11 +180,11 @@ export function createApp(deps: AppDeps) {
 	): Promise<MessageKey | null> {
 		const userid = session.user.userid;
 		if (loginBlocked(ctx, userid)) return 'tooManyLoginAttempts';
+		recordAttempt(ctx, userid);
 		const result = await changePassword(db, session.user, current, password, confirm);
-		if (!result.ok) {
-			if (result.error === 'wrongPassword') recordFailure(ctx, userid);
-			return result.error;
-		}
+		// Senha atual correta: a tentativa não conta, mesmo que a troca falhe por outro motivo
+		if (result.ok || result.error !== 'wrongPassword') forgiveAttempt(ctx, userid);
+		if (!result.ok) return result.error;
 		deleteOtherSessions(db, userid, session.token);
 		return null;
 	}
@@ -192,7 +198,7 @@ export function createApp(deps: AppDeps) {
 	async function registerPage(ctx: RequestContext): Promise<string> {
 		if (ctx.req.method !== 'POST') return renderRegister(ctx.lang, { invite: ctx.url.searchParams.get('convite') ?? '' });
 		const { invite = '', username = '', password = '', confirm = '' } = ctx.params;
-		const result = await register(db, invite, username, password, confirm);
+		const result = await register(db, invite, username, password, confirm, config.reservedNames);
 		if (!result.ok) return renderRegister(ctx.lang, { msg: error(result.error), invite, username });
 		if (ctx.session) deleteSession(db, ctx.session.token);
 		startSession(ctx, result.value);
@@ -226,11 +232,10 @@ export function createApp(deps: AppDeps) {
 			if (ctx.params.confirm !== 'yes') return renderAccount(ctx.lang, { user: session.user, msg: error('confirmDeletion') });
 			const userid = session.user.userid;
 			if (loginBlocked(ctx, userid)) return renderAccount(ctx.lang, { user: session.user, msg: error('tooManyLoginAttempts') });
+			recordAttempt(ctx, userid);
 			const result = await deleteAccount(db, session.user, ctx.params.password || '');
-			if (!result.ok) {
-				if (result.error === 'wrongPassword') recordFailure(ctx, userid);
-				return renderAccount(ctx.lang, { user: session.user, msg: error(result.error) });
-			}
+			if (!result.ok) return renderAccount(ctx.lang, { user: session.user, msg: error(result.error) });
+			forgiveAttempt(ctx, userid);
 			ctx.cookies.push(clearSessionCookie(config.cookieSecure));
 			console.log('[conta] conta excluída a pedido do titular');
 			return renderAccount(ctx.lang, { user: null, msg: success('accountDeleted') });
@@ -268,6 +273,8 @@ export function createApp(deps: AppDeps) {
 		case '/internal/reset': {
 			const user = getUser(db, toID(params.username));
 			if (!user) return { status: 404, body: { ok: false, error: 'Usuário não encontrado.' } };
+			// Só o código mais recente vale
+			revokeCodes(db, 'reset', user.userid);
 			const issued = issueCode(db, 'reset', user.userid, RESET_TTL_SECONDS);
 			console.log('[admin] código de redefinição gerado');
 			return { status: 200, body: { ok: true, ...issued, url: `https://${config.serverHost}/redefinir`, username: user.username } };
@@ -311,8 +318,10 @@ export function createApp(deps: AppDeps) {
 	return async function handle(req: IncomingMessage, res: ServerResponse) {
 		const url = new URL(req.url || '/', 'http://internal');
 		const path = url.pathname;
+		// O Caddy acrescenta o IP do cliente no fim do X-Forwarded-For; o que vem antes
+		// pode ter sido enviado pelo próprio cliente. Só a última entrada é confiável.
 		const forwarded = req.headers['x-forwarded-for'];
-		const ip = (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(',')[0]?.trim() ||
+		const ip = (Array.isArray(forwarded) ? forwarded.join(',') : forwarded)?.split(',').pop()?.trim() ||
 			req.socket.remoteAddress || 'unknown';
 		const ctx: RequestContext = {
 			req, res, url, params: {}, ip, lang: detectLang(req.headers['accept-language']), session: null, cookies: [],
@@ -322,7 +331,7 @@ export function createApp(deps: AppDeps) {
 
 		const isClientAction = /^\/~~[^/]+\/action\.php$/.test(path) || /^\/api\/[a-z]+\/?$/.test(path);
 		const isServerAction = path === '/action.php';
-		const pageMatch = /^\/(cadastro|redefinir|conta)(?:\/(sair|senha|excluir))?\/?$/.exec(path);
+		const pageMatch = /^\/(cadastro|redefinir|conta|privacidade)(?:\/(sair|senha|excluir))?\/?$/.exec(path);
 		const isInternal = path.startsWith('/internal/');
 		if (!isClientAction && !isServerAction && !pageMatch && !isInternal) {
 			return send(ctx, 404, 'not found', 'text/plain; charset=utf-8');
@@ -332,6 +341,11 @@ export function createApp(deps: AppDeps) {
 		// CSRF: navegadores sempre mandam Origin em POST; outra origem é recusada
 		const origin = req.headers.origin;
 		if (req.method === 'POST' && origin !== undefined && origin !== config.publicOrigin) {
+			return send(ctx, 403, t(ctx.lang, 'badOrigin'), 'text/plain; charset=utf-8');
+		}
+		// Sem Origin: um navegador que informa Sec-Fetch-Site de outro site também é recusado
+		const fetchSite = req.headers['sec-fetch-site'];
+		if (req.method === 'POST' && origin === undefined && fetchSite && !['same-origin', 'none'].includes(String(fetchSite))) {
 			return send(ctx, 403, t(ctx.lang, 'badOrigin'), 'text/plain; charset=utf-8');
 		}
 
@@ -372,6 +386,12 @@ export function createApp(deps: AppDeps) {
 				return send(ctx, 429, t(ctx.lang, 'tooManyRequests'), 'text/plain; charset=utf-8');
 			}
 			const [, page, sub = ''] = pageMatch;
+			if (page === 'privacidade') {
+				// Controlador: o primeiro admin de PS_ADMINS (nome como foi cadastrado)
+				const [adminId] = config.reservedNames;
+				const adminName = adminId ? (getUser(db, adminId)?.username || adminId) : 'admin';
+				return sendPage(ctx, renderPrivacy(ctx.lang, adminName));
+			}
 			if (page === 'cadastro') return sendPage(ctx, await registerPage(ctx));
 			if (page === 'redefinir') return sendPage(ctx, await resetPage(ctx));
 			return sendPage(ctx, await accountPage(ctx, sub));

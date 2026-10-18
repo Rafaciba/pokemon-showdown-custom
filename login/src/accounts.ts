@@ -3,8 +3,8 @@
  * troca/redefinição de senha e exclusão (LGPD).
  */
 import { type Database, nowSeconds } from './db.ts';
-import { hashPassword, verifyPassword, checkPasswordPolicy, DUMMY_HASH } from './passwords.ts';
-import { findCode, consumeCode } from './codes.ts';
+import { hashPassword, verifyPassword, checkPasswordPolicy, needsRehash, DUMMY_HASH } from './passwords.ts';
+import { findCode, consumeCode, revokeCodes } from './codes.ts';
 import { toID, validateUserid } from './util.ts';
 import type { MessageKey } from './i18n.ts';
 
@@ -63,8 +63,14 @@ export function completePurge(db: Database, userid: string): boolean {
 	return db.prepare('DELETE FROM pending_purges WHERE userid = ?').run(userid).changes === 1;
 }
 
+/**
+ * `reservedNames`: nomes que só podem ser cadastrados com convite reservado para
+ * eles (os admins de PS_ADMINS). Sem isso, se a conta do admin fosse excluída, quem
+ * cadastrasse o mesmo nome com um convite comum herdaria o rank ~.
+ */
 export async function register(
-	db: Database, inviteCode: string, rawName: string, password: string, confirm: string
+	db: Database, inviteCode: string, rawName: string, password: string, confirm: string,
+	reservedNames: ReadonlySet<string> = new Set()
 ): Promise<Result<User>> {
 	const invite = findCode(db, 'invite', inviteCode);
 	if (!invite) return fail('inviteInvalid');
@@ -73,6 +79,7 @@ export async function register(
 	if (!name.ok) return name;
 	const { userid, username } = name.value;
 	if (invite.userid && invite.userid !== userid) return fail('inviteForOtherName');
+	if (reservedNames.has(userid) && invite.userid !== userid) return fail('nameReserved');
 	if (getUser(db, userid)) return fail('nameTaken');
 	if (isPendingPurge(db, userid)) return fail('nameReleasing');
 
@@ -117,6 +124,10 @@ export async function authenticate(db: Database, rawName: string, password: stri
 		return null;
 	}
 	if (!await verifyPassword(password, row.password_hash)) return null;
+	// Parâmetros do scrypt mudaram: refaz o hash agora que temos a senha
+	if (needsRehash(row.password_hash)) {
+		db.prepare('UPDATE users SET password_hash = ? WHERE userid = ?').run(await hashPassword(password), row.userid);
+	}
 	return { userid: row.userid, username: row.username };
 }
 
@@ -124,6 +135,8 @@ async function setPassword(db: Database, userid: string, password: string) {
 	const passwordHash = await hashPassword(password);
 	db.prepare('UPDATE users SET password_hash = ?, password_changed_at = ? WHERE userid = ?')
 		.run(passwordHash, nowSeconds(), userid);
+	// Um código de redefinição que tenha vazado deixa de valer quando a senha muda
+	revokeCodes(db, 'reset', userid);
 }
 
 export async function changePassword(
@@ -174,5 +187,7 @@ export async function deleteAccount(db: Database, user: User, password: string):
 		db.exec('ROLLBACK');
 		throw err;
 	}
+	// LGPD: tira do WAL as páginas com os dados apagados
+	db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
 	return ok(undefined);
 }

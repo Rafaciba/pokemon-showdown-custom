@@ -9,6 +9,7 @@
 import { t, type Lang, type MessageKey } from './i18n.ts';
 import { escapeHTML as e } from './util.ts';
 import type { User } from './accounts.ts';
+import { PRIVACY } from './privacy.ts';
 
 export interface PageMessage {
 	kind: 'error' | 'success';
@@ -86,7 +87,7 @@ ${field('confirm', t(lang, 'fieldConfirm'), 'password', 'new-password', { maxlen
 </form>
 <hr>
 <p><strong>${e(t(lang, 'privacyTitle'))}</strong></p>
-<p><small>${e(t(lang, 'privacyText'))}</small></p>`);
+<p><small>${e(t(lang, 'privacyText'))} <a href="/privacidade">${e(t(lang, 'privacyLink'))}</a></small></p>`);
 }
 
 export function renderReset(lang: Lang, opts: { msg?: PageMessage, username?: string, done?: boolean }): string {
@@ -136,5 +137,18 @@ ${field('password', t(lang, 'fieldPassword'), 'password', 'current-password', { 
 </form>
 <hr>
 <p><strong>${e(t(lang, 'privacyTitle'))}</strong></p>
-<p><small>${e(t(lang, 'privacyText'))}</small></p>`);
+<p><small>${e(t(lang, 'privacyText'))} <a href="/privacidade">${e(t(lang, 'privacyLink'))}</a></small></p>`);
+}
+
+/** Aviso de privacidade (LGPD), em pt ou en conforme o navegador. */
+export function renderPrivacy(lang: Lang, adminName: string): string {
+	const notice = PRIVACY[lang];
+	const admin = `<strong>${e(adminName)}</strong>`;
+	const text = (paragraph: string) => e(paragraph).split('{admin}').join(admin);
+	const sections = notice.sections.map(section => `<p><strong>${e(section.title)}</strong></p>\n` +
+		section.paragraphs.map(paragraph => `<p><small>${text(paragraph)}</small></p>`).join('\n')).join('\n');
+	return layout(lang, notice.title, `<h3>${e(notice.title)}</h3>
+${sections}
+<p><small><em>${e(notice.updated)}</em></small></p>
+<p class="buttonbar">${playButton(lang)}</p>`);
 }

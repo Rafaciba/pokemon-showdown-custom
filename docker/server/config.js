@@ -22,6 +22,12 @@ exports.proxyip = ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'];
 
 // SEGURANÇA: o padrão do PS (true) dá console de admin aos sysops da Smogon.
 exports.backdoor = false;
+// Nenhum console administrativo por IP (o padrão do PS libera 127.0.0.1)
+exports.consoleips = [];
+// REPL desligado: é um eval do processo por socket Unix, que não usamos. Ligado, os
+// sockets ficam em logs/repl (bind mount) e a limpeza que os testes rodam no mesmo
+// container (Repl.cleanup) conecta neles e fecha na hora, e o EPIPE derruba o servidor.
+exports.repl = false;
 
 // Login server próprio (rede interna do Docker)
 exports.loginserver = process.env.LOGIN_SERVER_URL || 'http://login:9000/';

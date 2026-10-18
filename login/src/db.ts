@@ -59,6 +59,8 @@ export function openDatabase(path: string): Database {
 	db.exec('PRAGMA journal_mode = WAL');
 	db.exec('PRAGMA foreign_keys = ON');
 	db.exec('PRAGMA busy_timeout = 5000');
+	// LGPD: o que é apagado é sobrescrito no arquivo (sem restos de contas excluídas)
+	db.exec('PRAGMA secure_delete = ON');
 	migrate(db);
 	return db;
 }

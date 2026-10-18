@@ -16,8 +16,17 @@ x-node: &node
   init: true
   restart: unless-stopped
 
+# Logs dos containers com tamanho máximo (LGPD: retenção limitada; os logs podem ter
+# nomes de usuário). Até 3 arquivos de 10 MB por serviço.
+x-logging: &logging
+  driver: local
+  options:
+    max-size: 10m
+    max-file: "3"
+
 services:
   login:
+    logging: *logging
     <<: *node
     working_dir: /app
     command: ["node", "src/server.ts"]
@@ -27,6 +36,8 @@ services:
       LOGIN_PRIVATE_KEY_DIR: /data/keys
       LOGIN_DATABASE: /data/login.db
       LOGIN_SHARED_DIR: /shared
+      # Nomes de admin só podem ser cadastrados com convite reservado para eles
+      PS_ADMINS: ${PS_ADMINS:-}
     volumes:
       - ./login:/app:ro
       - login-data:/data
@@ -39,6 +50,7 @@ services:
       start_period: 15s
 
   client-build:
+    logging: *logging
     image: node:24-bookworm-slim
     init: true
     working_dir: /app
@@ -58,6 +70,7 @@ services:
     restart: "no"
 
   server:
+    logging: *logging
     <<: *node
     working_dir: /app
     command: ["sh", "/opt/ps/entrypoint.sh"]
@@ -90,6 +103,7 @@ services:
       start_period: 60s
 
   web:
+    logging: *logging
     image: caddy:2.10-alpine
     restart: unless-stopped
     ports:

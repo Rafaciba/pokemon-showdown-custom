@@ -34,3 +34,20 @@ else
 	echo "[client] build rápido para $PS_HOST. Use CLIENT_FORCE_BUILD=1 para regenerar os dados."
 	node build
 fi
+
+# pokedex-mini(-bw).js: JavaScript com os dados dos sprites, que o build só gera com
+# os sprites no disco. Uma cópia é baixada do site oficial uma vez e servida
+# localmente: assim nenhum script de terceiro é buscado a cada acesso (integridade).
+for f in pokedex-mini.js pokedex-mini-bw.js; do
+	dest="play.pokemonshowdown.com/data/$f"
+	if [ ! -s "$dest" ]; then
+		if node -e "fetch('https://play.pokemonshowdown.com/data/' + process.argv[1]).then(async r => {
+			if (!r.ok) throw new Error('HTTP ' + r.status);
+			require('fs').writeFileSync(process.argv[2], Buffer.from(await r.arrayBuffer()));
+		})" "$f" "$dest"; then
+			echo "[client] $f baixado"
+		else
+			echo "[client] aviso: não foi possível baixar $f"
+		fi
+	fi
+done
