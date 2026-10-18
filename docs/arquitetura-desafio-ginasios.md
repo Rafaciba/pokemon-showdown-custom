@@ -316,6 +316,32 @@ A prova de conceito foi validada com um teste de ponta a ponta pelo fluxo real: 
   - Times de formatos oficiais não passam pelo Proxy.
 - **Validado por e2e:** o formato salvo sobrevive à recarga da página; o teambuilder usa geração 9 e Pokédex completa (`formatType: natdex`) num desafio com base National Dex AG; o botão mostra "[Desafio] Liga TB"; a validação vai em `/vtm gen9desafioligatb` e o servidor responde que o time é válido; salvar mantém o formato do desafio; trocar para OU e voltar funciona; um time OU não é afetado; a tela principal encontra o time no formato do desafio.
 
+**Decisões do usuário para a fase 3 (2026-10-17):**
+
+- **Empate não conta:** nem vitória nem derrota. O jogador enfrenta o mesmo treinador de novo; não conta para o limite de derrotas nem reinicia a Elite 4.
+- **Uma jornada ativa por desafio:** o jogador pode jogar vários desafios em paralelo.
+- **Ordem livre:** o jogador escolhe na página do desafio o ginásio do próximo "Battle!"; sem escolha, enfrenta o primeiro ginásio ainda não vencido.
+- **Desistir durante uma batalha** dá forfeit nela (conta como derrota) e encerra a jornada na hora.
+
+**Resultado da fase 3 (jornadas, 2026-10-17):**
+
+- **Dados** (migração 2 do banco): `runs` (uma ativa por jogador e desafio, por índice único), `run_stages` (cópia das etapas com nome, tipo, time e nível efetivo do treinador, feita quando a jornada começa) e `run_battles` (resultado `win`, `loss`, `tie`, `void`, ou vazio enquanto a batalha está em andamento). Insígnias, derrotas e a posição na Elite 4 são calculadas a partir das batalhas (`journey.ts`, funções puras), sem tabela própria.
+- **Batalha:** o "Battle!" no formato do desafio confere a jornada ativa, a batalha em andamento, a trava de time (hash do time validado, sem apelidos e em qualquer ordem) e a etapa atual, e inicia a batalha contra o treinador da cópia da jornada. O resultado chega pelo `NpcBattle` (vitória, derrota ou empate) e atualiza a jornada: insígnia, vitória no desafio ou eliminação. Os avisos na sala ficam em inglês, como os do PS, porque a sala é pública.
+- **Batalha interrompida** (sala fechada sem fim, ou servidor reiniciado) vira `void` e não conta (confirmado pelo usuário "por enquanto"; ver a ideia de save state abaixo). A verificação é feita sob demanda: uma batalha "em andamento" cuja sala não existe mais é descartada. Assim, batalhas que continuam vivas depois de um hotpatch não são afetadas.
+- **Limite de derrotas** (confirmado pelo usuário): ao **atingir** o limite, o jogador é eliminado (limite 3 = eliminado na 3ª derrota). A página mostra "Derrotas: 1 de 3".
+- **Timer por turno:** a própria batalha ajusta o timer (saldo de N segundos, reabastecido a N a cada turno), em vez das regras de timer do formato, que limitam o acréscimo por turno a 30 s e acabariam limitando o tempo total. Ligado pelo servidor, o jogador não consegue desligá-lo.
+- **Batalhas sempre públicas** (confirmado pelo usuário): as preferências de privacidade do jogador não se aplicam às batalhas contra NPC (requisito). O aviso de batalha no Lobby mostra o nome do NPC.
+- **Segurança do lado do NPC:** o jogador NPC é criado só com nome, então fica com `id` vazio e fora da tabela de jogadores. Um usuário real com o mesmo nome não controla o NPC nem recebe o time dele.
+- **Páginas do jogador:** `view-ginasios` (desafios abertos e encerrados, com a jornada de cada um) e `view-ginasios-desafio-<id>` (regras, como batalhar, insígnias, ginásios, Elite 4/Campeão, derrotas, batalha em andamento, escolher ginásio, desistir e jornadas anteriores). A página se atualiza sozinha quando a batalha começa e termina. Visitantes veem as páginas só para leitura (confirmado pelo usuário).
+- **Admin:** `view-ginasiosadmin-jornadas-<id>`, com as jornadas do desafio e a ação "Encerrar jornada". Encerrar o desafio encerra as jornadas ativas na mesma transação.
+- **Batalha em andamento quando o admin encerra a jornada ou o desafio** (decisão do usuário): a batalha continua e **o resultado conta**. A insígnia entra no histórico da jornada; vitória sobre o Campeão muda a jornada para "vencida", e uma derrota que elimina muda para "eliminada". Fora isso, ela continua "encerrada". A desistência do próprio jogador não segue essa regra: o forfeit conta como derrota, e a jornada fica "desistiu". Validado por e2e (encerramento durante o ginásio e durante o Campeão).
+- **Robustez:** um formato nosso inválido fica fora da lista de formatos (em `server/rooms.ts`) em vez de derrubá-la. Isso foi achado no teste: um timer de 60 s nas regras do formato quebrava a lista na inicialização. A recarga só recusa a troca se um formato oficial falhar. As transações do banco são reentrantes.
+- **Validado por e2e com batalhas reais:**
+  - jornada: ginásio e Campeão vencidos; desistência no meio da batalha; trava de time (apelido e ordem aceitos, item diferente recusado); eliminação por limite de derrotas; timer por turno ligado e sem poder desligar;
+  - páginas: começar, escolher ginásio, atualização automática, insígnia, visitante só para leitura, admin encerrando a jornada, histórico e encerramento do desafio com jornada ativa.
+- **Ideia para depois (usuário, 2026-10-17):** um **save state automático** das batalhas, para que uma batalha interrompida (servidor reiniciado) possa continuar e para evitar o "reload scam" (o jogador recarregar a página ou derrubar a conexão para escapar de uma derrota).
+- **Fica para a fase 4:** conquistas no perfil (a jornada vencida já fica registrada como `won`), placar total, página de histórico e perfil, e a exclusão dos dados de jogo junto com a exclusão da conta.
+
 1. **Prova de conceito**, para reduzir os riscos técnicos:
    - batalha contra NPC com bot aleatório, dentro do processo;
    - ajuste no `search` e um formato gerado dinamicamente;
