@@ -1,4 +1,6 @@
-# (Nome do projeto a definir)
+# Liga de Desafios
+
+**https://ligadesafios.com.br**
 
 Servidor casual de batalhas Pokémon para jogar com amigos. Ele é construído sobre o **[Pokémon Showdown](https://pokemonshowdown.com/)** e tem modos de jogo próprios, como o **Desafio de Ginásios**.
 

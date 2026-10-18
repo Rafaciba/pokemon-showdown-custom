@@ -29,7 +29,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 			{
 				title: 'Quem somos',
 				paragraphs: [
-					'Este é um servidor casual de batalhas Pokémon, sem fins lucrativos, para uso entre amigos, construído sobre o Pokémon Showdown. O responsável pelos dados (controlador, na LGPD) é o administrador do servidor, a conta {admin}.',
+					'A Liga de Desafios (ligadesafios.com.br) é um servidor casual de batalhas Pokémon, sem fins lucrativos, para uso entre amigos, construído sobre o Pokémon Showdown. O responsável pelos dados (controlador, na LGPD) é o administrador do servidor, a conta {admin}.',
 				],
 			},
 			{
@@ -83,7 +83,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 			{
 				title: 'Who we are',
 				paragraphs: [
-					'This is a casual, non-profit Pokémon battle server for friends, built on Pokémon Showdown. The person responsible for the data (the controller, under Brazil\'s LGPD) is the server administrator, the {admin} account.',
+					'Liga de Desafios (ligadesafios.com.br) is a casual, non-profit Pokémon battle server for friends, built on Pokémon Showdown. The person responsible for the data (the controller, under Brazil\'s LGPD) is the server administrator, the {admin} account.',
 				],
 			},
 			{

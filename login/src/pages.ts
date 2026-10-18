@@ -41,7 +41,7 @@ function layout(lang: Lang, title: string, body: string): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
-<title>${e(title)} - Pokémon Showdown!</title>
+<title>${e(title)} - Liga de Desafios</title>
 <link rel="shortcut icon" href="/favicon.ico">
 <link rel="stylesheet" href="/style/battle.css">
 <link rel="stylesheet" href="/style/oldclient.css">

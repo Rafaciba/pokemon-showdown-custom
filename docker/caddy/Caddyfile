@@ -8,6 +8,13 @@
 # Em "localhost" o Caddy usa automaticamente uma CA local (certificado de dev).
 # Em produção, com um domínio real, ele emite o certificado via Let's Encrypt.
 
+# www.{domínio} só redireciona para o domínio principal (precisa do registro DNS do www;
+# ver docs/deploy-vps.md). Cookies e o login valem só no domínio principal.
+www.{$PS_HOST:localhost} {
+	header Strict-Transport-Security "max-age=31536000"
+	redir https://{$PS_HOST:localhost}{uri} permanent
+}
+
 {$PS_HOST:localhost} {
 	encode zstd gzip
 

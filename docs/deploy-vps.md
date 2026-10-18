@@ -1,5 +1,7 @@
 # Deploy na VPS
 
+Domínio: **ligadesafios.com.br** (Liga de Desafios).
+
 Passo a passo para subir o projeto numa VPS **limpa**, a partir da opção "SO simples" com **Ubuntu 22.04 LTS** (sem painel e sem aplicações pré-instaladas). Foi escrito para a VPS NVMe da HostGator, mas serve para qualquer VPS Ubuntu com acesso root.
 
 Plano recomendado: **2 vCPU, 4 GB de RAM e 100 GB NVMe** (NVMe 4). Com 2 GB, o build do cliente fica no limite da memória.
@@ -9,7 +11,6 @@ Nos comandos, troque:
 | Marcador | Por |
 |---|---|
 | `IP_DA_VPS` | o IPv4 que a HostGator informa no painel |
-| `SEU_DOMINIO` | o domínio escolhido, por exemplo `exemplo.com.br` |
 | `deploy` | o nome do usuário de administração, se quiser outro |
 
 > **Antes de começar:** ative a verificação em duas etapas na conta da HostGator e na do registro do domínio (registro.br ou outro). Quem entra nessas contas controla o servidor e o domínio.
@@ -170,17 +171,21 @@ Saia e entre de novo (`exit` e `ssh ps-vps`) para o grupo valer. Teste com `dock
 
 ## 8. Domínio
 
-No painel de DNS do domínio, crie:
+No painel de DNS do domínio `ligadesafios.com.br` (no registro.br, se usar o DNS do próprio Registro.br), crie:
 
 | Tipo | Nome | Valor |
 |---|---|---|
 | A | `@` (o próprio domínio) | `IP_DA_VPS` |
 | AAAA | `@` | o IPv6 da VPS, **só se** a HostGator fornecer um |
+| CNAME | `www` | `ligadesafios.com.br.` |
+
+O `www` só redireciona para o endereço principal (`https://ligadesafios.com.br`). Sem esse registro, o Caddy fica tentando obter o certificado do `www` e registra erros no log.
 
 Confira, do seu computador, se já propagou (pode levar de minutos a algumas horas):
 
 ```powershell
-Resolve-DnsName SEU_DOMINIO
+Resolve-DnsName ligadesafios.com.br
+Resolve-DnsName www.ligadesafios.com.br
 ```
 
 **O passo 10 só funciona depois disso.** O Caddy pede o certificado HTTPS ao Let's Encrypt no primeiro start, e o Let's Encrypt precisa achar a VPS pelo domínio.
@@ -209,7 +214,7 @@ nano .env
 Valores para produção:
 
 ```
-PS_HOST=SEU_DOMINIO
+PS_HOST=ligadesafios.com.br
 LOGIN_KEY_ID=1
 CLIENT_FORCE_BUILD=0
 PS_NO_IP_CHECKS=0
@@ -235,7 +240,7 @@ docker compose ps
 
 `login`, `server` e `web` devem estar `Up` (os dois primeiros com `healthy`), e o `client-build` com `Exited (0)`.
 
-Abra `https://SEU_DOMINIO` no navegador.
+Abra `https://ligadesafios.com.br` no navegador.
 
 ## 11. Conta de admin
 
@@ -348,7 +353,7 @@ Reiniciar o `server` interrompe as batalhas em andamento: a batalha de jornada �
 ## Problemas comuns
 
 - **O navegador não abre o site ou o certificado não sai.**
-  - Confira se o DNS já aponta para a VPS (`Resolve-DnsName SEU_DOMINIO`).
+  - Confira se o DNS já aponta para a VPS (`Resolve-DnsName ligadesafios.com.br`).
   - Confira se as portas 80 e 443 estão abertas no ufw e no firewall do painel da HostGator.
   - Veja o log: `docker compose logs web`.
   - Algumas imagens Ubuntu da Oracle Cloud (a infraestrutura da HostGator) vêm com regras de `iptables` que bloqueiam tudo menos o SSH. Se `sudo iptables -L INPUT -n` mostrar um `REJECT` antes das regras do ufw, avise para ajustarmos.

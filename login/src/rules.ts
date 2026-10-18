@@ -19,7 +19,7 @@ export const RULES: { [lang in Lang]: Notice } = {
 			{
 				title: 'O servidor',
 				paragraphs: [
-					'Servidor casual de batalhas Pokémon, para jogar entre amigos. Só joga quem tem conta, e as contas são criadas com convite do administrador ({admin}). Sem conta, dá para assistir às batalhas públicas, mas não para jogar nem falar no chat.',
+					'A Liga de Desafios é um servidor casual de batalhas Pokémon, para jogar entre amigos. Só joga quem tem conta, e as contas são criadas com convite do administrador ({admin}). Sem conta, dá para assistir às batalhas públicas, mas não para jogar nem falar no chat.',
 					'Dúvidas, problemas ou pedidos: mande uma mensagem privada ao administrador ({admin}) no jogo. O administrador pode moderar o chat e as batalhas com as ferramentas do Pokémon Showdown (advertência, silenciar, bloquear).',
 				],
 			},
@@ -108,7 +108,7 @@ export const RULES: { [lang in Lang]: Notice } = {
 			{
 				title: 'The server',
 				paragraphs: [
-					'A casual Pokémon battle server for friends. Only account holders can play, and accounts are created with an invite from the administrator ({admin}). Without an account you can watch public battles, but you cannot play or chat.',
+					'Liga de Desafios is a casual Pokémon battle server for friends. Only account holders can play, and accounts are created with an invite from the administrator ({admin}). Without an account you can watch public battles, but you cannot play or chat.',
 					'Questions, problems or requests: send a private message to the administrator ({admin}) in the game. The administrator can moderate chat and battles with the Pokémon Showdown tools (warn, mute, lock).',
 				],
 			},

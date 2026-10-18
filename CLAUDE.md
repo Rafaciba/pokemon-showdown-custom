@@ -1,6 +1,11 @@
-# Contexto do projeto: pokemon-showdown-custom
+# Contexto do projeto: Liga de Desafios
 
-Servidor **casual** de batalhas Pokémon, para uso próprio e com amigos. Ele é construído sobre o Pokémon Showdown (PS) da Smogon e tem modos de jogo próprios. O nome definitivo e o domínio ainda serão escolhidos; por enquanto o projeto se chama `pokemon-showdown-custom`.
+Servidor **casual** de batalhas Pokémon, para uso próprio e com amigos. Ele é construído sobre o Pokémon Showdown (PS) da Smogon e tem modos de jogo próprios.
+
+- **Nome:** Liga de Desafios.
+- **Domínio:** `ligadesafios.com.br` (definidos em 2026-10-18).
+- **Nome no jogo:** aparece nos textos (aba do navegador, páginas de conta, privacidade, regras). O logo do topo continua o do PS, e os créditos ao PS e à Smogon ficam.
+- **Nomes técnicos que continuam como estão:** os repositórios, o projeto do Docker Compose (`pokemon-showdown-custom`, do qual dependem os nomes dos volumes) e o id do servidor (`custom`).
 
 Política da organização: **sempre observar a LGPD e boas práticas de segurança** em tudo que for gerado.
 
@@ -134,7 +139,7 @@ D:\Workspace\pokemon-showdown\   ← repo "plataforma" → github: Rafaciba/poke
 - Ambiente local em **Docker** (Docker Desktop no Windows). Deploy final em **VPS na Hostgator**. Antes do deploy, confirmar acesso root, suporte a Docker e RAM (2 GB servem para poucos usuários).
   - Pesquisa de 2026-10-18: a VPS NVMe da HostGator atende (root, Ubuntu 22.04, datacenter no Brasil, sem backup incluso). Recomendado o plano de 2 vCPU e 4 GB, com "SO simples" e Docker instalado por nós.
   - Tutorial em `docs/deploy-vps.md`; backup criptografado com age em `scripts/vps-backup.sh`.
-  - O nome e o domínio ainda estão em aberto.
+  - Nome e domínio definidos em 2026-10-18: **Liga de Desafios**, `ligadesafios.com.br` (`PS_HOST` na VPS). O usuário já tem a VPS e o domínio, e está seguindo o tutorial.
 - Dar créditos visíveis ao Pokémon Showdown e à Smogon (README e interface).
 
 ## Modo: Desafio de Ginásios (requisitos do usuário)
