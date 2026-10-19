@@ -119,6 +119,7 @@ Rotas no domínio:
 | Mudou o `docker-compose.yml` ou o `Caddyfile` | `docker compose up -d --force-recreate` |
 | Rodar os testes do servidor | `docker compose run --rm --no-deps server-setup sh /opt/ps/test.sh test/main.js test/server/chat-plugins/gym-challenge.js` (no Git Bash, com `MSYS_NO_PATHCONV=1` na frente) |
 | Rodar os testes do login | `docker compose run --rm --no-deps login npm test` |
+| Teste de ponta a ponta (site, contas, convites, jornada) | `sh scripts/e2e.sh` (ver [testes-e2e.md](testes-e2e.md)) |
 | Parar tudo | `docker compose down` |
 | Apagar tudo, incluindo contas, chaves e certificados | `docker compose down -v` |
 
@@ -162,4 +163,4 @@ Os registros vencidos são apagados a cada hora.
 
 ## Pendências conhecidas
 
-- O teste ponta a ponta (login, batalha, `/convite`, exclusão) ainda não está versionado.
+Nenhuma no momento.

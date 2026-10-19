@@ -127,6 +127,7 @@ D:\Workspace\pokemon-showdown\   ← repo "plataforma" → github: Rafaciba/poke
   - `server/server/chat-plugins/<nosso-plugin>.ts`: comandos e páginas, carregados automaticamente;
   - `RoomGame` (`server/server/room-game.ts`): jogos de sala.
 - **Commits com vários repositórios:** um repositório por comando, nunca em paralelo, e sempre conferindo antes `test "$(git rev-parse --show-toplevel)" = "<caminho esperado>"`. Em 2026-10-17 um commit do repo raiz foi parar no fork por causa de um diretório errado, e a mensagem precisou ser corrigida com `push --force-with-lease`, com autorização do usuário.
+- **Teste de ponta a ponta versionado (2026-10-19):** `sh scripts/e2e.sh` roda `tests/e2e` (Playwright Test) contra o ambiente local: páginas, contas, convites, jornada completa e exclusão, com admin temporário e limpeza automática. Só em `*.localhost`. Ver `docs/testes-e2e.md`. Funcionalidade nova visível ao jogador ou ao admin ganha um passo nele.
 - **Testes de interface:** Playwright em container (`mcr.microsoft.com/playwright:v1.49.1-noble`), com `--host-resolver-rules=MAP ps.localhost host.docker.internal` e `ignoreHTTPSErrors`. O Chrome resolve `*.localhost` para o próprio container. Para testar páginas de admin: conta temporária por convite, mais uma linha temporária no `usergroups.csv`; apagar as duas no fim.
 - Configuração local do git nos forks: `core.longpaths=true` (o checkout do cliente falha sem isso no Windows) e `core.autocrlf=false`. O Git do sistema tem `autocrlf=true`, e os forks já foram normalizados para LF.
 
@@ -256,7 +257,7 @@ Ideias para o futuro, sem implementar agora:
 - Chaves RSA:
   - a **privada** fica no volume `login-data`, visível só para o `login`;
   - a **pública** e o token interno ficam no volume `login-shared`, montado somente leitura no `server`.
-- Teste e2e validado em 2026-10-17: login via assertion, `/trn`, Random Battle gen 9 até o turno 5 e assertion forjada rejeitada. O script ficou no scratchpad da sessão; vale transformá-lo em teste versionado depois.
+- Teste e2e validado em 2026-10-17: login via assertion, `/trn`, Random Battle gen 9 até o turno 5 e assertion forjada rejeitada. Desde 2026-10-19 há o teste versionado em `tests/e2e` (ver `docs/testes-e2e.md`).
 - O PS não pareia na ladder jogadores do mesmo IP (`server/server/ladders.ts`). Em dev, `PS_NO_IP_CHECKS=1` liga o `noipchecks`. **Decisão do usuário (2026-10-17): na VPS a proteção fica LIGADA** (`PS_NO_IP_CHECKS=0`); jogadores do mesmo IP só jogam por desafio direto.
 - Pendências do ambiente:
   - ~~sprites, áudio e `pokedex-mini` via proxy~~ **Feito em 2026-10-18:** sprites e sons vêm dos pacotes oficiais do PS (`scripts/recursos-ps.sh`, fora do git), servidos do disco, com o site oficial como reserva para o que faltar; o build gera o `pokedex-mini` a partir deles. Ver `docs/recursos-ps.md`;

@@ -459,7 +459,7 @@ Reiniciar o `server` interrompe as batalhas em andamento. As batalhas do Desafio
 
 Se o catálogo de insígnias mudou (reimportação), copie as imagens novas como no passo 9.
 
-**Não rode os testes na VPS.** Eles são para o ambiente local.
+**Não rode os testes na VPS.** Eles são para o ambiente local. Antes de enviar mudanças grandes, rode no seu computador o teste de ponta a ponta (`sh scripts/e2e.sh`, ver [testes-e2e.md](testes-e2e.md)).
 
 ### Migrar para os containers endurecidos (uma vez)
 

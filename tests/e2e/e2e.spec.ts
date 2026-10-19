@@ -1,0 +1,231 @@
+/**
+ * Teste de ponta a ponta do ambiente local (scripts/e2e.sh): páginas do site, contas e
+ * login, página de convites e uma jornada completa do Desafio de Ginásios.
+ *
+ * Tudo o que é criado aqui usa o prefixo E2E e é apagado pelo scripts/e2e.sh no fim,
+ * passe ou falhe. O admin temporário (E2E Admin) é preparado pelo script.
+ */
+import { test, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
+import {
+	ADMIN, PLAYER, clickPsButton, expectPopup, expectRoomText, openClient, openPsPage, playBattle,
+	register, roomIds, submitPsForm, waitNewRoom,
+} from './helpers';
+
+const HOST = process.env.PS_HOST || 'ps.localhost';
+const ADMIN_INVITE = process.env.E2E_ADMIN_INVITE || '';
+const PASSWORD = process.env.E2E_PASSWORD || '';
+const NEW_PASSWORD = `${PASSWORD}-nova`;
+const SERVER_WS = 'ws://server:8000/showdown/websocket';
+
+// O validador do formato recusa sets sem EVs
+const TRAINER_TEAM = 'Magikarp\nAbility: Swift Swim\nEVs: 1 HP\n- Splash';
+const PLAYER_TEAM = 'Pikachu||LightBall|Static|Thunderbolt|Timid|,,,252,4,252|||||';
+
+test.describe.configure({ mode: 'serial' });
+
+let admin: Page;
+let player: Page;
+let playerInvite = '';
+let challengeId = 0;
+let formatId = '';
+
+async function newPage(browser: Browser): Promise<[BrowserContext, Page]> {
+	const context = await browser.newContext({
+		baseURL: `https://${HOST}`, ignoreHTTPSErrors: true, viewport: { width: 1280, height: 900 },
+	});
+	return [context, await context.newPage()];
+}
+
+test.beforeAll(async ({ browser }) => {
+	expect(ADMIN_INVITE, 'rode pelo scripts/e2e.sh').not.toBe('');
+	expect(PASSWORD).not.toBe('');
+	[, admin] = await newPage(browser);
+	[, player] = await newPage(browser);
+});
+
+test('páginas do site: privacidade, regras e cabeçalhos de segurança', async ({ request }) => {
+	for (const [lang, title, rules] of [['pt-BR', /Aviso de privacidade/, /Regras/], ['en-US', /Privacy notice/, /Rules/]]) {
+		const privacy = await request.get('/privacidade', { headers: { 'Accept-Language': lang as string } });
+		expect(privacy.status()).toBe(200);
+		expect(await privacy.text()).toMatch(title as RegExp);
+		const page = await request.get('/regras', { headers: { 'Accept-Language': lang as string } });
+		expect(await page.text()).toMatch(rules as RegExp);
+	}
+	const signup = await request.get('/cadastro');
+	expect(signup.headers()['content-security-policy']).toContain("default-src 'none'");
+	expect(signup.headers()['strict-transport-security']).toContain('max-age=');
+	const client = await request.get('/');
+	expect(client.status()).toBe(200);
+	expect(client.headers()['strict-transport-security']).toContain('max-age=');
+});
+
+test('contas: cadastro do admin, convite usado e intruso bloqueados', async ({ request }) => {
+	expect(await register(admin, ADMIN_INVITE, ADMIN, PASSWORD)).toMatch(/Account created|Conta criada/);
+	// O mesmo convite não serve duas vezes
+	const [, other] = await newPage(admin.context().browser()!);
+	expect(await register(other, ADMIN_INVITE, 'E2E Outro', PASSWORD)).toMatch(/Invalid, used or expired|inválido, já usado/);
+	await other.context().close();
+	// Nome sem conta não recebe assertion (o servidor exige conta)
+	const intruder = await request.post('/~~custom/action.php', {
+		form: { act: 'getassertion', userid: 'e2eintruso', challstr: '1|abc' },
+	});
+	expect(await intruder.text()).toMatch(/^;;.*\/cadastro/);
+	// O admin entra no jogo pela sessão e abre o painel
+	await openClient(admin);
+	await openPsPage(admin, 'view-ginasiosadmin', /Gym Challenge: admin panel|Desafio de Ginásios: painel/);
+});
+
+test('contas: assertion forjada é recusada pelo servidor de jogo', async () => {
+	const reply = await new Promise<string>((resolve) => {
+		const ws = new WebSocket(SERVER_WS);
+		const timer = setTimeout(() => resolve('sem resposta'), 10_000);
+		ws.onmessage = ({ data }) => {
+			for (const line of String(data).split('\n')) {
+				if (line.startsWith('|challstr|')) {
+					const challenge = line.slice(10).split('|')[1];
+					const forged = `${challenge},e2eforjado,2,${Math.floor(Date.now() / 1000)},${HOST};${'ab'.repeat(192)}`;
+					ws.send(`|/trn E2E Forjado,0,${forged}`);
+				}
+				if (line.startsWith('|nametaken|') || line.startsWith('|updateuser|')) {
+					if (line.startsWith('|updateuser|') && !line.includes('E2E Forjado')) continue;
+					clearTimeout(timer);
+					ws.close();
+					resolve(line);
+				}
+			}
+		};
+	});
+	expect(reply).toMatch(/^\|nametaken\|/);
+});
+
+test('convites: gerar, código só uma vez, revogar e redefinir senha', async () => {
+	const id = 'view-ginasiosadmin-convites';
+	await openPsPage(admin, 'view-ginasiosadmin', /Invites|Convites/);
+	await clickPsButton(admin, 'view-ginasiosadmin', `button[value="${id}"]`);
+	await expectRoomText(admin, id, /Pending invites|Convites pendentes/);
+
+	// Convite aberto: é o que o jogador usa no cadastro
+	await submitPsForm(admin, id, 'form[data-submitsend^="/ginasioadmin gerarconvite"]', { username: '' });
+	await expectRoomText(admin, id, /Invite code|Código de convite/);
+	playerInvite = (await admin.evaluate(rid => (window as any).app.rooms[rid].$el.find('.infobox code').text(), id));
+	expect(playerInvite).toMatch(/^[A-Z2-9]{4}(-[A-Z2-9]{4}){3}$/);
+	// Ao recarregar, o código não aparece de novo
+	await openPsPage(admin, id, /Pending invites|Convites pendentes/);
+	expect(await admin.evaluate(rid => (window as any).app.rooms[rid].$el.text(), id)).not.toContain(playerInvite);
+
+	// Convite reservado: aparece na lista com o nome e pode ser revogado
+	await submitPsForm(admin, id, 'form[data-submitsend^="/ginasioadmin gerarconvite"]', { username: 'E2E Reservado' });
+	await expectRoomText(admin, id, /e2ereservado/);
+	const revoke = await admin.evaluate(rid => {
+		const $room = (window as any).app.rooms[rid].$el;
+		const $row = $room.find('tr').filter((i: number, tr: Element) => tr.textContent!.includes('e2ereservado'));
+		return $row.find('button[name=send]').attr('value');
+	}, id);
+	expect(revoke).toMatch(/^\/ginasioadmin revogarconvite \d+$/);
+	await clickPsButton(admin, id, `button[value="${revoke}"]`);
+	await expect.poll(async () => (await admin.evaluate(rid => (window as any).app.rooms[rid].$el.find('tr').text(), id)))
+		.not.toContain('e2ereservado');
+
+	// Nome já em uso é recusado com aviso
+	await submitPsForm(admin, id, 'form[data-submitsend^="/ginasioadmin gerarconvite"]', { username: ADMIN });
+	await expectPopup(admin, /already taken|já está em uso/);
+
+	// Redefinição de senha: jogador inexistente e o próprio admin
+	await submitPsForm(admin, id, 'form[data-submitsend^="/ginasioadmin redefinirsenha"]', { username: 'e2eninguem' });
+	await expectPopup(admin, /User not found|Usuário não encontrado/);
+	await submitPsForm(admin, id, 'form[data-submitsend^="/ginasioadmin redefinirsenha"]', { username: ADMIN });
+	await expectRoomText(admin, id, /Password reset code for|Código de redefinição/);
+});
+
+test('desafio: o admin cria treinadores e um desafio e o abre', async () => {
+	const trainerIds: number[] = [];
+	for (const [name, type] of [['E2E Lider', 'Water'], ['E2E Campeao', '']]) {
+		const before = await roomIds(admin);
+		await openPsPage(admin, 'view-ginasiosadmin-treinador-novo', /Save trainer|Salvar treinador/);
+		await submitPsForm(admin, 'view-ginasiosadmin-treinador-novo', 'form[data-submitsend^="/ginasioadmin salvartreinador"]', {
+			name, title: 'E2E', type, team: TRAINER_TEAM,
+		});
+		const saved = await waitNewRoom(admin, /^view-ginasiosadmin-treinador-\d+$/, before);
+		trainerIds.push(Number(saved.split('-').pop()));
+	}
+
+	const before = await roomIds(admin);
+	await openPsPage(admin, 'view-ginasiosadmin-desafio-novo', /Save challenge|Salvar desafio/);
+	await submitPsForm(admin, 'view-ginasiosadmin-desafio-novo', 'form[data-submitsend^="/ginasioadmin salvardesafio"]', {
+		name: 'E2E Desafio', gyms: '1', elite: 'no', lock: 'no',
+	});
+	const page = await waitNewRoom(admin, /^view-ginasiosadmin-desafio-\d+$/, before);
+	challengeId = Number(page.split('-').pop());
+
+	// Líder no ginásio 1 e o Campeão
+	await expectRoomText(admin, page, /Save trainers|Salvar treinadores/);
+	await admin.evaluate(([rid, [leader, champion]]) => {
+		const $form = (window as any).app.rooms[rid].$el.find('form[data-submitsend^="/ginasioadmin salvaretapas"]');
+		$form.find('select').filter((i: number, el: HTMLSelectElement) => /^gym[a-z]+$/.test(el.name)).val(String(leader));
+		$form.find('select').filter((i: number, el: HTMLSelectElement) => /^champion[a-z]+$/.test(el.name)).val(String(champion));
+		$form.find('button[type=submit]').click();
+	}, [page, trainerIds] as const);
+	await expectRoomText(admin, page, /Everything is ready|Tudo pronto/);
+	await clickPsButton(admin, page, `button[value="/ginasioadmin abrirdesafio ${challengeId}"]`);
+	await expectRoomText(admin, page, /Close challenge|Encerrar desafio/);
+	formatId = 'gen9desafioe2edesafio';
+});
+
+test('desafio: o jogador vence o ginásio e o Campeão, e o perfil mostra os times', async () => {
+	expect(await register(player, playerInvite, PLAYER, PASSWORD)).toMatch(/Account created|Conta criada/);
+	await openClient(player);
+	const page = `view-ginasios-desafio-${challengeId}`;
+	await openPsPage(player, page, /Start journey|Começar jornada/);
+	await clickPsButton(player, page, `button[value="/ginasio iniciar ${challengeId}"]`);
+	await expectRoomText(player, page, /Badges: 0\/1|Insígnias: 0\/1/);
+
+	for (const stage of ['ginásio', 'Campeão']) {
+		const before = await roomIds(player);
+		// O mesmo que o botão Battle! faz com o formato e o time escolhidos
+		await player.evaluate(([team, format]) => {
+			const app = (window as any).app;
+			app.send('/utm ' + team);
+			app.send('/search ' + format);
+		}, [PLAYER_TEAM, formatId] as const);
+		const battle = await waitNewRoom(player, new RegExp(`^battle-${formatId}-\\d+$`), before);
+		const winner = await playBattle(player, battle);
+		expect(winner, `vencedor contra o ${stage}`).toBe(PLAYER);
+	}
+
+	await openPsPage(player, page, /Won|Vencida/);
+	const profile = 'view-ginasios-perfil-e2ejogador';
+	await openPsPage(player, profile, /Winning teams|Times vencedores/);
+	const rows = await player.evaluate(rid => {
+		const $ = (window as any).$;
+		return (window as any).app.rooms[rid].$el.find('details tr').map((i: number, tr: Element) => ({
+			text: $(tr).text().replace(/\s+/g, ' ').trim(),
+			icons: $(tr).find('psicon, .picon, span[style*="pokemonicons"]').length,
+		})).get();
+	}, profile);
+	// Cabeçalho, o ginásio e o Campeão, cada um com o ícone do Pikachu
+	expect(rows).toHaveLength(3);
+	expect(rows[1].icons).toBe(1);
+	expect(rows[2].text).toMatch(/Champion|Campeão/);
+	expect(rows[2].icons).toBe(1);
+});
+
+test('contas: troca de senha e exclusão apagam os dados de jogo', async () => {
+	await player.goto('/conta');
+	await player.fill('form[action="/conta/senha"] input[name=current]', PASSWORD);
+	await player.fill('form[action="/conta/senha"] input[name=password]', NEW_PASSWORD);
+	await player.fill('form[action="/conta/senha"] input[name=confirm]', NEW_PASSWORD);
+	await player.click('form[action="/conta/senha"] button[type=submit]');
+	await expect(player.locator('body')).toContainText(/Password changed|Senha alterada/);
+
+	await player.fill('form[action="/conta/excluir"] input[name=password]', NEW_PASSWORD);
+	await player.check('form[action="/conta/excluir"] input[name=confirm]');
+	await player.click('form[action="/conta/excluir"] button[type=submit]');
+	await expect(player.locator('body')).toContainText(/have been deleted|foram excluídos/);
+
+	// O servidor de jogo apaga as jornadas em até um minuto (fila do login)
+	const profile = 'view-ginasios-perfil-e2ejogador';
+	await expect.poll(async () => {
+		await openPsPage(admin, profile, /Gym profile|Perfil no Desafio/);
+		return admin.evaluate(rid => (window as any).app.rooms[rid].$el.text(), profile);
+	}, { timeout: 100_000, intervals: [10_000] }).toMatch(/No journeys yet|Nenhuma jornada/);
+});

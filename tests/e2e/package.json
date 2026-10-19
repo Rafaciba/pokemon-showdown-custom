@@ -1,0 +1,12 @@
+{
+  "name": "pokemon-showdown-custom-e2e",
+  "private": true,
+  "description": "Teste de ponta a ponta do ambiente local (scripts/e2e.sh). Só para teste: nada daqui vai para produção.",
+  "license": "MIT",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.1"
+  }
+}

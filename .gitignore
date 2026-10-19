@@ -30,3 +30,7 @@ npm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Teste de ponta a ponta (scripts/e2e.sh)
+tests/e2e/node_modules/
+tests/e2e/results/
