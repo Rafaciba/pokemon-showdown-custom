@@ -109,26 +109,34 @@ www.{$PS_HOST:localhost} {
 		redir * /regras 301
 	}
 
-	# PROVISÓRIO: sprites e áudio não estão no repositório do cliente.
-	# Enquanto não hospedamos esses arquivos, buscamos no site oficial (só imagens e
-	# sons; o pokedex-mini(-bw).js, que é JavaScript, é baixado uma vez no build do
-	# cliente e servido localmente, ver docker/client/build.sh).
+	# Sprites e sons: servidos do nosso disco, a partir dos pacotes oficiais do PS
+	# (scripts/recursos-ps.sh, em client/play.pokemonshowdown.com/{sprites,audio}, fora
+	# do git; ver docs/recursos-ps.md). O que faltar (ex.: um Pokémon mais novo que o
+	# pacote) vem do site oficial como reserva (decisão do usuário, 2026-10-18).
 	#
-	# Segurança e LGPD: o pedido sai do nosso domínio para um terceiro. Nada que
-	# identifique o jogador vai junto: sem cookie de sessão, sem IP (X-Forwarded-*),
+	# Segurança e LGPD da reserva: o pedido sai do nosso domínio para um terceiro. Nada
+	# que identifique o jogador vai junto: sem cookie de sessão, sem IP (X-Forwarded-*),
 	# sem Referer; e nenhum cookie do terceiro volta para o nosso domínio.
 	@remoteassets path /sprites/* /audio/*
 	handle @remoteassets {
-		reverse_proxy https://play.pokemonshowdown.com {
-			header_up Host {upstream_hostport}
-			header_up -Cookie
-			header_up -Authorization
-			header_up -Referer
-			header_up -X-Forwarded-For
-			header_up -X-Forwarded-Host
-			header_up -X-Forwarded-Proto
-			header_up -Via
-			header_down -Set-Cookie
+		root * /srv/client/play.pokemonshowdown.com
+		@localasset file
+		handle @localasset {
+			header Cache-Control "public, max-age=604800"
+			file_server
+		}
+		handle {
+			reverse_proxy https://play.pokemonshowdown.com {
+				header_up Host {upstream_hostport}
+				header_up -Cookie
+				header_up -Authorization
+				header_up -Referer
+				header_up -X-Forwarded-For
+				header_up -X-Forwarded-Host
+				header_up -X-Forwarded-Proto
+				header_up -Via
+				header_down -Set-Cookie
+			}
 		}
 	}
 

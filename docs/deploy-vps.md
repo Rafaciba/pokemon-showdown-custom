@@ -273,6 +273,19 @@ sudo install -d -m 700 /var/log/ps-custom /var/log/ps-custom/caddy
 
 `PS_NO_IP_CHECKS` fica em `0` na VPS (decisão de 2026-10-17): a ladder não pareia jogadores do mesmo IP. Quem joga da mesma casa usa desafio direto.
 
+### Sprites e sons
+
+Os sprites e os sons do jogo vêm dos pacotes oficiais do PS, baixados direto na VPS (cerca de 1,1 GB; ver [recursos-ps.md](recursos-ps.md)). Precisa de uns 3 GB livres durante a instalação:
+
+```sh
+df -h /
+sudo apt install -y unzip
+cd /opt/pokemon-showdown-custom
+sh scripts/recursos-ps.sh
+```
+
+O passo 10 (`client-build`) gera o `pokedex-mini.js` a partir deles. Sem os pacotes, o jogo funciona do mesmo jeito, buscando as imagens e os sons no site oficial pelo nosso servidor.
+
 ### Imagens das insígnias
 
 As imagens das insígnias não ficam no git (ver [insignias.md](insignias.md)). Gere-as no seu computador com o importador (passos 1 a 3 de "Como importar" em `docs/insignias.md`) e copie para a VPS. Na VPS:
@@ -426,7 +439,7 @@ docker compose up -d
 docker compose restart server
 ```
 
-Se a mudança mexeu em formatos ou mods que o teambuilder precisa enxergar, troque a 5ª linha por `CLIENT_FORCE_BUILD=1 docker compose run --rm client-build`. Se mexeu só no `login/`, basta `docker compose restart login`.
+Se a mudança mexeu em formatos ou mods que o teambuilder precisa enxergar, troque a 5ª linha por `CLIENT_FORCE_BUILD=1 docker compose run --rm client-build`. Se mexeu só no `login/`, basta `docker compose restart login`. Se mexeu no `docker/caddy/Caddyfile`, rode também `docker compose restart web`: o `up -d` não recarrega o Caddyfile quando só ele muda.
 
 Reiniciar o `server` interrompe as batalhas em andamento. As batalhas do Desafio de Ginásios ficam salvas e reabrem do mesmo ponto quando o jogador entra de novo; as batalhas entre jogadores são perdidas. Prefira horários vazios.
 
@@ -460,7 +473,6 @@ Se o catálogo de insígnias mudou (reimportação), copie as imagens novas como
 
 Estes pontos já estão no relatório de segurança ([revisao-seguranca-lgpd.md](revisao-seguranca-lgpd.md)) e **ainda não foram feitos**. O deploy funciona sem eles, mas o ideal é fechá-los antes de abrir o servidor:
 
-- **Sprites e sons próprios** (decisão: feito no deploy da VPS). Hoje o Caddy os busca no site oficial, sem repassar dados do jogador. Hospedá-los na VPS ocupa alguns GB de disco.
 - **Containers de produção endurecidos:**
   - usuário sem privilégios;
   - código somente leitura;

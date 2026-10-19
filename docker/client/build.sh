@@ -35,9 +35,14 @@ else
 	node build
 fi
 
-# pokedex-mini(-bw).js: JavaScript com os dados dos sprites, que o build só gera com
-# os sprites no disco. Uma cópia é baixada do site oficial uma vez e servida
-# localmente: assim nenhum script de terceiro é buscado a cada acesso (integridade).
+# pokedex-mini(-bw).js: JavaScript com os tamanhos dos sprites animados.
+# Com os sprites no disco (scripts/recursos-ps.sh), é gerado aqui a partir deles.
+# Sem eles, uma cópia é baixada do site oficial uma vez e servida localmente: assim
+# nenhum script de terceiro é buscado a cada acesso (integridade).
+if [ -d play.pokemonshowdown.com/sprites/ani ]; then
+	echo "[client] gerando pokedex-mini a partir dos sprites locais..."
+	node ./build-tools/build-minidex
+fi
 for f in pokedex-mini.js pokedex-mini-bw.js; do
 	dest="play.pokemonshowdown.com/data/$f"
 	if [ ! -s "$dest" ]; then

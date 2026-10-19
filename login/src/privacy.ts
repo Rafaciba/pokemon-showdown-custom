@@ -60,7 +60,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 			{
 				title: 'Terceiros',
 				paragraphs: [
-					'Não vendemos nem compartilhamos os seus dados. As imagens e os sons do jogo vêm do site oficial do Pokémon Showdown, mas passam pelo nosso servidor, que não repassa o seu cookie, o seu IP nem a página de onde o pedido saiu. Links externos (Pokédex, fórum da Smogon e afins) só são acessados se você clicar neles.',
+					'Não vendemos nem compartilhamos os seus dados. As imagens e os sons do jogo ficam no nosso servidor (pacotes oficiais do Pokémon Showdown). Só o que faltar neles é buscado no site oficial do Pokémon Showdown, e esse pedido passa pelo nosso servidor, que não repassa o seu cookie, o seu IP nem a página de onde o pedido saiu. Links externos (Pokédex, fórum da Smogon e afins) só são acessados se você clicar neles.',
 				],
 			},
 			{
@@ -116,7 +116,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 			{
 				title: 'Third parties',
 				paragraphs: [
-					'We do not sell or share your data. Game images and sounds come from the official Pokémon Showdown website, but they go through our server, which does not forward your cookie, your IP address or the page the request came from. External links (Pokédex, Smogon forum and the like) are only accessed if you click them.',
+					'We do not sell or share your data. Game images and sounds are stored on our server (official Pokémon Showdown packages). Only what is missing from them is fetched from the official Pokémon Showdown website, and that request goes through our server, which does not forward your cookie, your IP address or the page the request came from. External links (Pokédex, Smogon forum and the like) are only accessed if you click them.',
 				],
 			},
 			{

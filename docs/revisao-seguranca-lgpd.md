@@ -122,7 +122,7 @@ Batalhas contra NPC não geram log (`logchallenges` desligado). O chat não é r
 1. **Aviso de privacidade** em `/privacidade` (pt e en, `login/src/privacy.ts`): controlador (o admin), dados, finalidades e bases legais, terceiros, retenção, direitos do titular. **Pedidos: mensagem privada ao admin no jogo**; a exclusão de conta é feita direto em `/conta`. O rodapé do cliente e as páginas de cadastro e conta apontam para ele, e os textos curtos foram corrigidos ("não guardamos seu IP" valia só para o login).
 2. **Logs de batalha da ladder: 30 dias.** Uma limpeza diária apaga os dias mais antigos, e os logs em que o jogador aparece são apagados junto com a conta (`custom-accounts.ts`). O modlog continua sem prazo definido (pendência).
 3. **Consulta do teambuilder à Smogon: desativada** (`client-custom.js`). Ele só deixa de mostrar os links de análises dos formatos oficiais.
-4. **Sprites e sons no próprio servidor: no deploy da VPS.** Até lá, passam pelo proxy sem dados do jogador. Achado durante a verificação: as folhas de estilo e o logo tinham endereços fixos de `play.pokemonshowdown.com`, buscados direto pelo navegador. Agora são do mesmo domínio e passam pelo proxy. Verificado por e2e: nenhum pedido direto a outros domínios na tela principal, no teambuilder e durante as batalhas.
+4. **Sprites e sons no próprio servidor: feito em 2026-10-18** (ver "Sprites e sons próprios" abaixo). Até lá, passam pelo proxy sem dados do jogador. Achado durante a verificação: as folhas de estilo e o logo tinham endereços fixos de `play.pokemonshowdown.com`, buscados direto pelo navegador. Agora são do mesmo domínio e passam pelo proxy. Verificado por e2e: nenhum pedido direto a outros domínios na tela principal, no teambuilder e durante as batalhas.
 
 ### Tradução pt-BR (2026-10-18)
 Revisada contra o OWASP Top 10 ao ser feita. Detalhes em `docs/traducao-pt-br.md`.
@@ -160,6 +160,13 @@ Achado no primeiro start na VPS: os avisos do proxy do Caddy (log padrão, guard
 - **Como:** log de acesso do Caddy num arquivo (`mode 0600`, pasta só do root, fora do backup), com rotação diária e apagamento depois de 14 dias pelo logrotate do sistema (`docker/logrotate/ps-custom-caddy`), porque a rotação do Caddy é por tamanho. O log padrão (stdout) passou a apagar o IP, a porta, `X-Forwarded-For`, `Referer`, cookies, `Authorization` e a query string.
 - **Segredos:** os links de convite e de redefinição levam códigos na URL; o log de acesso grava o caminho sem a query string e sem `Referer`. O Caddy já omite cookies e `Authorization` (validado: nenhum código no arquivo depois de pedidos com `?convite=` e `Referer`).
 - **Transparência:** o aviso de privacidade (pt e en) descreve o registro, a finalidade, a base legal, o prazo e quem acessa.
+
+### Sprites e sons próprios (2026-10-18)
+Revisado contra o OWASP Top 10 e a LGPD ao ser feito. Detalhes em `docs/recursos-ps.md`.
+- **A08 (integridade) e A05.** Os pacotes vêm só por HTTPS, do site do próprio PS, e o zip é testado (CRC) antes de extrair. O script recusa entradas fora de `sprites/`/`audio/`, caminhos com `..` ou absolutos (zip slip) e links simbólicos (que fariam o Caddy servir arquivos do sistema), normaliza as permissões e só troca a versão antiga depois de tudo conferido. Testado com zips maliciosos (13 casos).
+- **A08.** O `pokedex-mini.js` (JavaScript) passa a ser gerado localmente a partir dos sprites, em vez de baixado do site oficial.
+- **Terceiros e LGPD.** Imagens e sons saem do nosso domínio; só o que faltar no pacote vai ao site oficial, pelo proxy que não repassa cookie, IP nem Referer. O aviso de privacidade foi atualizado.
+- **Direitos.** Os arquivos ficam fora dos repositórios públicos (o fork do cliente já ignorava as pastas), como faz o próprio PS.
 
 ## Testes desta revisão
 - **Login:** 19 testes (5 novos: aviso de privacidade, nomes reservados, anulação de códigos, bloqueio por conta e IP sem afetar outro IP e sem escapar por `X-Forwarded-For` forjado, POST de outro site sem `Origin`).
