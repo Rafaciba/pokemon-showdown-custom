@@ -54,9 +54,8 @@ Use este passo a passo quando chegarem textos novos da Smogon (golpes, itens, me
 4. **Validar:** `node scripts/traducao/validar.cjs <pasta> <lote>` para cada lote. O validador confere chaves, placeholders, espaços iniciais, tipos traduzidos por engano, tipos sem "tipo" antes (aviso) e shortDesc longo demais (aviso).
 5. **Aplicar:** `node scripts/traducao/aplicar.cjs <pasta>`. Isso junta as traduções novas às que já existem e regrava os arquivos `pt`.
 6. **Gerar e testar:**
-   - `docker compose exec server node build`;
    - no `client-build`, `node build translations && node build`;
-   - `docker compose restart server`;
+   - `docker compose up -d --force-recreate server`, que refaz o build do servidor no `server-setup` (o container `server` tem o código somente leitura);
    - rodar as suítes do servidor, do login e do cliente (`node test/run`). O teste "keeps ... locale catalogs synchronized" do cliente acusa um `pt.ts` dessincronizado.
 
 **Textos da interface clássica** (`src/oldclient/*.js`) não são extraídos automaticamente, porque estão espalhados no código como HTML montado à mão. Quando uma atualização da Smogon mexer nesses arquivos, levante os textos novos à mão e grave-os em `<pasta>/out/dicionario-01.json`, no formato `{ "exact": {}, "patterns": [], "html": {} }`. Depois valide e aplique como acima. Regras do dicionário:

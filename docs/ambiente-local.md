@@ -17,16 +17,25 @@ Abra **https://ps.localhost**.
 
 O primeiro start demora alguns minutos. Nele o Docker:
 
-1. instala as dependências;
-2. compila o servidor;
-3. gera os dados do teambuilder a partir do `server/`;
-4. compila o cliente.
+1. ajusta o dono dos volumes para o usuário sem privilégios (`volume-init`);
+2. instala as dependências e compila o servidor (`server-setup`);
+3. gera os dados do teambuilder a partir do `server/` e compila o cliente (`client-build`).
 
 Para acompanhar:
 
 ```sh
-docker compose logs -f client-build server
+docker compose logs -f server-setup client-build server
 ```
+
+### Primeira vez depois do endurecimento (2026-10-19)
+
+Os containers rodavam como root, e os arquivos que eles criaram em `server/`, `client/` e `data/` ficaram com o root como dono (o Docker Desktop guarda isso). Agora todos rodam com o usuário `PS_UID:PS_GID` (1000), que não consegue gravar nesses arquivos. Ajuste uma vez, no Git Bash:
+
+```sh
+MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W)/server:/s" -v "$(pwd -W)/client:/c" -v "$(pwd -W)/data:/d" node:24-bookworm-slim chown -R 1000:1000 /s /c /d
+```
+
+Leva cerca de 1 minuto. Os volumes o `volume-init` ajusta sozinho.
 
 ### Certificado HTTPS local
 
@@ -84,7 +93,11 @@ Trocar a senha também funciona pela opção "Password..." do próprio cliente.
 | `web` | Caddy: HTTPS, cliente estático e proxy | 80/443 (públicas) |
 | `login` | login server próprio (`login/`) | 9000 (interna) |
 | `server` | servidor de jogo do PS (`server/`) | 8000 (interna) |
+| `volume-init` | ajusta o dono dos volumes e encerra (único com root, só com permissão de trocar donos) | — |
+| `server-setup` | instala as dependências do servidor, compila e encerra | — |
 | `client-build` | compila o cliente e encerra | — |
+
+Endurecimento (ver `docs/revisao-seguranca-lgpd.md`, seção "Containers"): os serviços rodam sem root (`PS_UID:PS_GID`), com o sistema de arquivos somente leitura, sem capabilities (o `web` só com a de abrir as portas 80 e 443), sem ganho de privilégios e com limite de memória e de processos. O `server` só grava em `config/`, `databases/` e `logs/`; o código, o build e as dependências ficam somente leitura para ele.
 
 Rotas no domínio:
 
@@ -97,10 +110,12 @@ Rotas no domínio:
 
 | Situação | Comando |
 |---|---|
-| Mudou código do `server/` | `docker compose restart server` (ou `/hotpatch` no chat, como admin) |
-| Mudou formatos/mods e quer que o teambuilder enxergue | `CLIENT_FORCE_BUILD=1 docker compose run --rm client-build` e depois `docker compose restart server` |
+| Mudou código do `server/` | `docker compose up -d --force-recreate server` (refaz o `server-setup` e o `client-build`). O `restart` sozinho não compila |
+| Mudou formatos/mods e quer que o teambuilder enxergue | `CLIENT_FORCE_BUILD=1 docker compose up -d --force-recreate server` |
 | Mudou código do `client/` | `docker compose run --rm client-build` |
 | Mudou o `login/` | `docker compose restart login` |
+| Mudou o `docker-compose.yml` ou o `Caddyfile` | `docker compose up -d --force-recreate` |
+| Rodar os testes do servidor | `docker compose run --rm --no-deps server-setup sh /opt/ps/test.sh test/main.js test/server/chat-plugins/gym-challenge.js` (no Git Bash, com `MSYS_NO_PATHCONV=1` na frente) |
 | Rodar os testes do login | `docker compose run --rm --no-deps login npm test` |
 | Parar tudo | `docker compose down` |
 | Apagar tudo, incluindo contas, chaves e certificados | `docker compose down -v` |
@@ -115,12 +130,14 @@ As variáveis ficam no arquivo `.env`, que é ignorado pelo git. Use `.env.examp
 | `PS_NO_IP_CHECKS` | `0` | Com `1`, a ladder pareia jogadores do mesmo IP e os limites por IP ficam desligados. Serve para testar com duas abas. Sem isso, a busca fica infinita, porque o PS nunca junta dois jogadores do mesmo IP. |
 | `CLIENT_FORCE_BUILD` | `0` | Com `1`, força o build completo do cliente. |
 | `LOGIN_KEY_ID` | `1` | ID da chave de login. |
+| `PS_UID` / `PS_GID` | `1000` | Usuário e grupo com que os containers rodam. Na VPS, os do usuário dono da pasta do projeto. |
 
-Depois de mudar o `.env`, rode `docker compose up -d`. Se mudou o `PS_HOST`, rode também `docker compose run --rm client-build`.
+Depois de mudar o `.env`, rode `docker compose up -d --force-recreate`.
 
 Nada de configuração é alterado dentro dos forks. Os templates ficam em `docker/`:
 
-- `docker/server/config.js` é copiado para `server/config/config.js` a cada start do servidor. Esse destino é ignorado pelo git do fork.
+- `docker/server/config.js` é montado somente leitura em `server/config/config.js` no `server`, e copiado para lá pelo `server-setup` (para os testes). Esse destino é ignorado pelo git do fork.
+- `docker/server/derive-package.cjs` gera o `package.json` usado na instalação das dependências, sem as que não usamos. O do fork não muda.
 - `docker/client/config.js` e `docker/client/routes.json` são templates. O build substitui `__PS_HOST__` pelo valor configurado e grava o resultado no volume `client-config`, que o Caddy serve em `/config/*`. A pasta `config/` do fork não é tocada.
 - `docker/caddy/Caddyfile` contém as regras equivalentes ao `.htaccess` original do cliente.
 
@@ -143,6 +160,4 @@ Os registros vencidos são apagados a cada hora.
 
 ## Pendências conhecidas
 
-- **Sprites e áudio** não estão no repositório do cliente. Provisoriamente, o Caddy os busca em play.pokemonshowdown.com. Para a VPS, avaliar hospedar esses arquivos nós mesmos.
-- **Exclusão de conta:** hoje apaga tudo o que está no login server. Os dados ligados ao nome no servidor de jogo (ranking da ladder, rank, e no futuro times e insígnias) ainda precisam ser apagados junto. Isso fica para quando esses dados existirem.
-- Os containers de desenvolvimento rodam como `root`. As imagens de produção (VPS) devem usar um usuário sem privilégios.
+- O teste ponta a ponta (login, batalha, `/convite`, exclusão) ainda não está versionado.

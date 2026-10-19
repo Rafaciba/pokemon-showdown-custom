@@ -263,13 +263,25 @@ CLIENT_FORCE_BUILD=0
 PS_NO_IP_CHECKS=0
 PS_ADMINS=Rafaciba
 PS_ACCESS_LOG_DIR=/var/log/ps-custom/caddy
+PS_UID=1000
+PS_GID=1000
 ```
 
-`PS_ACCESS_LOG_DIR` é a pasta do log de acesso do site (com IP, guardado por 14 dias para segurança; ver o passo 12 e `docs/revisao-seguranca-lgpd.md`). Crie a pasta, só para o root:
+`PS_ACCESS_LOG_DIR` é a pasta do log de acesso do site (com IP, guardado por 14 dias para segurança; ver o passo 12 e `docs/revisao-seguranca-lgpd.md`). Crie a pasta, fechada para os outros usuários:
 
 ```sh
 sudo install -d -m 700 /var/log/ps-custom /var/log/ps-custom/caddy
 ```
+
+No start, o serviço `volume-init` passa o dono dela para o usuário dos containers.
+
+`PS_UID` e `PS_GID` são o usuário com que os containers rodam (nenhum roda como root). Use os do `deploy`, para que ele continue dono dos arquivos e o `git pull` funcione. Confira com:
+
+```sh
+id -u deploy; id -g deploy
+```
+
+O normal é `1000` e `1000`. Se for outro número, ajuste no `.env`.
 
 `PS_NO_IP_CHECKS` fica em `0` na VPS (decisão de 2026-10-17): a ladder não pareia jogadores do mesmo IP. Quem joga da mesma casa usa desafio direto.
 
@@ -308,10 +320,10 @@ Confira na VPS: `ls /opt/pokemon-showdown-custom/assets/badges | wc -l` deve mos
 
 ```sh
 docker compose up -d
-docker compose logs -f client-build server web
+docker compose logs -f server-setup client-build server web
 ```
 
-O primeiro start leva vários minutos: instala dependências, compila o servidor, gera os dados do teambuilder e compila o cliente. Está pronto quando o log do `server` mostra `Worker 1 now listening` e o `web` mostra que obteve o certificado (`certificate obtained successfully`). Saia do log com `Ctrl+C`; os serviços continuam rodando.
+O primeiro start leva vários minutos: o `server-setup` instala as dependências e compila o servidor, e o `client-build` gera os dados do teambuilder e compila o cliente. Está pronto quando o log do `server` mostra `Worker 1 now listening` e o `web` mostra que obteve o certificado (`certificate obtained successfully`). Saia do log com `Ctrl+C`; os serviços continuam rodando.
 
 Confira o estado:
 
@@ -319,7 +331,7 @@ Confira o estado:
 docker compose ps
 ```
 
-`login`, `server` e `web` devem estar `Up` (os dois primeiros com `healthy`), e o `client-build` com `Exited (0)`.
+`login`, `server` e `web` devem estar `Up` (os dois primeiros com `healthy`), e `volume-init`, `server-setup` e `client-build` com `Exited (0)`: eles preparam tudo e terminam.
 
 Abra `https://ligadesafios.com.br` no navegador.
 
@@ -343,7 +355,7 @@ sudo install -m 644 docker/logrotate/ps-custom-caddy /etc/logrotate.d/ps-custom-
 sudo logrotate -d /etc/logrotate.d/ps-custom-caddy 2>&1 | tail -5
 ```
 
-O `-d` só simula: não deve mostrar erro. Para consultar o log (só com sudo):
+O `-d` só simula: não deve mostrar erro. Para consultar o log (a pasta é do usuário dos containers, o `deploy`; os outros usuários não a leem):
 
 ```sh
 sudo tail -n 20 /var/log/ps-custom/caddy/access.log
@@ -398,7 +410,7 @@ Remove-Item teste.tar.gz      # é a cópia sem criptografia: não deixe no disc
 
 Não use `age ... | tar ...` no Windows PowerShell 5.1: ele trata o que passa pelo `|` como texto e corrompe o arquivo ("Unrecognized archive format").
 
-> **LGPD:** quem exclui a conta continua nos backups até eles vencerem (14 dias na VPS, e o prazo que você mantiver no seu computador). O aviso de privacidade ainda **não** menciona isso. Decida o prazo das cópias fora da VPS e me avise, para atualizarmos o aviso (`login/src/privacy.ts`).
+> **LGPD:** quem exclui a conta continua nos backups até eles vencerem (14 dias na VPS, como diz o aviso de privacidade). As cópias no seu computador ficam a seu critério: apague as antigas de tempos em tempos.
 
 ### Restaurar numa VPS nova
 
@@ -422,7 +434,7 @@ Não use `age ... | tar ...` no Windows PowerShell 5.1: ele trata o que passa pe
    rm -rf /tmp/restore /tmp/backup.tar.gz
    docker compose up -d
    ```
-   Só a chave privada precisa voltar: a pública é sempre derivada dela, e o token interno é recriado sozinho.
+   Só a chave privada precisa voltar: a pública é sempre derivada dela, e o token interno é recriado sozinho. O `volume-init` ajusta o dono dos arquivos copiados com `sudo`.
 4. Se o IP mudou, atualize o registro A do domínio.
 
 ## 13. Atualizar o projeto
@@ -434,18 +446,52 @@ cd /opt/pokemon-showdown-custom
 git pull
 git -C server pull
 git -C client pull
-docker compose run --rm client-build
-docker compose up -d
-docker compose restart server
+docker compose up -d --force-recreate
 ```
 
-Se a mudança mexeu em formatos ou mods que o teambuilder precisa enxergar, troque a 5ª linha por `CLIENT_FORCE_BUILD=1 docker compose run --rm client-build`. Se mexeu só no `login/`, basta `docker compose restart login`. Se mexeu no `docker/caddy/Caddyfile`, rode também `docker compose restart web`: o `up -d` não recarrega o Caddyfile quando só ele muda.
+O `--force-recreate` recria todos os serviços na ordem certa: `volume-init`, `server-setup` (dependências e build do servidor), `client-build`, `login`, `server` e `web`. Assim também entram as mudanças do `login/`, do `docker/caddy/Caddyfile` e do `docker-compose.yml`. O site fica fora do ar enquanto isso, em torno de 1 minuto (mais, se o cliente precisar do build completo).
+
+**Não use `docker compose restart server` depois de um `git pull`:** o servidor roda com o código somente leitura, e quem compila é o `server-setup`. O `restart` só reinicia o servidor com o build antigo.
+
+Se a mudança mexeu em formatos ou mods que o teambuilder precisa enxergar, use `CLIENT_FORCE_BUILD=1 docker compose up -d --force-recreate`.
 
 Reiniciar o `server` interrompe as batalhas em andamento. As batalhas do Desafio de Ginásios ficam salvas e reabrem do mesmo ponto quando o jogador entra de novo; as batalhas entre jogadores são perdidas. Prefira horários vazios.
 
 Se o catálogo de insígnias mudou (reimportação), copie as imagens novas como no passo 9.
 
 **Não rode os testes na VPS.** Eles são para o ambiente local.
+
+### Migrar para os containers endurecidos (uma vez)
+
+Até 2026-10-19 os containers rodavam como root, e por isso parte dos arquivos do projeto ficou com o root como dono. O `volume-init` cuida dos volumes e da pasta do log de acesso, mas a pasta do projeto precisa de um ajuste manual, uma única vez:
+
+```sh
+cd /opt/pokemon-showdown-custom
+docker compose down
+git pull
+git -C server pull
+git -C client pull
+grep -q '^PS_UID=' .env || printf 'PS_UID=%s
+PS_GID=%s
+' "$(id -u deploy)" "$(id -g deploy)" >> .env
+sudo chown -R deploy:deploy /opt/pokemon-showdown-custom
+docker compose up -d
+docker compose logs volume-init server-setup
+```
+
+O `volume-init` mostra "ajustando o dono de ..." para cada volume na primeira vez, e nada nas seguintes. O `server-setup` reinstala as dependências (sem as que não usamos) e termina com `[setup] pronto`.
+
+### Atualizar as imagens
+
+As imagens (`node` e `caddy`) ficam fixadas por digest no `docker-compose.yml`: uma imagem trocada no Docker Hub não entra sem querermos. Para trazer as correções de segurança, atualize de tempos em tempos (por exemplo, uma vez por mês) no ambiente local:
+
+```sh
+docker pull node:24-bookworm-slim
+docker pull caddy:2.10-alpine
+docker image inspect node:24-bookworm-slim caddy:2.10-alpine --format '{{index .RepoDigests 0}}'
+```
+
+Troque os digests no `docker-compose.yml` (`x-node-image` e a imagem do `web`), teste localmente e faça o commit. Na VPS, a atualização normal (acima) baixa as imagens novas.
 
 ## 14. Comandos úteis
 
@@ -467,15 +513,5 @@ Se o catálogo de insígnias mudou (reimportação), copie as imagens novas como
   - Veja o log: `docker compose logs web`.
   - Algumas imagens Ubuntu da Oracle Cloud (a infraestrutura da HostGator) vêm com regras de `iptables` que bloqueiam tudo menos o SSH. Se `sudo iptables -L INPUT -n` mostrar um `REJECT` antes das regras do ufw, avise para ajustarmos.
 - **O build do cliente morre sem erro claro** (o log para no meio). Provavelmente faltou memória: confira o swap com `free -h`.
-- **"Couldn't connect to server" no cliente.** O `PS_HOST` do `.env` precisa ser exatamente o domínio usado no navegador. Depois de mudá-lo, rode `docker compose run --rm client-build` e `docker compose up -d`.
-
-## Pendências antes de abrir para os amigos
-
-Estes pontos já estão no relatório de segurança ([revisao-seguranca-lgpd.md](revisao-seguranca-lgpd.md)) e **ainda não foram feitos**. O deploy funciona sem eles, mas o ideal é fechá-los antes de abrir o servidor:
-
-- **Containers de produção endurecidos:**
-  - usuário sem privilégios;
-  - código somente leitura;
-  - `cap_drop: ALL` e `no-new-privileges`;
-  - imagens fixadas por digest;
-  - dependências sem pacotes opcionais e `npm audit`.
+- **`Permission denied` ou `EACCES` no log de um serviço.** Algum arquivo ficou com outro dono, por exemplo depois de um comando com `sudo` na pasta do projeto. Rode `sudo chown -R deploy:deploy /opt/pokemon-showdown-custom` e `docker compose up -d --force-recreate`.
+- **"Couldn't connect to server" no cliente.** O `PS_HOST` do `.env` precisa ser exatamente o domínio usado no navegador. Depois de mudá-lo, rode `docker compose up -d --force-recreate`.

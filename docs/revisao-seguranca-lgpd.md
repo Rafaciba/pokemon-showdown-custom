@@ -16,7 +16,7 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 | Média | Logs de batalha (nomes e times) não tinham prazo de retenção e não eram apagados com a conta | **Corrigido** (30 dias; apagados com a conta) |
 | Média | Não havia aviso de privacidade nosso; o rodapé apontava para a política da Smogon | **Corrigido** (`/privacidade`) |
 | Média | O cliente buscava imagens direto de `play.pokemonshowdown.com` (endereços fixos nas folhas de estilo e no logo), mandando o IP do jogador à Smogon | **Corrigido** (mesmo domínio, pelo proxy) |
-| Média | Containers como root, código montado com escrita, imagens sem digest, dependências do upstream com vulnerabilidades conhecidas | **Pendente** (deploy na VPS) |
+| Média | Containers como root, código montado com escrita, imagens sem digest, dependências do upstream com vulnerabilidades conhecidas | **Corrigido em 2026-10-19** (ver "Containers e dependências") |
 | Baixa | Nomes de treinador e desafio aceitavam quebra de linha e `< > & " @ \` (injeção no protocolo e em HTML do PS que não escapa) | **Corrigido** |
 | Baixa | O jogador podia esconder a batalha contra o NPC (`/hideroom`, `/modjoin`), contra o requisito de batalhas públicas | **Corrigido** |
 | Baixa | Códigos de redefinição continuavam valendo depois de trocar a senha ou de gerar um código novo | **Corrigido** |
@@ -62,11 +62,13 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 - `consoleips = []`;
 - `repl = false`. Antes, a suíte de testes rodava no mesmo container e chamava `Repl.cleanup`, que conecta nos sockets vivos do servidor e os fecha na hora. O EPIPE resultante derrubava o processo principal e os subprocessos (o aviso "The main process crashed" aparecia no Lobby e na Staff);
 - logs dos containers limitados a 3 × 10 MB por serviço.
-- **Pendente para a VPS:** usuário sem privilégios (`user:`), código somente leitura, `read_only`, `cap_drop: ALL`, `no-new-privileges` e imagens fixadas por digest.
+- **Containers endurecidos (2026-10-19):** usuário sem privilégios, código somente leitura para o servidor, `read_only`, `cap_drop: ALL`, `no-new-privileges`, limites de memória e de processos e imagens fixadas por digest (ver "Containers e dependências").
 
 ### A06 – Componentes vulneráveis
 - O login não tem dependências de runtime.
-- **Pendente:** o `npm audit` aponta vulnerabilidades no servidor (19, uma crítica: `tar`) e no cliente (12), quase todas transitivas, opcionais ou de build, herdadas do upstream. Na VPS, instalar sem as dependências opcionais que não usamos (mysql2, pg, nodemailer), acompanhar os merges do upstream e rodar `npm audit` periodicamente.
+- **Servidor (2026-10-19):** as dependências são instaladas sem as que não usamos (`docker/server/derive-package.cjs`), e o `npm audit --omit=dev` caiu de 19 vulnerabilidades (uma crítica) para 1 moderada que não se aplica (ver "Containers e dependências").
+- **Cliente:** as dependências (20 no `npm audit`, nenhuma crítica) só rodam no build, sobre o nosso próprio código, num container sem root e que termina. Nada delas chega ao navegador além do código que o Babel compila. Aceito; reavaliar a cada merge do upstream.
+- Rodar `npm audit` a cada merge do upstream.
 
 ### A07 – Identificação e autenticação
 - O limite de tentativas de senha passa a ser **por conta e IP** (10 a cada 15 min), mais 30 por IP. Assim, ninguém bloqueia a conta de outra pessoa a partir do próprio IP.
@@ -86,6 +88,7 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 
 ### A10 – SSRF
 - O único destino externo é fixo (`play.pokemonshowdown.com`), e só `/sprites/*` e `/audio/*` passam pelo proxy. O login não faz pedidos para fora.
+- **`/show` com imagem (2026-10-19):** o servidor do PS baixava qualquer URL digitada para medir a imagem (`probe-image-size`), inclusive endereços da rede interna do Docker. O pacote não é mais instalado, e o `/show` com imagem é recusado. Isso também evita que o site da imagem receba o IP de todos na sala.
 
 ## LGPD
 
@@ -185,11 +188,33 @@ Decisões do usuário:
 - **Prazo de 6 meses** por registro (referência do Marco Civil para registros de segurança; a LGPD não fixa dias, exige finalidade e eliminação ao fim dela) e **IP apagado aos 30 dias** (serve sobretudo para pegar evasão de punição logo depois dela).
 - **O modlog fica até o prazo mesmo depois da exclusão da conta** (legítimo interesse em segurança: o punido não apaga o histórico excluindo a conta). O aviso de privacidade e o aviso da página de exclusão dizem isso.
 - **`alts_log` desligado**: ligar o SQLite também ligaria esse registro do PS (IP de cada troca de nome entre contas, sem data, impossível de expirar). Opção `Config.altslog = false` no fork (`server/chat-commands/info.ts`, sem mudar o comportamento para quem não a define).
-- **Dependência:** `better-sqlite3@12.11.1`, com binário pronto, instalado pelo nosso `docker/server/entrypoint.sh` se não carregar (o fork não muda; o npm confere a integridade do pacote).
+- **Dependência:** `better-sqlite3@12.11.1`, com binário pronto, instalado pelo nosso script (o fork não muda; o npm confere a integridade do pacote). Desde o endurecimento, fica em `docker/server/derive-package.cjs` (ver "Containers e dependências").
 
 Também desligados de propósito: mensagens privadas offline (`usesqlitepms`) e amigos (`usesqlitefriends`). A moderação automática do PS (Perspective, que grava o texto das mensagens) só funciona com uma chave do Google, que não configuramos. A exclusão de conta passou a limpar os dados que o banco de plugins possa ter do jogador (pontuação de trivia, preferências de mensagens; autoria de perguntas de trivia fica anônima).
 
 Validado: teste de unidade da limpeza (IP aos 30 dias, registro aos 6 meses, alts junto) e, no servidor real, registros antigos limpos na inicialização, `/modnote` gravado e visível no `/modlog`, `alts_log` vazio e exclusão de conta limpando trivia e preferências de mensagens com o modlog mantido. A suíte do servidor passou a rodar também os testes de SQLite do PS que eram pulados.
+
+### Containers e dependências (2026-10-19)
+
+Decisões do usuário: manter as montagens (fluxo de `git pull`), tratar as dependências no nosso script sem mudar o `package.json` do fork, tirar o `probe-image-size`, rodar o Caddy sem root e pôr limites de recursos.
+
+**Containers** (`docker-compose.yml`):
+- Todos rodam com o usuário `PS_UID:PS_GID` (na VPS, o do `deploy`), sistema de arquivos somente leitura (`/tmp` em memória), `cap_drop: ALL` e `no-new-privileges`.
+- O `web` (Caddy) só mantém `NET_BIND_SERVICE`, para abrir as portas 80 e 443. A CA local de desenvolvimento não é instalada no container (`skip_install_trust`).
+- O `server` monta o código, o build (`dist/`) e as dependências **somente leitura**, e só grava em `config/`, `databases/` e `logs/`. O `config.js` também é somente leitura. Quem invadir o processo do servidor não consegue alterar o código que roda nem deixar algo para o próximo start.
+- Dependências e build ficam com o `server-setup`, que roda antes e termina. Os testes do servidor rodam nele (`docker/server/test.sh`), com uma chave pública descartável: o token interno não chega a um container que instala pacotes de terceiros.
+- O `volume-init` é o único com root, sem rede e só com `CHOWN` e `DAC_READ_SEARCH`: ajusta o dono dos volumes e da pasta do log de acesso, e termina.
+- Limites: `server` 1,5 GB e 512 processos (inclui os subprocessos de batalha); `login` 256 MB e 64; `web` 256 MB e 256. Em uso normal: cerca de 400 MB, 40 MB e 15 MB.
+- Imagens fixadas por digest (`node:24-bookworm-slim`, `caddy:2.10-alpine`); a atualização é manual e está em `docs/deploy-vps.md`, "Atualizar as imagens".
+- A pasta do log de acesso passa a ter como dono o usuário dos containers (o `deploy`), e não o root. Na prática não muda quem acessa: o `deploy` está no grupo `docker`, que já equivale a root.
+
+**Dependências do servidor** (`docker/server/derive-package.cjs`):
+- Saem: `mysql2` e `pg` (bancos externos), `sqlite` e `sqlite3` (não usados pelo código; traziam o `tar` crítico e o `node-gyp`), `nodemailer`, `githubhook`, `cloud-env` e `probe-image-size`.
+- `better-sqlite3` fixo na 12.11.1 (antes instalado pelo entrypoint) e `tar-fs` na 2.1.4 ou mais nova (usado só na instalação).
+- Resta 1 aviso moderado: `uuid` dentro do `sockjs`. Não se aplica: a falha exige passar um buffer ao `uuid`, e o `sockjs` só chama `uuidv4()`.
+- O teste `test/lib/postgres.js` da Smogon fica de fora, porque testa a biblioteca do Postgres, que não instalamos.
+
+Validado localmente: usuário e capabilities de cada container; escrita recusada no código, no build, nas dependências, no `config.js` e no sistema do container; escrita aceita nos bancos; site, sprites e páginas do login respondendo; e2e com cadastro por convite, intruso bloqueado, batalha entre dois jogadores, `/convite` e exclusão de contas (dados de jogo apagados pelo servidor); build completo do cliente; 2575 testes do servidor e 21 do login.
 
 ## Testes desta revisão
 - **Login:** 19 testes (5 novos: aviso de privacidade, nomes reservados, anulação de códigos, bloqueio por conta e IP sem afetar outro IP e sem escapar por `X-Forwarded-For` forjado, POST de outro site sem `Origin`).

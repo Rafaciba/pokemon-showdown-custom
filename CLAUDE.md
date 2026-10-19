@@ -77,7 +77,7 @@ API interna (`/internal/invite`, `/internal/reset`, `/internal/purges`, `/intern
   - `server/translations/en-template/pokemon-showdown-custom.ts` (modelo, valores `null`);
   - `server/translations/pt/pokemon-showdown-custom.ts` (traduções).
 - **Fluxo ao criar ou alterar textos `TL`:**
-  1. `node build` (a ferramenta lê o código compilado);
+  1. `node build` (a ferramenta lê o código compilado). Os passos 1, 2 e 5 rodam no `server-setup` (`docker compose run --rm --no-deps server-setup <comando>`), porque o `server` é somente leitura;
   2. `node build translations`, que lista as chaves novas;
   3. desfazer a alteração que a ferramenta fez no `main.ts` da Smogon (`git checkout translations/en-template/main.ts`) e colocar as chaves novas, com as traduções, num JSON;
   4. rodar `node scripts/catalogo-traducoes.cjs <json>` (na raiz), que atualiza os dois catálogos;
@@ -85,7 +85,7 @@ API interna (`/internal/invite`, `/internal/reset`, `/internal/purges`, `/intern
 - **Não reutilizar chaves que já existem no catálogo da Smogon** com contexto (por exemplo, `Type` tem o contexto "kind"). Um `TL\`Type\`` nosso obrigaria a alterar o `main.ts` deles. Usar chaves próprias, como `Trainer type`.
 
   O teste da Smogon `test/tools/translations.js` falha se o modelo estiver dessincronizado.
-- **Testes do servidor:** `docker compose exec server npx mocha test/main.js test/server/chat-plugins/gym-challenge.js`. Isso roda a suíte inteira do PS, mais de 2500 testes.
+- **Testes do servidor:** `MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps server-setup sh /opt/ps/test.sh test/main.js test/server/chat-plugins/gym-challenge.js` (no Git Bash). Isso roda a suíte inteira do PS, mais de 2500 testes. Eles não rodam no container `server`, que tem o código somente leitura (os testes recompilam o `dist/`).
 
 ### Contrato que o login server precisa respeitar
 
@@ -236,8 +236,11 @@ Ideias para o futuro, sem implementar agora:
 - Serviços:
   - `web`: Caddy, com HTTPS, cliente estático e proxy. Substitui o Apache e o `.htaccess`;
   - `login`: Node 24, roda o TS direto, **sem dependências de runtime**;
-  - `server`: PS;
+  - `server`: PS, com código, build e dependências **somente leitura** (grava só em `config/`, `databases/` e `logs/`);
+  - `volume-init`: ajusta o dono dos volumes e encerra (único com root, sem rede, só `CHOWN` e `DAC_READ_SEARCH`);
+  - `server-setup`: instala as dependências do servidor (`docker/server/derive-package.cjs`, sem as que não usamos), compila, garante os admins e encerra;
   - `client-build`: compila o cliente e encerra.
+- **Containers endurecidos (2026-10-19):** sem root (`PS_UID:PS_GID`, padrão 1000), `read_only`, `cap_drop: ALL` (o `web` mantém só `NET_BIND_SERVICE`), `no-new-privileges`, limites de memória e processos, imagens fixadas por digest. **Depois de mudar o código do servidor, use `docker compose up -d --force-recreate server`**: o `restart` não compila. Ver "Containers e dependências" em `docs/revisao-seguranca-lgpd.md`.
 - Tudo responde em **https://ps.localhost** (`PS_HOST`). O cliente **exige HTTPS** porque compara a origem com `https://{routes.client}`; o Caddy usa uma CA local para `*.localhost`. **O host não pode ser `localhost` puro**: com esse host, o cliente clássico força `ws://localhost:{port}` sem TLS (`client/play.pokemonshowdown.com/src/oldclient/client.js`, `connect`) e não conecta.
 - Rotas:
   - `/showdown/*` → server:8000 (WebSocket);
@@ -246,7 +249,7 @@ Ideias para o futuro, sem implementar agora:
   - só o **cliente clássico** é servido. As rotas do cliente novo (`/preactalpha` etc.) também abrem o clássico.
 - O id do servidor no cliente é `custom` (`docker/client/config.js`).
 - Os forks **não são alterados** para configurar o ambiente:
-  - `docker/server/config.js` é copiado para `server/config/config.js`, que é ignorado pelo git;
+  - `docker/server/config.js` é montado somente leitura em `server/config/config.js` (e copiado para lá pelo `server-setup`), que é ignorado pelo git;
   - `config.js` e `routes.json` do cliente são templates (`__PS_HOST__`), renderizados pelo `docker/client/build.sh` no volume `client-config`;
   - `client/caches/pokemon-showdown` é um bind mount do `server/`, e o build roda com `--no-update`.
 - No Windows, `client/play.pokemonshowdown.com/config/*` são symlinks que viram arquivos de texto (`core.symlinks=false`). Por isso o Caddy serve `/config/*` direto do volume `client-config`.
@@ -257,8 +260,8 @@ Ideias para o futuro, sem implementar agora:
 - O PS não pareia na ladder jogadores do mesmo IP (`server/server/ladders.ts`). Em dev, `PS_NO_IP_CHECKS=1` liga o `noipchecks`. **Decisão do usuário (2026-10-17): na VPS a proteção fica LIGADA** (`PS_NO_IP_CHECKS=0`); jogadores do mesmo IP só jogam por desafio direto.
 - Pendências do ambiente:
   - ~~sprites, áudio e `pokedex-mini` via proxy~~ **Feito em 2026-10-18:** sprites e sons vêm dos pacotes oficiais do PS (`scripts/recursos-ps.sh`, fora do git), servidos do disco, com o site oficial como reserva para o que faltar; o build gera o `pokedex-mini` a partir deles. Ver `docs/recursos-ps.md`;
-  - os containers de dev rodam como root, e a produção deve usar um usuário sem privilégios;
-  - ~~o PS grava IPs em logs e modlog~~ **Feito em 2026-10-19:** modlog do PS ligado (SQLite, `better-sqlite3@12.11.1` instalado pelo entrypoint), 6 meses por registro e IP apagado aos 30 dias (limpeza diária em `custom-accounts.ts`); `alts_log` desligado (`Config.altslog = false`, opção do fork); mensagens offline e amigos desligados. Ver a seção "Modlog" de `docs/revisao-seguranca-lgpd.md`.
+  - ~~os containers rodam como root~~ **Feito em 2026-10-19** (ver "Containers endurecidos" acima);
+  - ~~o PS grava IPs em logs e modlog~~ **Feito em 2026-10-19:** modlog do PS ligado (SQLite, `better-sqlite3@12.11.1` fixado pelo `derive-package.cjs`), 6 meses por registro e IP apagado aos 30 dias (limpeza diária em `custom-accounts.ts`); `alts_log` desligado (`Config.altslog = false`, opção do fork); mensagens offline e amigos desligados. Ver a seção "Modlog" de `docs/revisao-seguranca-lgpd.md`.
 
 ## Status (atualizado em 2026-10-17)
 

@@ -13,6 +13,10 @@
 #     do proxy trazem o pedido inteiro, e o IP só deve existir no log de acesso;
 #   - o log de acesso de cada site (abaixo) guarda o IP por 14 dias, para segurança.
 {
+	# A CA local (só em *.localhost) não é instalada no sistema do container, que é
+	# somente leitura e roda sem root. O navegador confia nela por fora, se quiser.
+	skip_install_trust
+
 	log default {
 		output stdout
 		format filter {
