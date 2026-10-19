@@ -460,7 +460,19 @@ Substitui o placeholder (ícone de tipo) pelas insígnias dos jogos. Catálogo, 
 - **Código:** `badge-catalog.ts` (gerado), `badges.ts` (busca, ordem do seletor, imagem com reserva), painel em `admin.ts`, exibição em `player.ts` e aviso em `runs.ts`.
 - **Aviso na sala:** com insígnia, "X earned the Boulder Badge! (1/2)" com a imagem; sem insígnia, o aviso antigo com o tipo. Os dois têm padrões distintos no dicionário do cliente.
 
-**Validado:** testes (catálogo, ordem do seletor, reserva, cópia na jornada, banco) e e2e no navegador: painel com imagens, insígnia forjada recusada, sorteio; aviso com nome e imagem, reserva com o tipo, página da jornada, histórico e perfil (nome, líder, desafio e data), em inglês e em português.
+**Validado (insígnias):** testes (catálogo, ordem do seletor, reserva, cópia na jornada, banco) e e2e no navegador: painel com imagens, insígnia forjada recusada, sorteio; aviso com nome e imagem, reserva com o tipo, página da jornada, histórico e perfil (nome, líder, desafio e data), em inglês e em português.
+
+### Sprites dos treinadores (2026-10-19)
+
+**Decisões do usuário:** o admin escolhe o sprite de cada treinador NPC numa **galeria com busca**, entre os sprites oficiais de treinador do PS (os mesmos de `/avatar`, cerca de 1.500, servidos do nosso disco). O sprite aparece **na tela de batalha**, no **banco de treinadores** (lista e edição) e na **página do desafio** (jornada).
+
+**Como funciona:**
+- **Lista oficial:** `OFFICIAL_AVATARS` de `server/chat-commands/avatars.tsx`, exportada no fork (uma palavra, sem mudar o comportamento do PS). Avatares personalizados (`#...`) ficam de fora.
+- **Código:** `trainer-sprites.ts` (validação, busca, imagem); galeria `view-ginasiosadmin-sprites-<id>-<página>[-<busca>]` e comandos `/ginasioadmin buscarsprite` e `definirsprite` em `admin.ts`. A busca usa só letras e números (o PS separa os parâmetros da página por hífen) e compara com o id sem hífens.
+- **Dados:** o banco de treinadores já tinha a coluna `avatar`. A jornada guarda uma cópia (`run_stages.trainer_avatar`, migração 5), como o nome e o time: trocar o sprite não altera jornadas em andamento.
+- **Batalha:** o `RoomBattle` só conhece o avatar de jogadores com usuário; o do NPC vai como edição do lado p2 (`>player p2 {"avatar": ...}`), que fica no input log, então a retomada do save state também o tem.
+
+**Validado:** testes (lista oficial, busca, imagem, cópia na jornada, avatar do NPC no log da batalha e na retomada) e e2e no navegador: galeria paginada, busca, escolha, lista do banco, ids inválidos recusados (inexistente, `#custom`, `../../etc/passwd`), remoção; página da jornada e tela de batalha com o sprite (servidor real).
 
 1. **Prova de conceito**, para reduzir os riscos técnicos:
    - batalha contra NPC com bot aleatório, dentro do processo;

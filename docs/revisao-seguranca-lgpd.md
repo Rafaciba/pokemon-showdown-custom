@@ -168,6 +168,12 @@ Revisado contra o OWASP Top 10 e a LGPD ao ser feito. Detalhes em `docs/recursos
 - **Terceiros e LGPD.** Imagens e sons saem do nosso domínio; só o que faltar no pacote vai ao site oficial, pelo proxy que não repassa cookie, IP nem Referer. O aviso de privacidade foi atualizado.
 - **Direitos.** Os arquivos ficam fora dos repositórios públicos (o fork do cliente já ignorava as pastas), como faz o próprio PS.
 
+### Sprites dos treinadores (2026-10-19)
+- **A01 (acesso).** Galeria e comandos só para o admin (`isAdmin`), e a troca entra no modlog, como as outras ações do painel.
+- **A03 (injeção/XSS e caminhos).** Só ids da lista oficial do PS são aceitos (testado com um id inexistente, `#custom` e `../../etc/passwd`); a busca é reduzida a letras e números; o id entra na URL da imagem com `encodeURIComponent` e no HTML escapado.
+- **Fork.** Única mudança fora dos nossos arquivos: `export` em `OFFICIAL_AVATARS` (`server/chat-commands/avatars.tsx`), sem mudar o comportamento.
+- **LGPD.** Nenhum dado pessoal: o sprite é do treinador NPC.
+
 ## Testes desta revisão
 - **Login:** 19 testes (5 novos: aviso de privacidade, nomes reservados, anulação de códigos, bloqueio por conta e IP sem afetar outro IP e sem escapar por `X-Forwarded-For` forjado, POST de outro site sem `Origin`).
 - **Servidor:** 2541 testes, incluindo os nomes proibidos e a retenção dos logs de batalha.
