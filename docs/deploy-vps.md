@@ -479,4 +479,3 @@ Estes pontos já estão no relatório de segurança ([revisao-seguranca-lgpd.md]
   - `cap_drop: ALL` e `no-new-privileges`;
   - imagens fixadas por digest;
   - dependências sem pacotes opcionais e `npm audit`.
-- **Prazo de retenção do modlog** e **prazo das cópias de backup fora da VPS**, para constarem no aviso de privacidade.

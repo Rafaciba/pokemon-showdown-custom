@@ -29,6 +29,17 @@ exports.consoleips = [];
 // container (Repl.cleanup) conecta neles e fecha na hora, e o EPIPE derruba o servidor.
 exports.repl = false;
 
+// SQLite: só para o modlog (registro das ações de moderação) e o banco básico dos plugins
+// do PS (decisão do usuário, 2026-10-19). O modlog fica 6 meses, e o IP dele, 30 dias
+// (limpeza diária em chat-plugins/custom-accounts.ts). Desligados de propósito (LGPD):
+// mensagens privadas offline, lista de amigos e o alts_log (IP de cada troca de nome
+// entre contas, sem data; Config.altslog é uma opção do nosso fork).
+exports.usesqlite = true;
+exports.usesqlitemodlog = true;
+exports.usesqlitepms = false;
+exports.usesqlitefriends = false;
+exports.altslog = false;
+
 // Login server próprio (rede interna do Docker)
 exports.loginserver = process.env.LOGIN_SERVER_URL || 'http://login:9000/';
 exports.loginserverkeyalgo = 'RSA-SHA256';

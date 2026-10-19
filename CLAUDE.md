@@ -258,7 +258,7 @@ Ideias para o futuro, sem implementar agora:
 - Pendências do ambiente:
   - ~~sprites, áudio e `pokedex-mini` via proxy~~ **Feito em 2026-10-18:** sprites e sons vêm dos pacotes oficiais do PS (`scripts/recursos-ps.sh`, fora do git), servidos do disco, com o site oficial como reserva para o que faltar; o build gera o `pokedex-mini` a partir deles. Ver `docs/recursos-ps.md`;
   - os containers de dev rodam como root, e a produção deve usar um usuário sem privilégios;
-  - o PS grava IPs em logs e modlog. Revisar isso por causa da LGPD antes da produção.
+  - ~~o PS grava IPs em logs e modlog~~ **Feito em 2026-10-19:** modlog do PS ligado (SQLite, `better-sqlite3@12.11.1` instalado pelo entrypoint), 6 meses por registro e IP apagado aos 30 dias (limpeza diária em `custom-accounts.ts`); `alts_log` desligado (`Config.altslog = false`, opção do fork); mensagens offline e amigos desligados. Ver a seção "Modlog" de `docs/revisao-seguranca-lgpd.md`.
 
 ## Status (atualizado em 2026-10-17)
 

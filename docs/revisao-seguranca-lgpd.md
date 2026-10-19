@@ -29,7 +29,7 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 | Baixa | Modlog e crashlog guardavam o identificador de jogadores | **Corrigido** (registram a ação, não o jogador) |
 | Baixa | Jornadas podiam ser criadas sem limite (desistir e recomeçar em loop) | **Corrigido** (até 5 a cada 10 min por jogador) |
 | Baixa | O teambuilder consultava `smogon.com/dex/api` direto do navegador (IP e formato iam para a Smogon) | **Corrigido** (desativado) |
-| Baixa | Modlog (punições, com nome e IP) sem prazo de retenção definido | **Pendente** (o aviso diz "enquanto necessário para a segurança") |
+| Baixa | Modlog (punições, com nome e IP) sem prazo de retenção definido | **Corrigido em 2026-10-19**: 6 meses, IP 30 dias (ver "Modlog") |
 | Info | `consoleips` usava o padrão do PS (127.0.0.1) | **Corrigido** (vazio) |
 | Info | REPL do PS ligado (eval do processo por socket Unix em `logs/repl`). Rodar os testes no container derrubava o servidor com `EPIPE` | **Corrigido** (`repl = false`) |
 
@@ -112,7 +112,10 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 | Estado das batalhas de ginásio em andamento (nomes, times e jogadas, sem chat) | `server/databases/gym-challenge.db` (`run_battles.input_log`) | até a batalha terminar | Sim (e as batalhas em andamento terminam com forfeit) |
 | Logs dos containers | Docker (3 × 10 MB por serviço) | por tamanho | Não (sem IP: o log do Caddy filtra o IP dos avisos; pode haver nomes em erros) |
 | Logs de batalha da ladder (nomes e times) | `server/logs/AAAA-MM/...` | 30 dias | Sim |
-| **Modlog e punições** (nome e IP, só quando há moderação) | `server/logs/modlog`, `config/punishments.tsv` | **indefinida** | **Não** |
+| **Modlog** (ações de moderação: nome do alvo, alts conhecidas, IP, quem agiu, motivo) | `server/databases/modlog.db` | **6 meses**; o **IP sai aos 30 dias** (limpeza diária) | **Não** (legítimo interesse; fica até o prazo) |
+| Punições em vigor (nome e IP) | `config/punishments.tsv` | até vencer ou ser retirada (o PS apaga ao vencer) | Não |
+| Trivia e preferências de mensagens privadas (só se usados) | `server/databases/chat-plugins.db`, `offline-pms.db` | até a exclusão | Sim |
+| Cópias de segurança (contas, jornadas, modlog, config) | `/var/backups/ps-custom` (criptografadas com age) | 14 dias (o script apaga as antigas) | Substituídas em até 14 dias |
 | Times e preferências | localStorage do navegador | controle do usuário | Local |
 | Idioma escolhido (`pt`/`en`) | localStorage, cookie `ps_lang` (1 ano) e memória do servidor de jogo enquanto conectado | controle do usuário | Local (não identifica ninguém) |
 
@@ -120,7 +123,7 @@ Batalhas contra NPC não geram log (`logchallenges` desligado). O chat não é r
 
 ### Decisões do usuário (2026-10-18) e o que foi feito
 1. **Aviso de privacidade** em `/privacidade` (pt e en, `login/src/privacy.ts`): controlador (o admin), dados, finalidades e bases legais, terceiros, retenção, direitos do titular. **Pedidos: mensagem privada ao admin no jogo**; a exclusão de conta é feita direto em `/conta`. O rodapé do cliente e as páginas de cadastro e conta apontam para ele, e os textos curtos foram corrigidos ("não guardamos seu IP" valia só para o login).
-2. **Logs de batalha da ladder: 30 dias.** Uma limpeza diária apaga os dias mais antigos, e os logs em que o jogador aparece são apagados junto com a conta (`custom-accounts.ts`). O modlog continua sem prazo definido (pendência).
+2. **Logs de batalha da ladder: 30 dias.** Uma limpeza diária apaga os dias mais antigos, e os logs em que o jogador aparece são apagados junto com a conta (`custom-accounts.ts`). O modlog ganhou prazo em 2026-10-19 (ver "Modlog").
 3. **Consulta do teambuilder à Smogon: desativada** (`client-custom.js`). Ele só deixa de mostrar os links de análises dos formatos oficiais.
 4. **Sprites e sons no próprio servidor: feito em 2026-10-18** (ver "Sprites e sons próprios" abaixo). Até lá, passam pelo proxy sem dados do jogador. Achado durante a verificação: as folhas de estilo e o logo tinham endereços fixos de `play.pokemonshowdown.com`, buscados direto pelo navegador. Agora são do mesmo domínio e passam pelo proxy. Verificado por e2e: nenhum pedido direto a outros domínios na tela principal, no teambuilder e durante as batalhas.
 
@@ -173,6 +176,20 @@ Revisado contra o OWASP Top 10 e a LGPD ao ser feito. Detalhes em `docs/recursos
 - **A03 (injeção/XSS e caminhos).** Só ids da lista oficial do PS são aceitos (testado com um id inexistente, `#custom` e `../../etc/passwd`); a busca é reduzida a letras e números; o id entra na URL da imagem com `encodeURIComponent` e no HTML escapado.
 - **Fork.** Única mudança fora dos nossos arquivos: `export` em `OFFICIAL_AVATARS` (`server/chat-commands/avatars.tsx`), sem mudar o comportamento.
 - **LGPD.** Nenhum dado pessoal: o sprite é do treinador NPC.
+
+### Modlog (2026-10-19)
+Achado ao definir o prazo: **o servidor não gravava modlog nenhum**. O PS atual só grava o modlog em SQLite (`Config.usesqlite` e `usesqlitemodlog`), que estava desligado, e a dependência `better-sqlite3` nunca chegava a ser instalada: a 11.10.0 travada pela Smogon não tem binário pronto para o Node 24, o container não tem compilador e o npm pula dependências opcionais que falham. O aviso de privacidade prometia "registros de moderação" que não existiam.
+
+Decisões do usuário:
+- **Ligar o modlog do PS**, para ter trilha de investigação (`/modlog` para a staff).
+- **Prazo de 6 meses** por registro (referência do Marco Civil para registros de segurança; a LGPD não fixa dias, exige finalidade e eliminação ao fim dela) e **IP apagado aos 30 dias** (serve sobretudo para pegar evasão de punição logo depois dela).
+- **O modlog fica até o prazo mesmo depois da exclusão da conta** (legítimo interesse em segurança: o punido não apaga o histórico excluindo a conta). O aviso de privacidade e o aviso da página de exclusão dizem isso.
+- **`alts_log` desligado**: ligar o SQLite também ligaria esse registro do PS (IP de cada troca de nome entre contas, sem data, impossível de expirar). Opção `Config.altslog = false` no fork (`server/chat-commands/info.ts`, sem mudar o comportamento para quem não a define).
+- **Dependência:** `better-sqlite3@12.11.1`, com binário pronto, instalado pelo nosso `docker/server/entrypoint.sh` se não carregar (o fork não muda; o npm confere a integridade do pacote).
+
+Também desligados de propósito: mensagens privadas offline (`usesqlitepms`) e amigos (`usesqlitefriends`). A moderação automática do PS (Perspective, que grava o texto das mensagens) só funciona com uma chave do Google, que não configuramos. A exclusão de conta passou a limpar os dados que o banco de plugins possa ter do jogador (pontuação de trivia, preferências de mensagens; autoria de perguntas de trivia fica anônima).
+
+Validado: teste de unidade da limpeza (IP aos 30 dias, registro aos 6 meses, alts junto) e, no servidor real, registros antigos limpos na inicialização, `/modnote` gravado e visível no `/modlog`, `alts_log` vazio e exclusão de conta limpando trivia e preferências de mensagens com o modlog mantido. A suíte do servidor passou a rodar também os testes de SQLite do PS que eram pulados.
 
 ## Testes desta revisão
 - **Login:** 19 testes (5 novos: aviso de privacidade, nomes reservados, anulação de códigos, bloqueio por conta e IP sem afetar outro IP e sem escapar por `X-Forwarded-For` forjado, POST de outro site sem `Origin`).
