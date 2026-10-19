@@ -4,6 +4,18 @@
 
 Servidor casual de batalhas Pokémon para jogar com amigos. Ele é construído sobre o **[Pokémon Showdown](https://pokemonshowdown.com/)** e tem modos de jogo próprios, como o **Desafio de Ginásios**.
 
+## Código-fonte
+
+Todo o código da Liga de Desafios é aberto. O que roda em ligadesafios.com.br é a branch `main` destes repositórios:
+
+| Repositório | O que é | Licença |
+|---|---|---|
+| [Rafaciba/pokemon-showdown-custom](https://github.com/Rafaciba/pokemon-showdown-custom) | este repositório: login server, Docker, Caddy, scripts e documentação | MIT |
+| [Rafaciba/pokemon-showdown](https://github.com/Rafaciba/pokemon-showdown) | fork do servidor de jogo, com os modos próprios | MIT |
+| [Rafaciba/pokemon-showdown-client](https://github.com/Rafaciba/pokemon-showdown-client) | fork do cliente web | AGPL-3.0 |
+
+O cliente é AGPL-3.0: como ele é servido pela rede com modificações, o rodapé do jogo e as páginas de conta têm o link "Código-fonte" para este repositório.
+
 ## Créditos
 
 Este projeto só existe graças ao trabalho do **Pokémon Showdown** e da comunidade **[Smogon](https://www.smogon.com/)**:

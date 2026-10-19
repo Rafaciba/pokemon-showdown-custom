@@ -53,7 +53,8 @@ function layout(lang: Lang, title: string, body: string): string {
 ${langSwitch(lang)}
 ${body}
 <p class="credits"><small>${e(t(lang, 'credits'))}
-<a href="https://pokemonshowdown.com/credits">Pokémon Showdown</a> · <a href="https://www.smogon.com/">Smogon</a><br>
+<a href="https://pokemonshowdown.com/credits">Pokémon Showdown</a> · <a href="https://www.smogon.com/">Smogon</a> ·
+<a href="https://github.com/Rafaciba/pokemon-showdown-custom">${e(t(lang, 'sourceCode'))}</a><br>
 ${e(t(lang, 'fanDisclaimer'))}</small></p>
 </div>
 </div>

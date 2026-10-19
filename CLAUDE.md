@@ -119,7 +119,7 @@ D:\Workspace\pokemon-showdown\   ← repo "plataforma" → github: Rafaciba/poke
   - `master` = espelho do upstream, **nunca** recebe commits nossos;
   - `main` = nossas mudanças (já criada).
   - Para atualizar: `git fetch upstream`, depois `git checkout master`, `git merge upstream/master`, `git checkout main`, `git merge master`.
-- Todos os repos são **públicos**: atende à AGPL do cliente e é boa prática de comunidade.
+- Todos os repos são **públicos**: atende à AGPL do cliente e é boa prática de comunidade. Desde 2026-10-18, o rodapé do cliente e as páginas de conta têm o link "Código-fonte" para o repo raiz, cujo README lista os três repositórios (a `main` é o que roda em produção).
 - Para minimizar conflitos com o upstream, as personalizações ficam em arquivos próprios:
   - `server/config/custom-formats.ts`: formatos próprios, carregados por `sim/dex-formats.ts`;
   - `server/data/mods/<nosso-mod>/`: mudanças de mecânica;
