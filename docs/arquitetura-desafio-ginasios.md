@@ -470,7 +470,8 @@ Substitui o placeholder (ícone de tipo) pelas insígnias dos jogos. Catálogo, 
 - **Lista oficial:** `OFFICIAL_AVATARS` de `server/chat-commands/avatars.tsx`, exportada no fork (uma palavra, sem mudar o comportamento do PS). Avatares personalizados (`#...`) ficam de fora.
 - **Código:** `trainer-sprites.ts` (validação, busca, imagem); galeria `view-ginasiosadmin-sprites-<id>-<página>[-<busca>]` e comandos `/ginasioadmin buscarsprite` e `definirsprite` em `admin.ts`. A busca usa só letras e números (o PS separa os parâmetros da página por hífen) e compara com o id sem hífens.
 - **Dados:** o banco de treinadores já tinha a coluna `avatar`. A jornada guarda uma cópia (`run_stages.trainer_avatar`, migração 5), como o nome e o time: trocar o sprite não altera jornadas em andamento.
-- **Batalha:** o `RoomBattle` só conhece o avatar de jogadores com usuário; o do NPC vai como edição do lado p2 (`>player p2 {"avatar": ...}`), que fica no input log, então a retomada do save state também o tem.
+- **Batalha:** o `RoomBattle` só conhece o avatar de jogadores com usuário. A `NpcBattle` sobrescreve o `addPlayer` para o lado do NPC já entrar com o sprite na primeira linha `|player|` (antes, uma edição posterior fazia o cliente mostrar um avatar qualquer por 1 a 2 segundos). O sprite fica no input log, então a retomada do save state também o tem.
+- **Painel do desafio:** o sprite aparece ao lado de cada treinador na tabela de atribuição (fixos, sorteio, Elite 4 e Campeão) e no resumo de desafio encerrado.
 
 **Validado:** testes (lista oficial, busca, imagem, cópia na jornada, avatar do NPC no log da batalha e na retomada) e e2e no navegador: galeria paginada, busca, escolha, lista do banco, ids inválidos recusados (inexistente, `#custom`, `../../etc/passwd`), remoção; página da jornada e tela de batalha com o sprite (servidor real).
 
