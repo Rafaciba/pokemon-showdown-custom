@@ -371,3 +371,40 @@ test('cadastro pelo cliente aponta para a página de convite', async () => {
 	assert.equal(res.json.actionsuccess, false);
 	assert.match(res.json.actionerror, /\/cadastro/);
 });
+
+test('lista e revoga convites pendentes pela API interna', async () => {
+	assert.equal((await internal('/internal/invites', {}, 'token-errado')).status, 401);
+	assert.equal((await internal('/internal/invites/revoke', { id: '1' }, 'token-errado')).status, 401);
+	const pendingIds = async () => (await internal('/internal/invites', {})).json.invites as
+		{ id: number, userid: string | null, createdAt: number, expiresAt: number }[];
+	const before = (await pendingIds()).length;
+
+	const open = await newInvite();
+	await newInvite('Gardenia');
+	const list = await pendingIds();
+	assert.equal(list.length, before + 2);
+	const reserved = list.find(invite => invite.userid === 'gardenia');
+	assert.ok(reserved, 'convite com nome reservado aparece com o nome');
+	assert.ok(reserved.expiresAt > reserved.createdAt);
+	assert.ok(!JSON.stringify(list).includes(open), 'a lista nunca traz o código');
+
+	// Revogado: some da lista e não serve mais no cadastro
+	assert.equal((await internal('/internal/invites/revoke', { id: String(reserved.id) })).status, 200);
+	assert.equal((await internal('/internal/invites/revoke', { id: String(reserved.id) })).status, 404);
+	assert.equal((await internal('/internal/invites/revoke', { id: 'x' })).status, 400);
+	assert.equal((await pendingIds()).length, before + 1);
+
+	// Usado: some da lista
+	const res = await post('/cadastro', { invite: open, username: 'Roark', password: 'cranidos-1', confirm: 'cranidos-1' });
+	assert.match(res.text, /Conta criada/);
+	assert.equal((await pendingIds()).length, before);
+});
+
+test('erros da API interna no idioma de quem pediu', async () => {
+	await registerUser('Wallace');
+	const taken = await internal('/internal/invite', { username: 'Wallace', lang: 'en' });
+	assert.equal(taken.json.error, 'That name is already taken.');
+	assert.equal((await internal('/internal/invite', { username: 'Wallace' })).json.error, 'Esse nome já está em uso.');
+	assert.equal((await internal('/internal/reset', { username: 'ninguem', lang: 'en' })).json.error, 'User not found.');
+	assert.equal((await internal('/internal/reset', { username: 'ninguem', lang: 'pt' })).json.error, 'Usuário não encontrado.');
+});

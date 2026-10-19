@@ -49,7 +49,7 @@ Regras definidas pelo usuário em 2026-10-17:
 - **Convites:**
   - só o admin gera;
   - código de uso único, válido por **3 dias**;
-  - gerado por comando no chat (`/convite`) ou pelo CLI. Uma página no painel admin fica para depois.
+  - gerado por comando no chat (`/convite`), pelo CLI ou pela página **Convites** do painel admin (`view-ginasiosadmin-convites`, feita em 2026-10-19), que também lista os pendentes (sem o código, que só existe como hash), revoga convites e gera códigos de redefinição de senha. O código aparece uma única vez, logo depois de gerado.
 - **Senha:** mínimo de **8** caracteres.
 - **Sessão:** **30 dias**, renovada a cada uso, com cookie `ps_session` HttpOnly, Secure e SameSite=Lax.
 - **Esqueci a senha:** o admin gera um código de redefinição (`/redefinirsenha`, válido por 24h), e o jogador usa em `/redefinir`.

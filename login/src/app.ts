@@ -26,7 +26,9 @@ import {
 	createSession, getSession, deleteSession, deleteOtherSessions, sessionCookie, clearSessionCookie, readCookie,
 	SESSION_COOKIE, type ActiveSession,
 } from './sessions.ts';
-import { issueCode, revokeCodes, INVITE_TTL_SECONDS, RESET_TTL_SECONDS } from './codes.ts';
+import {
+	issueCode, listPendingInvites, revokeCodes, revokeInvite, INVITE_TTL_SECONDS, RESET_TTL_SECONDS,
+} from './codes.ts';
 import { renderAccount, renderPrivacy, renderRegister, renderReset, renderRules, type PageMessage } from './pages.ts';
 
 const MAX_BODY_BYTES = 16 * 1024;
@@ -256,23 +258,35 @@ export function createApp(deps: AppDeps) {
 	}
 
 	function internalApi(path: string, params: Params): { status: number, body: unknown } {
+		// Idioma de quem pediu, para as mensagens de erro mostradas no jogo
+		const lang = parseLang(params.lang) ?? 'pt';
 		const inviteUrl = (code: string) => `https://${config.serverHost}/cadastro?convite=${encodeURIComponent(code)}`;
 		switch (path) {
 		case '/internal/invite': {
 			let userid: string | null = null;
 			if (params.username) {
 				const name = normalizeUsername(params.username);
-				if (!name.ok) return { status: 400, body: { ok: false, error: t('pt', name.error) } };
-				if (getUser(db, name.value.userid)) return { status: 409, body: { ok: false, error: t('pt', 'nameTaken') } };
+				if (!name.ok) return { status: 400, body: { ok: false, error: t(lang, name.error) } };
+				if (getUser(db, name.value.userid)) return { status: 409, body: { ok: false, error: t(lang, 'nameTaken') } };
 				userid = name.value.userid;
 			}
 			const issued = issueCode(db, 'invite', userid, INVITE_TTL_SECONDS);
 			console.log(`[admin] convite gerado${userid ? ' (nome reservado)' : ''}`);
 			return { status: 200, body: { ok: true, ...issued, url: inviteUrl(issued.code), userid } };
 		}
+		case '/internal/invites':
+			// Convites pendentes, para a página do painel admin (sem os códigos)
+			return { status: 200, body: { ok: true, invites: listPendingInvites(db) } };
+		case '/internal/invites/revoke': {
+			const id = /^[1-9][0-9]{0,15}$/.test(params.id || '') ? Number(params.id) : 0;
+			if (!id) return { status: 400, body: { ok: false, error: 'id required' } };
+			if (!revokeInvite(db, id)) return { status: 404, body: { ok: false, error: 'not found' } };
+			console.log('[admin] convite revogado');
+			return { status: 200, body: { ok: true } };
+		}
 		case '/internal/reset': {
 			const user = getUser(db, toID(params.username));
-			if (!user) return { status: 404, body: { ok: false, error: 'Usuário não encontrado.' } };
+			if (!user) return { status: 404, body: { ok: false, error: t(lang, 'userNotFound') } };
 			// Só o código mais recente vale
 			revokeCodes(db, 'reset', user.userid);
 			const issued = issueCode(db, 'reset', user.userid, RESET_TTL_SECONDS);

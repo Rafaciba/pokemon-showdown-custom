@@ -37,6 +37,7 @@ const messages = {
 		pt: 'Código de redefinição inválido, expirado ou de outro usuário.',
 		en: 'Invalid or expired reset code, or it belongs to another user.',
 	},
+	userNotFound: { pt: 'Usuário não encontrado.', en: 'User not found.' },
 	confirmDeletion: { pt: 'Marque a confirmação para excluir a conta.', en: 'Tick the confirmation box to delete your account.' },
 	// Contrato com o cliente
 	accountRequired: {

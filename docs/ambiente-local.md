@@ -76,6 +76,8 @@ O servidor **exige conta**, e o cadastro só acontece com um convite de uso úni
 
 O código aparece só para quem gerou. Envie-o em particular.
 
+No painel admin (`/ginasioadmin`), o botão **Convites** abre uma página que faz o mesmo: gerar convites (com nome reservado opcional), listar os pendentes, revogar um convite e gerar o código de redefinição de senha. A lista não mostra os códigos, que o login guarda só como hash: cada código aparece uma única vez, logo depois de gerado.
+
 ### Páginas
 
 - `/cadastro`: criar conta com convite.

@@ -194,6 +194,19 @@ Também desligados de propósito: mensagens privadas offline (`usesqlitepms`) e 
 
 Validado: teste de unidade da limpeza (IP aos 30 dias, registro aos 6 meses, alts junto) e, no servidor real, registros antigos limpos na inicialização, `/modnote` gravado e visível no `/modlog`, `alts_log` vazio e exclusão de conta limpando trivia e preferências de mensagens com o modlog mantido. A suíte do servidor passou a rodar também os testes de SQLite do PS que eram pulados.
 
+### Página de convites (2026-10-19)
+
+Página **Convites** no painel admin (`view-ginasiosadmin-convites`): gerar convite (com nome reservado opcional), listar os pendentes, revogar e gerar código de redefinição de senha. Decisão do usuário: não guardar quem gerou cada convite.
+
+- **A01:** a página e os comandos (`/ginasioadmin gerarconvite`, `revogarconvite`, `redefinirsenha`) exigem admin (conta registrada e rank `~`). A API interna nova do login (`/internal/invites`, `/internal/invites/revoke`) exige o token, como as outras.
+- **A02:** a lista nunca traz o código, que o login guarda só como hash. O convite é identificado pelo `rowid`, e não pelo hash. O código gerado na página fica na memória do servidor de jogo só até a página ser desenhada de novo (no máximo 10 minutos) e aparece uma única vez.
+- **A03:** o id do convite é validado como número nos dois lados; o nome reservado já vem normalizado do login (só letras minúsculas e números) e é escapado na página.
+- **A09:** revogar entra no modlog (`INVITEREVOKE`, só o número do convite), como gerar (`INVITE`) e redefinir (`PASSWORDRESET`), sem nomes de jogadores.
+- **Idioma:** as mensagens de erro do login (nome em uso, usuário não encontrado) saíam sempre em português. O servidor de jogo passou a mandar o idioma de quem pediu, também no `/convite` e no `/redefinirsenha`.
+- **LGPD:** nenhum dado novo é guardado.
+
+Validado: 2 testes novos no login (lista sem o código, revogação, convite usado sai da lista, erros em pt e en) e e2e no navegador, em inglês e em português: abrir pelo botão do painel, gerar convite aberto e reservado, código só uma vez, nome em uso recusado, revogar (e revogar inexistente), redefinição para jogador inexistente e existente.
+
 ### Containers e dependências (2026-10-19)
 
 Decisões do usuário: manter as montagens (fluxo de `git pull`), tratar as dependências no nosso script sem mudar o `package.json` do fork, tirar o `probe-image-size`, rodar o Caddy sem root e pôr limites de recursos.

@@ -74,3 +74,26 @@ export function countPendingCodes(db: Database, kind: CodeKind): number {
 		.get(kind, nowSeconds()) as { n: number };
 	return row.n;
 }
+
+/** Convite pendente, sem o código (só o hash fica no banco). */
+export interface PendingInvite {
+	/** rowid do SQLite: identifica o convite para revogar, sem expor o hash */
+	id: number;
+	/** nome reservado, se houver */
+	userid: string | null;
+	createdAt: number;
+	expiresAt: number;
+}
+
+export function listPendingInvites(db: Database): PendingInvite[] {
+	return db.prepare(
+		'SELECT rowid AS id, userid, created_at AS createdAt, expires_at AS expiresAt FROM codes ' +
+		"WHERE kind = 'invite' AND expires_at > ? ORDER BY created_at, rowid"
+	).all(nowSeconds()) as unknown as PendingInvite[];
+}
+
+/** Anula um convite pendente. Retorna false se ele não existe (já usado, vencido ou revogado). */
+export function revokeInvite(db: Database, id: number): boolean {
+	const result = db.prepare("DELETE FROM codes WHERE rowid = ? AND kind = 'invite'").run(id);
+	return result.changes === 1;
+}
