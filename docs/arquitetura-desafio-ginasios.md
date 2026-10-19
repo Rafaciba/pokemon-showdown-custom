@@ -353,7 +353,7 @@ A prova de conceito foi validada com um teste de ponta a ponta pelo fluxo real: 
 
 - **Conquistas sem tabela nova:** são as jornadas com status "vencida". Vencer de novo acumula uma conquista por vitória. Placar e insígnias também vêm das jornadas e batalhas já gravadas.
 - **Páginas:**
-  - `view-ginasios-perfil-<usuário>`: conquistas (desafio, data e insígnias), jornadas em andamento e placar por desafio (jornadas, vencidas, batalhas vencidas e perdidas), com link para o histórico;
+  - `view-ginasios-perfil-<usuário>`: conquistas (desafio, data e insígnias, com o bloco "Times vencedores", acrescentado em 2026-10-19), jornadas em andamento e placar por desafio (jornadas, vencidas, batalhas vencidas e perdidas), com link para o histórico;
   - `view-ginasios-historico-<desafio>-<usuário>`: cada jornada com resultado, insígnias, batalhas vencidas e perdidas, e o total do desafio. As jornadas anteriores da página do desafio usam a mesma tabela.
   - Visitantes veem "entre para ver"; a página carrega sozinha depois do login.
 - **Nome exibido:** o atual, se o jogador estiver conectado; senão, o userid. O banco do jogo não guarda nomes de exibição (minimização de dados).
@@ -536,3 +536,14 @@ Cada fase tem testes: unitários para `rules.ts` e e2e com batalhas reais (como 
 Nenhuma questão bloqueia a fase 1. Os detalhes dos níveis de IA (o que cada nível faz) serão definidos na fase 5.
 
 > **Imagens de insígnia:** as imagens oficiais são propriedade da Nintendo, Creatures, Game Freak e The Pokémon Company. O aviso de projeto de fã sem fins lucrativos está no rodapé do cliente e das páginas de conta.
+
+## Times vencedores nas conquistas (2026-10-19)
+
+Pedido do usuário: mostrar nas conquistas o time que venceu cada insígnia e o Campeão.
+
+- **Decisões do usuário:** só os ícones dos Pokémon (não o time completo, que mostraria a estratégia a qualquer jogador logado); insígnias e Campeão, sem a Elite 4; num bloco que se abre ("Times vencedores") em cada conquista; recuperar as vitórias antigas dos logs de batalha.
+- **Vitórias antigas:** não há como recuperar. As batalhas contra NPC não são gravadas em log (o PS só grava as da ladder; `logchallenges` está desligado), e o estado salvo é apagado quando a batalha termina. Elas aparecem como "Não registrado".
+- **Banco (migração 6):** `run_battles.player_species`, com a lista das espécies do time do jogador em JSON. É gravada quando a batalha começa (`runs.ts`), o que cobre também as batalhas retomadas depois de um reinício, e apagada pelo `finishBattle` quando o resultado não é vitória. Só as espécies, porque é só isso que a página mostra (minimização).
+- **Página:** a insígnia mostra o time da primeira vitória naquele ginásio, que é a que deu a insígnia. O Campeão mostra o time da vitória que encerrou a jornada.
+- **LGPD:** o aviso de privacidade passou a citar as espécies (pt e en), que ficam visíveis no perfil para os usuários logados e são apagadas com a conta, junto com as jornadas.
+- **Validado:** teste de unidade (espécies só nas vitórias; derrota, interrompida e batalha sem espécies ficam sem registro); batalha real contra NPC gravando as espécies ao começar; perfil no navegador em inglês e português, com uma vitória registrada, uma sem registro e o Campeão.

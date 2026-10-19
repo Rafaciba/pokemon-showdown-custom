@@ -111,7 +111,7 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 | **Log de acesso do site** (IP, data, método, caminho sem query string, status, tamanho, user agent) | arquivo do Caddy na VPS (`/var/log/ps-custom/caddy`, só root) | **14 dias** (logrotate diário) | Não (não é ligado à conta; some sozinho) |
 | Rank e autoridade de sala | `server/config` | até a exclusão | Sim |
 | Ladder | `server/config/ladders` | até a exclusão | Sim |
-| Jornadas, insígnias e histórico | `server/databases/gym-challenge.db` | até a exclusão | Sim |
+| Jornadas, insígnias e histórico, com as espécies do time de cada vitória (desde 2026-10-19) | `server/databases/gym-challenge.db` | até a exclusão | Sim |
 | Estado das batalhas de ginásio em andamento (nomes, times e jogadas, sem chat) | `server/databases/gym-challenge.db` (`run_battles.input_log`) | até a batalha terminar | Sim (e as batalhas em andamento terminam com forfeit) |
 | Logs dos containers | Docker (3 × 10 MB por serviço) | por tamanho | Não (sem IP: o log do Caddy filtra o IP dos avisos; pode haver nomes em erros) |
 | Logs de batalha da ladder (nomes e times) | `server/logs/AAAA-MM/...` | 30 dias | Sim |

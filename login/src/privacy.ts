@@ -6,7 +6,7 @@
  */
 import type { Lang } from './i18n.ts';
 
-export const PRIVACY_UPDATED = '2026-10-18';
+export const PRIVACY_UPDATED = '2026-10-19';
 
 interface Section {
 	title: string;
@@ -24,7 +24,7 @@ export interface Notice {
 export const PRIVACY: { [lang in Lang]: Notice } = {
 	pt: {
 		title: 'Aviso de privacidade',
-		updated: 'Atualizado em 18/10/2026.',
+		updated: 'Atualizado em 19/10/2026.',
 		sections: [
 			{
 				title: 'Quem somos',
@@ -37,13 +37,13 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 				paragraphs: [
 					'Conta: o seu nome de usuário e um hash da sua senha (a senha em si nunca é guardada). Não pedimos e-mail nem nenhum outro dado pessoal.',
 					'Sessão: um cookie (ps_session) que mantém você conectado por 30 dias, renovados a cada uso. No servidor fica só um hash desse cookie.',
-					'Jogo: a sua posição no ranking (ladder), um eventual cargo de moderação e, no Desafio de Ginásios, as suas jornadas, insígnias e conquistas. O seu perfil e histórico no Desafio de Ginásios ficam visíveis para os outros usuários logados.',
+					'Jogo: a sua posição no ranking (ladder), um eventual cargo de moderação e, no Desafio de Ginásios, as suas jornadas, insígnias e conquistas, com os Pokémon do time que venceu cada insígnia e o Campeão (só as espécies, sem itens, golpes ou outros detalhes). O seu perfil e histórico no Desafio de Ginásios ficam visíveis para os outros usuários logados.',
 					'Batalhas do Desafio de Ginásios em andamento: o estado da batalha (nomes, times e jogadas, sem as mensagens de chat), para que ela continue se for interrompida. Ele é apagado quando a batalha termina.',
 					'Registros de batalhas da ladder: nomes dos jogadores e times usados, guardados por 30 dias. As batalhas são públicas enquanto acontecem.',
 					'Registro de acesso ao site: o IP, a data e a hora, o endereço pedido (sem códigos de convite ou de redefinição), o resultado e o navegador (user agent) de cada acesso, guardados por 14 dias e apagados automaticamente. Ele serve só para a segurança do servidor (identificar ataques e abusos), não fica ligado à sua conta e só o administrador tem acesso.',
 					'Registros de moderação (modlog): as ações da equipe de moderação, como avisos e punições, com o nome de quem foi alvo, as contas ligadas a ele conhecidas na hora e o IP. Cada registro fica 6 meses, e o IP é apagado dele depois de 30 dias. As punições em vigor (por exemplo, um bloqueio) ficam até vencerem ou serem retiradas.',
 					'Cópias de segurança: os dados acima (exceto o registro de acesso e os registros de batalhas) entram numa cópia de segurança diária criptografada, guardada por 14 dias e apagada automaticamente.',
-					'Times e preferências ficam só no seu navegador; não são enviados ao servidor. O idioma escolhido também fica num cookie (ps_lang), só para as páginas de conta abrirem no mesmo idioma do jogo, e é informado ao servidor de jogo enquanto você está conectado.',
+					'Os times montados e as preferências ficam só no seu navegador; o servidor recebe o time só para a batalha, e o que fica guardado dele está descrito acima. O idioma escolhido também fica num cookie (ps_lang), só para as páginas de conta abrirem no mesmo idioma do jogo, e é informado ao servidor de jogo enquanto você está conectado.',
 				],
 			},
 			{
@@ -81,7 +81,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 	},
 	en: {
 		title: 'Privacy notice',
-		updated: 'Last updated on 2026-10-18.',
+		updated: 'Last updated on 2026-10-19.',
 		sections: [
 			{
 				title: 'Who we are',
@@ -94,13 +94,13 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 				paragraphs: [
 					'Account: your username and a hash of your password (the password itself is never stored). We do not ask for an e-mail address or any other personal data.',
 					'Session: a cookie (ps_session) that keeps you logged in for 30 days, renewed whenever you use it. The server keeps only a hash of it.',
-					'Game: your ladder ranking, any moderation rank and, in the Gym Challenge, your journeys, badges and achievements. Your Gym Challenge profile and history are visible to other logged-in users.',
+					'Game: your ladder ranking, any moderation rank and, in the Gym Challenge, your journeys, badges and achievements, with the Pokémon of the team that won each badge and the Champion (species only, without items, moves or other details). Your Gym Challenge profile and history are visible to other logged-in users.',
 					'Gym Challenge battles in progress: the battle state (names, teams and moves, without chat messages), so the battle can continue if it is interrupted. It is deleted when the battle ends.',
 					'Ladder battle logs: player names and the teams used, kept for 30 days. Battles are public while they happen.',
 					'Website access log: the IP address, date and time, requested address (without invite or reset codes), result and browser (user agent) of each access, kept for 14 days and deleted automatically. It is used only for the server\'s security (spotting attacks and abuse), is not linked to your account, and only the administrator can access it.',
 					'Moderation records (modlog): actions taken by the moderation team, such as warnings and punishments, with the name of the target, the linked accounts known at the time and the IP address. Each record is kept for 6 months, and the IP address is removed from it after 30 days. Active punishments (for example, a lock) are kept until they expire or are lifted.',
 					'Backups: the data above (except the access log and battle logs) goes into a daily encrypted backup, kept for 14 days and deleted automatically.',
-					'Teams and preferences stay in your browser only; they are not sent to the server. Your chosen language is also kept in a cookie (ps_lang), only so that the account pages open in the same language as the game, and it is sent to the game server while you are connected.',
+					'The teams you build and your preferences stay in your browser only; the server receives a team only for the battle, and what is kept from it is described above. Your chosen language is also kept in a cookie (ps_lang), only so that the account pages open in the same language as the game, and it is sent to the game server while you are connected.',
 				],
 			},
 			{
