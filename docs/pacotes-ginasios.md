@@ -102,6 +102,23 @@ Os quatro pacotes passam na validação da importação, e as quatro ligas ficam
 
 Para mudar um time do pacote, edite `scripts/pacotes/ligas.cjs`, rode `node scripts/pacotes/ligas.cjs` (na raiz) e confira a prévia importando no ambiente local.
 
+## Liga Favoritos
+
+O pacote `pacotes/liga-favoritos.json` (22 KB) é gerado por `scripts/pacotes/favoritos.cjs` a partir dos times de Pokémon favoritos do usuário. Pedido e decisões do usuário (2026-10-20):
+
+- **Treinadores:** um por tipo, chamado "<Tipo> Rafa" (Fire Rafa, Steel Rafa... 18 ao todo), com título Gym Leader e os Pokémon favoritos do usuário daquele tipo.
+  - O usuário escolheu só os Pokémon, e as builds são nossas, no mesmo estilo das ligas. Cada time tem no máximo uma Mega, quando há uma entre os Pokémon do time.
+  - Os apelidos e os gêneros do time Ground ficam como o usuário colocou.
+- **Campeão:** "Favorite Rafa", com o time de favoritos do usuário exatamente como ele montou, inclusive apelidos, gêneros e builds.
+- **Desafio "Liga Favoritos":**
+  - tipos sorteados: cada jornada sorteia 8 dos 18 treinadores de tipo como líderes, e o Favorite Rafa é o Campeão;
+  - sem Elite 4;
+  - o resto na configuração das outras ligas (IA base Médio, tempo livre, derrotas ilimitadas);
+  - insígnias com o ícone do tipo.
+- **Sem sprite:** o sprite é escolhido depois, na galeria do painel.
+
+O pacote passa na validação da importação, e a liga fica pronta para abrir num banco vazio.
+
 ## Segurança e LGPD
 
 Ver a seção "Pacotes de treinadores e desafios" de `docs/revisao-seguranca-lgpd.md`. Em resumo:

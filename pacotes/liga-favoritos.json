@@ -1,0 +1,277 @@
+{
+	"type": "liga-desafios/ginasios",
+	"version": 1,
+	"trainers": [
+		{
+			"name": "Fire Rafa",
+			"title": "Gym Leader",
+			"type": "Fire",
+			"doubles": false,
+			"sprite": "",
+			"team": "Houndoom @ Houndoominite\nAbility: Flash Fire\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Nasty Plot\n- Fire Blast\n- Dark Pulse\n- Sludge Bomb\n\nNinetales @ Heat Rock\nAbility: Drought\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Nasty Plot\n- Fire Blast\n- Solar Beam\n- Will-O-Wisp\n\nCharizard @ Heavy-Duty Boots\nAbility: Solar Power\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Fire Blast\n- Solar Beam\n- Air Slash\n- Focus Blast\n\nTyphlosion @ Choice Specs\nAbility: Flash Fire\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Eruption\n- Fire Blast\n- Focus Blast\n- Solar Beam\n\nCentiskorch @ Heavy-Duty Boots\nAbility: Flash Fire\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Coil\n- Fire Lash\n- Leech Life\n- Knock Off\n\nRapidash @ Life Orb\nAbility: Flash Fire\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Flare Blitz\n- Wild Charge\n- High Horsepower\n- Morning Sun"
+		},
+		{
+			"name": "Steel Rafa",
+			"title": "Gym Leader",
+			"type": "Steel",
+			"doubles": false,
+			"sprite": "",
+			"team": "Mawile @ Mawilite\nAbility: Intimidate\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Swords Dance\n- Play Rough\n- Iron Head\n- Sucker Punch\n\nSteelix @ Leftovers\nAbility: Sturdy\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Stealth Rock\n- Earthquake\n- Heavy Slam\n- Roar\n\nCorviknight @ Leftovers\nAbility: Mirror Armor\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Bulk Up\n- Brave Bird\n- Body Press\n- Roost\n\nSkarmory @ Rocky Helmet\nAbility: Sturdy\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Spikes\n- Brave Bird\n- Roost\n- Whirlwind\n\nScizor @ Choice Band\nAbility: Technician\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Bullet Punch\n- U-turn\n- Knock Off\n- Superpower\n\nSandslash-Alola @ Life Orb\nAbility: Slush Rush\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Triple Axel\n- Iron Head\n- Knock Off\n- Rapid Spin"
+		},
+		{
+			"name": "Dark Rafa",
+			"title": "Gym Leader",
+			"type": "Dark",
+			"doubles": false,
+			"sprite": "",
+			"team": "Sharpedo @ Sharpedonite\nAbility: Speed Boost\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Protect\n- Crunch\n- Waterfall\n- Psychic Fangs\n\nHoundoom @ Choice Specs\nAbility: Flash Fire\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Fire Blast\n- Dark Pulse\n- Sludge Bomb\n- Overheat\n\nHonchkrow @ Life Orb\nAbility: Moxie\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Brave Bird\n- Sucker Punch\n- Superpower\n- Night Slash\n\nMightyena @ Choice Band\nAbility: Intimidate\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Crunch\n- Sucker Punch\n- Play Rough\n- Iron Tail\n\nShiftry @ Focus Sash\nAbility: Chlorophyll\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Leaf Blade\n- Knock Off\n- Sucker Punch\n\nCrawdaunt @ Life Orb\nAbility: Adaptability\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Swords Dance\n- Crabhammer\n- Knock Off\n- Aqua Jet"
+		},
+		{
+			"name": "Bug Rafa",
+			"title": "Gym Leader",
+			"type": "Bug",
+			"doubles": false,
+			"sprite": "",
+			"team": "Scizor @ Scizorite\nAbility: Technician\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Bullet Punch\n- U-turn\n- Swords Dance\n- Roost\n\nHeracross @ Flame Orb\nAbility: Guts\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Close Combat\n- Megahorn\n- Knock Off\n- Facade\n\nAriados @ Focus Sash\nAbility: Insomnia\nEVs: 252 HP / 4 Atk / 252 Spe\nJolly Nature\n- Sticky Web\n- Toxic Spikes\n- Megahorn\n- Sucker Punch\n\nBeedrill @ Life Orb\nAbility: Sniper\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Poison Jab\n- U-turn\n- Drill Run\n- Knock Off\n\nScolipede @ Life Orb\nAbility: Speed Boost\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Megahorn\n- Poison Jab\n- Earthquake\n\nVikavolt @ Choice Specs\nAbility: Levitate\nEVs: 252 HP / 252 SpA / 4 SpD\nModest Nature\nIVs: 0 Atk\n- Thunderbolt\n- Bug Buzz\n- Volt Switch\n- Energy Ball"
+		},
+		{
+			"name": "Ground Rafa",
+			"title": "Gym Leader",
+			"type": "Ground",
+			"doubles": false,
+			"sprite": "",
+			"team": "Poppy (Hippowdon) (M) @ Leftovers\nAbility: Sand Stream\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Stealth Rock\n- Earthquake\n- Slack Off\n- Whirlwind\n\nPitanguinha (Steelix) (F) @ Steelixite\nAbility: Sturdy\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Earthquake\n- Heavy Slam\n- Stone Edge\n- Dragon Tail\n\nBátima (Gliscor) @ Toxic Orb\nAbility: Poison Heal\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Earthquake\n- Knock Off\n- Roost\n- Protect\n\nDonphan @ Leftovers\nAbility: Sturdy\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Rapid Spin\n- Earthquake\n- Knock Off\n- Ice Shard\n\nParaechinus (Sandslash) (M) @ Life Orb\nAbility: Sand Rush\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Earthquake\n- Stone Edge\n- Knock Off\n\nNidoking (M) @ Life Orb\nAbility: Sheer Force\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Earth Power\n- Sludge Wave\n- Ice Beam\n- Flamethrower"
+		},
+		{
+			"name": "Ice Rafa",
+			"title": "Gym Leader",
+			"type": "Ice",
+			"doubles": false,
+			"sprite": "",
+			"team": "Glalie @ Glalitite\nAbility: Inner Focus\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Return\n- Earthquake\n- Explosion\n- Ice Shard\n\nLapras @ Leftovers\nAbility: Water Absorb\nEVs: 252 HP / 252 SpA / 4 SpD\nModest Nature\nIVs: 0 Atk\n- Freeze-Dry\n- Surf\n- Thunderbolt\n- Psychic\n\nMamoswine @ Life Orb\nAbility: Thick Fat\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Icicle Crash\n- Earthquake\n- Ice Shard\n- Stealth Rock\n\nWeavile @ Choice Band\nAbility: Pressure\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Triple Axel\n- Knock Off\n- Ice Shard\n- Low Kick\n\nDelibird @ Heavy-Duty Boots\nAbility: Vital Spirit\nEVs: 252 HP / 4 Def / 252 Spe\nJolly Nature\n- Spikes\n- Rapid Spin\n- Freeze-Dry\n- Memento\n\nDewgong @ Leftovers\nAbility: Thick Fat\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Surf\n- Ice Beam\n- Encore\n- Protect"
+		},
+		{
+			"name": "Flying Rafa",
+			"title": "Gym Leader",
+			"type": "Flying",
+			"doubles": false,
+			"sprite": "",
+			"team": "Pidgeot @ Pidgeotite\nAbility: Keen Eye\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\n- Hurricane\n- Heat Wave\n- U-turn\n- Roost\n\nStaraptor @ Choice Band\nAbility: Reckless\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Brave Bird\n- Double-Edge\n- Close Combat\n- U-turn\n\nYanmega @ Life Orb\nAbility: Speed Boost\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Protect\n- Bug Buzz\n- Air Slash\n- Giga Drain\n\nNinjask @ Focus Sash\nAbility: Speed Boost\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- X-Scissor\n- Acrobatics\n- Protect\n\nMantine @ Heavy-Duty Boots\nAbility: Water Absorb\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Scald\n- Hurricane\n- Roost\n- Defog\n\nNoctowl @ Heavy-Duty Boots\nAbility: Tinted Lens\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Hurricane\n- Hyper Voice\n- Roost\n- Calm Mind"
+		},
+		{
+			"name": "Psychic Rafa",
+			"title": "Gym Leader",
+			"type": "Psychic",
+			"doubles": false,
+			"sprite": "",
+			"team": "Gardevoir @ Gardevoirite\nAbility: Trace\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Calm Mind\n- Hyper Voice\n- Psyshock\n- Mystical Fire\n\nAlakazam @ Life Orb\nAbility: Magic Guard\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Nasty Plot\n- Psychic\n- Shadow Ball\n- Focus Blast\n\nRapidash-Galar @ Life Orb\nAbility: Pastel Veil\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Play Rough\n- Zen Headbutt\n- High Horsepower\n\nStarmie @ Leftovers\nAbility: Natural Cure\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Rapid Spin\n- Scald\n- Psyshock\n- Recover\n\nGrumpig @ Leftovers\nAbility: Thick Fat\nEVs: 252 HP / 4 Def / 252 SpD\nCalm Nature\nIVs: 0 Atk\n- Calm Mind\n- Psychic\n- Shadow Ball\n- Rest\n\nOranguru @ Mental Herb\nAbility: Inner Focus\nEVs: 252 HP / 252 SpA / 4 SpD\nQuiet Nature\nIVs: 0 Atk / 0 Spe\n- Trick Room\n- Psychic\n- Focus Blast\n- Nasty Plot"
+		},
+		{
+			"name": "Normal Rafa",
+			"title": "Gym Leader",
+			"type": "Normal",
+			"doubles": false,
+			"sprite": "",
+			"team": "Tauros (M) @ Life Orb\nAbility: Sheer Force\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Body Slam\n- Close Combat\n- Earthquake\n- Rock Slide\n\nSwellow @ Flame Orb\nAbility: Guts\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Facade\n- Brave Bird\n- U-turn\n- Protect\n\nSnorlax @ Leftovers\nAbility: Thick Fat\nEVs: 252 HP / 4 Def / 252 SpD\nCareful Nature\n- Body Slam\n- Curse\n- Rest\n- Sleep Talk\n\nSmeargle @ Focus Sash\nAbility: Own Tempo\nEVs: 252 HP / 4 Def / 252 Spe\nJolly Nature\n- Spore\n- Sticky Web\n- Stealth Rock\n- Whirlwind\n\nDubwool @ Leftovers\nAbility: Fluffy\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Cotton Guard\n- Body Press\n- Rest\n- Sleep Talk\n\nGirafarig @ Eviolite\nAbility: Inner Focus\nEVs: 252 HP / 4 Def / 252 SpD\nCalm Nature\nIVs: 0 Atk\n- Nasty Plot\n- Psychic\n- Hyper Voice\n- Shadow Ball"
+		},
+		{
+			"name": "Grass Rafa",
+			"title": "Gym Leader",
+			"type": "Grass",
+			"doubles": false,
+			"sprite": "",
+			"team": "Torterra @ Leftovers\nAbility: Shell Armor\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Wood Hammer\n- Earthquake\n- Stealth Rock\n- Synthesis\n\nTropius @ Sitrus Berry\nAbility: Harvest\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Leech Seed\n- Substitute\n- Air Slash\n- Protect\n\nFerrothorn @ Leftovers\nAbility: Iron Barbs\nEVs: 252 HP / 252 Def / 4 SpD\nRelaxed Nature\nIVs: 0 Spe\n- Spikes\n- Leech Seed\n- Power Whip\n- Gyro Ball\n\nRoserade @ Focus Sash\nAbility: Natural Cure\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Leaf Storm\n- Sludge Bomb\n- Sleep Powder\n- Synthesis\n\nBreloom @ Toxic Orb\nAbility: Poison Heal\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Spore\n- Seed Bomb\n- Mach Punch\n- Swords Dance\n\nCacturne @ Life Orb\nAbility: Water Absorb\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Seed Bomb\n- Sucker Punch\n- Drain Punch"
+		},
+		{
+			"name": "Electric Rafa",
+			"title": "Gym Leader",
+			"type": "Electric",
+			"doubles": false,
+			"sprite": "",
+			"team": "Ampharos @ Ampharosite\nAbility: Static\nEVs: 252 HP / 252 SpA / 4 SpD\nModest Nature\nIVs: 0 Atk\n- Thunderbolt\n- Dragon Pulse\n- Focus Blast\n- Volt Switch\n\nToxtricity @ Throat Spray\nAbility: Punk Rock\nEVs: 252 SpA / 4 SpD / 252 Spe\nModest Nature\n- Overdrive\n- Boomburst\n- Sludge Bomb\n- Volt Switch\n\nElectrode @ Light Clay\nAbility: Soundproof\nEVs: 252 HP / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Reflect\n- Light Screen\n- Thunderbolt\n- Volt Switch\n\nManectric @ Choice Specs\nAbility: Lightning Rod\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Thunderbolt\n- Volt Switch\n- Overheat\n- Snarl\n\nGalvantula @ Focus Sash\nAbility: Compound Eyes\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Sticky Web\n- Thunder\n- Bug Buzz\n- Giga Drain\n\nZebstrika @ Life Orb\nAbility: Lightning Rod\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Wild Charge\n- Flame Charge\n- High Horsepower\n- Volt Switch"
+		},
+		{
+			"name": "Rock Rafa",
+			"title": "Gym Leader",
+			"type": "Rock",
+			"doubles": false,
+			"sprite": "",
+			"team": "Shuckle @ Mental Herb\nAbility: Sturdy\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\n- Sticky Web\n- Stealth Rock\n- Encore\n- Infestation\n\nRhydon @ Eviolite\nAbility: Lightning Rod\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Swords Dance\n- Earthquake\n- Stone Edge\n- Megahorn\n\nGolem @ Custap Berry\nAbility: Sturdy\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Earthquake\n- Stone Edge\n- Heavy Slam\n- Explosion\n\nLycanroc-Dusk @ Life Orb\nAbility: Tough Claws\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Accelerock\n- Stone Edge\n- Close Combat\n\nArmaldo @ Leftovers\nAbility: Battle Armor\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Rapid Spin\n- Stone Edge\n- X-Scissor\n- Earthquake\n\nKabutops @ Life Orb\nAbility: Swift Swim\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Swords Dance\n- Liquidation\n- Stone Edge\n- Aqua Jet"
+		},
+		{
+			"name": "Dragon Rafa",
+			"title": "Gym Leader",
+			"type": "Dragon",
+			"doubles": false,
+			"sprite": "",
+			"team": "Garchomp @ Garchompite\nAbility: Rough Skin\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Earthquake\n- Stone Edge\n- Fire Fang\n\nHaxorus @ Life Orb\nAbility: Mold Breaker\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Dragon Dance\n- Outrage\n- Earthquake\n- Poison Jab\n\nNoivern @ Choice Specs\nAbility: Infiltrator\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\n- Draco Meteor\n- Hurricane\n- Flamethrower\n- U-turn\n\nFlygon @ Choice Scarf\nAbility: Levitate\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Earthquake\n- Outrage\n- U-turn\n- Stone Edge\n\nKingdra @ Lum Berry\nAbility: Sniper\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Dragon Dance\n- Waterfall\n- Outrage\n- Iron Head\n\nDragonair @ Eviolite\nAbility: Shed Skin\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Dragon Dance\n- Outrage\n- Extreme Speed\n- Waterfall"
+		},
+		{
+			"name": "Poison Rafa",
+			"title": "Gym Leader",
+			"type": "Poison",
+			"doubles": false,
+			"sprite": "",
+			"team": "Gengar @ Gengarite\nAbility: Cursed Body\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Shadow Ball\n- Sludge Wave\n- Focus Blast\n- Destiny Bond\n\nVenusaur @ Black Sludge\nAbility: Overgrow\nEVs: 252 HP / 4 Def / 252 SpD\nCalm Nature\nIVs: 0 Atk\n- Giga Drain\n- Sludge Bomb\n- Synthesis\n- Leech Seed\n\nArbok @ Life Orb\nAbility: Intimidate\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Coil\n- Gunk Shot\n- Sucker Punch\n- Earthquake\n\nToxicroak @ Life Orb\nAbility: Dry Skin\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Gunk Shot\n- Drain Punch\n- Sucker Punch\n\nDrapion @ Leftovers\nAbility: Battle Armor\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Knock Off\n- Poison Jab\n- Earthquake\n\nCrobat @ Heavy-Duty Boots\nAbility: Infiltrator\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Brave Bird\n- U-turn\n- Roost\n- Defog"
+		},
+		{
+			"name": "Fairy Rafa",
+			"title": "Gym Leader",
+			"type": "Fairy",
+			"doubles": false,
+			"sprite": "",
+			"team": "Azumarill @ Choice Band\nAbility: Huge Power\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Aqua Jet\n- Liquidation\n- Play Rough\n- Knock Off\n\nGranbull @ Leftovers\nAbility: Intimidate\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Play Rough\n- Earthquake\n- Thunder Wave\n- Heal Bell\n\nMr. Mime @ Life Orb\nAbility: Filter\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Nasty Plot\n- Psychic\n- Dazzling Gleam\n- Focus Blast\n\nNinetales-Alola @ Light Clay\nAbility: Snow Warning\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Aurora Veil\n- Blizzard\n- Moonblast\n- Freeze-Dry\n\nWigglytuff @ Leftovers\nAbility: Competitive\nEVs: 252 HP / 4 Def / 252 SpD\nCalm Nature\nIVs: 0 Atk\n- Dazzling Gleam\n- Fire Blast\n- Thunder Wave\n- Protect\n\nTogetic @ Eviolite\nAbility: Serene Grace\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Dazzling Gleam\n- Wish\n- Roost\n- Thunder Wave"
+		},
+		{
+			"name": "Water Rafa",
+			"title": "Gym Leader",
+			"type": "Water",
+			"doubles": false,
+			"sprite": "",
+			"team": "Swampert @ Swampertite\nAbility: Torrent\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Rain Dance\n- Waterfall\n- Earthquake\n- Ice Punch\n\nKingler @ Life Orb\nAbility: Sheer Force\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Swords Dance\n- Crabhammer\n- Knock Off\n- Rock Slide\n\nWalrein @ Leftovers\nAbility: Thick Fat\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Surf\n- Ice Beam\n- Protect\n- Roar\n\nFeraligatr @ Life Orb\nAbility: Sheer Force\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Dragon Dance\n- Liquidation\n- Crunch\n- Ice Punch\n\nCloyster @ White Herb\nAbility: Skill Link\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Shell Smash\n- Icicle Spear\n- Rock Blast\n- Rapid Spin\n\nQwilfish @ Black Sludge\nAbility: Intimidate\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Spikes\n- Toxic Spikes\n- Waterfall\n- Taunt"
+		},
+		{
+			"name": "Ghost Rafa",
+			"title": "Gym Leader",
+			"type": "Ghost",
+			"doubles": false,
+			"sprite": "",
+			"team": "Banette @ Banettite\nAbility: Insomnia\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Destiny Bond\n- Will-O-Wisp\n- Shadow Claw\n- Knock Off\n\nChandelure @ Choice Specs\nAbility: Flash Fire\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Shadow Ball\n- Fire Blast\n- Energy Ball\n- Trick\n\nMismagius @ Life Orb\nAbility: Levitate\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Nasty Plot\n- Shadow Ball\n- Dazzling Gleam\n- Thunderbolt\n\nMarowak-Alola @ Thick Club\nAbility: Lightning Rod\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Swords Dance\n- Flare Blitz\n- Shadow Bone\n- Bonemerang\n\nAnnihilape @ Leftovers\nAbility: Defiant\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Bulk Up\n- Drain Punch\n- Rage Fist\n- Taunt\n\nFroslass (F) @ Focus Sash\nAbility: Cursed Body\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\n- Spikes\n- Taunt\n- Ice Beam\n- Poltergeist"
+		},
+		{
+			"name": "Fighting Rafa",
+			"title": "Gym Leader",
+			"type": "Fighting",
+			"doubles": false,
+			"sprite": "",
+			"team": "Machamp @ Assault Vest\nAbility: No Guard\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Dynamic Punch\n- Knock Off\n- Bullet Punch\n- Ice Punch\n\nToxicroak @ Life Orb\nAbility: Dry Skin\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Gunk Shot\n- Drain Punch\n- Sucker Punch\n\nSirfetch'd @ Leek\nAbility: Scrappy\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- Close Combat\n- Brave Bird\n- Knock Off\n\nConkeldurr @ Flame Orb\nAbility: Guts\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Mach Punch\n- Drain Punch\n- Knock Off\n- Ice Punch\n\nPoliwrath @ Leftovers\nAbility: Water Absorb\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Bulk Up\n- Drain Punch\n- Waterfall\n- Ice Punch\n\nHitmonchan (M) @ Life Orb\nAbility: Iron Fist\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Drain Punch\n- Ice Punch\n- Thunder Punch\n- Mach Punch"
+		},
+		{
+			"name": "Favorite Rafa",
+			"title": "Champion",
+			"type": null,
+			"doubles": false,
+			"sprite": "",
+			"team": "Pitanguinha (Steelix) (F) @ Leftovers\nAbility: Sturdy\nEVs: 252 HP / 4 Atk / 252 SpD\nCareful Nature\n- Stealth Rock\n- Earthquake\n- Heavy Slam\n- Toxic\n\nParaechinus (Sandslash) (M) @ Heavy-Duty Boots\nAbility: Sand Rush\nEVs: 248 HP / 252 Def / 8 SpD\nImpish Nature\n- Earthquake\n- Rapid Spin\n- Knock Off\n- Spikes\n\nBátima (Gliscor) (M) @ Toxic Orb\nAbility: Poison Heal\nEVs: 244 HP / 244 SpD / 20 Spe\nJolly Nature\n- Swords Dance\n- Roost\n- Earthquake\n- Facade\n\nPlutão (Houndoom) (M) @ Houndoominite\nAbility: Flash Fire\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\n- Nasty Plot\n- Fire Blast\n- Dark Pulse\n- Sludge Bomb\n\nCharlene (Charizard) (F) @ Heavy-Duty Boots\nAbility: Blaze\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Toxic\n- Roost\n- Flamethrower\n- Hurricane\n\nMel (Mightyena) (F) @ Life Orb\nAbility: Moxie\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Crunch\n- Sucker Punch\n- Play Rough\n- Iron Tail"
+		}
+	],
+	"challenges": [
+		{
+			"name": "Liga Favoritos",
+			"baseFormat": "gen9nationaldexag",
+			"customRules": "Standard NatDex, Terastal Clause, Z-Move Clause, Dynamax Clause",
+			"typeMode": "random",
+			"gymCount": 8,
+			"orderMode": "free",
+			"hasElite4": false,
+			"teamLock": false,
+			"baseAILevel": "medium",
+			"timerMode": "free",
+			"turnSeconds": null,
+			"lossLimit": null,
+			"eliminateOnElite4Loss": false,
+			"eliminateOnChampionLoss": false,
+			"stages": [
+				{
+					"kind": "champion",
+					"position": 1,
+					"trainer": "Favorite Rafa",
+					"aiLevel": null,
+					"badge": null
+				}
+			],
+			"pool": [
+				{
+					"trainer": "Fire Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Steel Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Dark Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Bug Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Ground Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Ice Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Flying Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Psychic Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Normal Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Grass Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Electric Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Rock Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Dragon Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Poison Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Fairy Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Water Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Ghost Rafa",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"trainer": "Fighting Rafa",
+					"aiLevel": null,
+					"badge": null
+				}
+			]
+		}
+	]
+}
