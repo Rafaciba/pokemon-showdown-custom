@@ -1,0 +1,222 @@
+{
+	"type": "liga-desafios/ginasios",
+	"version": 1,
+	"trainers": [
+		{
+			"name": "Brock",
+			"title": "Gym Leader",
+			"type": "Rock",
+			"doubles": false,
+			"sprite": "brock-gen3",
+			"team": "Aerodactyl @ Aerodactylite\nAbility: Unnerve\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Stone Edge\n- Earthquake\n- Fire Fang\n- Roost\n\nGolem @ Custap Berry\nAbility: Sturdy\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Stealth Rock\n- Earthquake\n- Stone Edge\n- Explosion\n\nKabutops @ Life Orb\nAbility: Swift Swim\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Swords Dance\n- Liquidation\n- Stone Edge\n- Rapid Spin\n\nOmastar @ White Herb\nAbility: Shell Armor\nEVs: 252 SpA / 4 SpD / 252 Spe\nModest Nature\nIVs: 0 Atk\n- Shell Smash\n- Hydro Pump\n- Ice Beam\n- Earth Power\n\nTyranitar @ Lum Berry\nAbility: Sand Stream\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Dragon Dance\n- Stone Edge\n- Crunch\n- Earthquake\n\nGigalith @ Leftovers\nAbility: Sand Force\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Stone Edge\n- Earthquake\n- Superpower\n- Heavy Slam"
+		},
+		{
+			"name": "Misty",
+			"title": "Gym Leader",
+			"type": "Water",
+			"doubles": false,
+			"sprite": "misty-gen3",
+			"team": "Starmie @ Life Orb\nAbility: Analytic\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Hydro Pump\n- Psyshock\n- Ice Beam\n- Thunderbolt\n\nGyarados @ Gyaradosite\nAbility: Intimidate\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Dragon Dance\n- Waterfall\n- Crunch\n- Earthquake\n\nPolitoed @ Damp Rock\nAbility: Drizzle\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Scald\n- Ice Beam\n- Encore\n- Perish Song\n\nGolduck @ Life Orb\nAbility: Swift Swim\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Hydro Pump\n- Ice Beam\n- Focus Blast\n- Grass Knot\n\nQuagsire @ Leftovers\nAbility: Unaware\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Earthquake\n- Scald\n- Recover\n- Haze\n\nVaporeon @ Leftovers\nAbility: Water Absorb\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Scald\n- Wish\n- Protect\n- Haze"
+		},
+		{
+			"name": "Lt. Surge",
+			"title": "Gym Leader",
+			"type": "Electric",
+			"doubles": false,
+			"sprite": "ltsurge-gen3",
+			"team": "Raichu @ Life Orb\nAbility: Lightning Rod\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Nasty Plot\n- Thunderbolt\n- Focus Blast\n- Grass Knot\n\nElectrode @ Light Clay\nAbility: Aftermath\nEVs: 252 HP / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Reflect\n- Light Screen\n- Thunderbolt\n- Volt Switch\n\nMagnezone @ Air Balloon\nAbility: Magnet Pull\nEVs: 252 HP / 252 SpA / 4 SpD\nModest Nature\n- Thunderbolt\n- Flash Cannon\n- Volt Switch\n- Body Press\n\nElectivire @ Expert Belt\nAbility: Motor Drive\nEVs: 252 Atk / 4 SpA / 252 Spe\nNaive Nature\n- Wild Charge\n- Ice Punch\n- Earthquake\n- Flamethrower\n\nJolteon @ Choice Specs\nAbility: Volt Absorb\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Thunderbolt\n- Volt Switch\n- Shadow Ball\n- Hyper Voice\n\nAmpharos @ Ampharosite\nAbility: Static\nEVs: 252 HP / 252 SpA / 4 SpD\nModest Nature\nIVs: 0 Atk\n- Thunderbolt\n- Dragon Pulse\n- Focus Blast\n- Volt Switch"
+		},
+		{
+			"name": "Erika",
+			"title": "Gym Leader",
+			"type": "Grass",
+			"doubles": false,
+			"sprite": "erika-gen3",
+			"team": "Venusaur @ Venusaurite\nAbility: Chlorophyll\nEVs: 252 HP / 4 Def / 252 SpD\nCalm Nature\nIVs: 0 Atk\n- Giga Drain\n- Sludge Bomb\n- Synthesis\n- Leech Seed\n\nVileplume @ Black Sludge\nAbility: Effect Spore\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Giga Drain\n- Sludge Bomb\n- Moonblast\n- Sleep Powder\n\nVictreebel @ Life Orb\nAbility: Chlorophyll\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Swords Dance\n- Power Whip\n- Poison Jab\n- Sucker Punch\n\nBellossom @ Leftovers\nAbility: Healer\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Quiver Dance\n- Giga Drain\n- Moonblast\n- Sleep Powder\n\nTangrowth @ Rocky Helmet\nAbility: Regenerator\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\n- Giga Drain\n- Knock Off\n- Sleep Powder\n- Synthesis\n\nJumpluff @ Leftovers\nAbility: Infiltrator\nEVs: 252 HP / 4 Def / 252 Spe\nJolly Nature\n- Sleep Powder\n- Leech Seed\n- U-turn\n- Encore"
+		},
+		{
+			"name": "Koga",
+			"title": "Gym Leader",
+			"type": "Poison",
+			"doubles": false,
+			"sprite": "koga-gen3",
+			"team": "Weezing @ Black Sludge\nAbility: Levitate\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Sludge Bomb\n- Will-O-Wisp\n- Pain Split\n- Fire Blast\n\nMuk @ Assault Vest\nAbility: Poison Touch\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Gunk Shot\n- Knock Off\n- Drain Punch\n- Shadow Sneak\n\nCrobat @ Heavy-Duty Boots\nAbility: Infiltrator\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Brave Bird\n- U-turn\n- Roost\n- Taunt\n\nVenomoth @ Heavy-Duty Boots\nAbility: Tinted Lens\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Quiver Dance\n- Bug Buzz\n- Sludge Bomb\n- Sleep Powder\n\nTentacruel @ Black Sludge\nAbility: Liquid Ooze\nEVs: 252 HP / 4 Def / 252 SpD\nCalm Nature\nIVs: 0 Atk\n- Rapid Spin\n- Scald\n- Sludge Bomb\n- Toxic Spikes\n\nBeedrill @ Beedrillite\nAbility: Swarm\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Swords Dance\n- U-turn\n- Poison Jab\n- Drill Run"
+		},
+		{
+			"name": "Sabrina",
+			"title": "Gym Leader",
+			"type": "Psychic",
+			"doubles": false,
+			"sprite": "sabrina-gen3",
+			"team": "Alakazam @ Alakazite\nAbility: Magic Guard\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Psychic\n- Shadow Ball\n- Focus Blast\n- Nasty Plot\n\nMr. Mime @ Light Clay\nAbility: Filter\nEVs: 252 HP / 4 SpA / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Reflect\n- Light Screen\n- Psychic\n- Dazzling Gleam\n\nEspeon @ Life Orb\nAbility: Magic Bounce\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Calm Mind\n- Psychic\n- Shadow Ball\n- Dazzling Gleam\n\nSlowbro @ Leftovers\nAbility: Regenerator\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Scald\n- Psyshock\n- Slack Off\n- Thunder Wave\n\nHypno @ Leftovers\nAbility: Insomnia\nEVs: 252 HP / 4 Def / 252 SpD\nCalm Nature\nIVs: 0 Atk\n- Psychic\n- Foul Play\n- Thunder Wave\n- Protect\n\nGardevoir @ Choice Scarf\nAbility: Trace\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Moonblast\n- Psychic\n- Focus Blast\n- Healing Wish"
+		},
+		{
+			"name": "Blaine",
+			"title": "Gym Leader",
+			"type": "Fire",
+			"doubles": false,
+			"sprite": "blaine-gen3",
+			"team": "Arcanine @ Heavy-Duty Boots\nAbility: Intimidate\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Flare Blitz\n- Extreme Speed\n- Will-O-Wisp\n- Morning Sun\n\nCharizard @ Charizardite X\nAbility: Blaze\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Dragon Dance\n- Flare Blitz\n- Dragon Claw\n- Earthquake\n\nMagmortar @ Life Orb\nAbility: Flame Body\nEVs: 252 SpA / 4 SpD / 252 Spe\nModest Nature\nIVs: 0 Atk\n- Fire Blast\n- Thunderbolt\n- Focus Blast\n- Psychic\n\nRapidash @ Heavy-Duty Boots\nAbility: Flash Fire\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Flare Blitz\n- Wild Charge\n- High Horsepower\n- Morning Sun\n\nNinetales @ Heat Rock\nAbility: Drought\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Nasty Plot\n- Fire Blast\n- Solar Beam\n- Extrasensory\n\nMagcargo @ Leftovers\nAbility: Flame Body\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Lava Plume\n- Stealth Rock\n- Recover\n- Earth Power"
+		},
+		{
+			"name": "Giovanni",
+			"title": "Gym Leader",
+			"type": "Ground",
+			"doubles": false,
+			"sprite": "giovanni-gen3",
+			"team": "Nidoking @ Life Orb\nAbility: Sheer Force\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Earth Power\n- Sludge Wave\n- Ice Beam\n- Flamethrower\n\nNidoqueen @ Black Sludge\nAbility: Sheer Force\nEVs: 252 HP / 252 SpA / 4 SpD\nModest Nature\nIVs: 0 Atk\n- Earth Power\n- Sludge Wave\n- Ice Beam\n- Stealth Rock\n\nRhyperior @ Weakness Policy\nAbility: Solid Rock\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Earthquake\n- Stone Edge\n- Megahorn\n- Ice Punch\n\nDugtrio @ Focus Sash\nAbility: Arena Trap\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Earthquake\n- Stone Edge\n- Sucker Punch\n- Memento\n\nMarowak @ Thick Club\nAbility: Rock Head\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Swords Dance\n- Earthquake\n- Stone Edge\n- Knock Off\n\nSteelix @ Steelixite\nAbility: Sturdy\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Stealth Rock\n- Earthquake\n- Heavy Slam\n- Stone Edge"
+		},
+		{
+			"name": "Lorelei",
+			"title": "Elite Four",
+			"type": "Ice",
+			"doubles": false,
+			"sprite": "lorelei-gen3",
+			"team": "Lapras @ Leftovers\nAbility: Water Absorb\nEVs: 252 HP / 252 SpA / 4 SpD\nModest Nature\nIVs: 0 Atk\n- Freeze-Dry\n- Surf\n- Thunderbolt\n- Psychic\n\nCloyster @ White Herb\nAbility: Skill Link\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Shell Smash\n- Icicle Spear\n- Rock Blast\n- Rapid Spin\n\nDewgong @ Leftovers\nAbility: Thick Fat\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\nIVs: 0 Atk\n- Surf\n- Ice Beam\n- Encore\n- Protect\n\nJynx @ Choice Specs\nAbility: Dry Skin\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Ice Beam\n- Psychic\n- Focus Blast\n- Energy Ball\n\nMamoswine @ Life Orb\nAbility: Thick Fat\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Icicle Crash\n- Earthquake\n- Ice Shard\n- Stealth Rock\n\nAbomasnow @ Abomasite\nAbility: Snow Warning\nEVs: 4 Atk / 252 SpA / 252 HP\nMild Nature\n- Blizzard\n- Giga Drain\n- Ice Shard\n- Earthquake"
+		},
+		{
+			"name": "Bruno",
+			"title": "Elite Four",
+			"type": "Fighting",
+			"doubles": false,
+			"sprite": "bruno-gen3",
+			"team": "Machamp @ Assault Vest\nAbility: No Guard\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Dynamic Punch\n- Knock Off\n- Bullet Punch\n- Ice Punch\n\nHitmonlee @ Life Orb\nAbility: Reckless\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- High Jump Kick\n- Knock Off\n- Stone Edge\n- Poison Jab\n\nHitmonchan @ Assault Vest\nAbility: Iron Fist\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Drain Punch\n- Ice Punch\n- Thunder Punch\n- Mach Punch\n\nPoliwrath @ Leftovers\nAbility: Water Absorb\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Bulk Up\n- Drain Punch\n- Waterfall\n- Ice Punch\n\nConkeldurr @ Flame Orb\nAbility: Guts\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Mach Punch\n- Drain Punch\n- Knock Off\n- Ice Punch\n\nLucario @ Lucarionite\nAbility: Inner Focus\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Nasty Plot\n- Aura Sphere\n- Flash Cannon\n- Vacuum Wave"
+		},
+		{
+			"name": "Agatha",
+			"title": "Elite Four",
+			"type": "Ghost",
+			"doubles": false,
+			"sprite": "agatha-gen3",
+			"team": "Gengar @ Gengarite\nAbility: Cursed Body\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Shadow Ball\n- Sludge Wave\n- Focus Blast\n- Destiny Bond\n\nMismagius @ Life Orb\nAbility: Levitate\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Nasty Plot\n- Shadow Ball\n- Dazzling Gleam\n- Thunderbolt\n\nDusknoir @ Leftovers\nAbility: Frisk\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Shadow Sneak\n- Ice Punch\n- Will-O-Wisp\n- Pain Split\n\nMarowak-Alola @ Thick Club\nAbility: Rock Head\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Flare Blitz\n- Shadow Bone\n- Bonemerang\n- Swords Dance\n\nChandelure @ Choice Specs\nAbility: Flash Fire\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Shadow Ball\n- Fire Blast\n- Energy Ball\n- Trick\n\nAegislash @ Leftovers\nAbility: Stance Change\nEVs: 252 HP / 4 Atk / 252 SpA\nQuiet Nature\n- Shadow Ball\n- Flash Cannon\n- Shadow Sneak\n- King's Shield"
+		},
+		{
+			"name": "Lance",
+			"title": "Elite Four",
+			"type": "Dragon",
+			"doubles": false,
+			"sprite": "lance-gen3",
+			"team": "Dragonite @ Heavy-Duty Boots\nAbility: Multiscale\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Dragon Dance\n- Extreme Speed\n- Earthquake\n- Fire Punch\n\nKingdra @ Choice Specs\nAbility: Sniper\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Draco Meteor\n- Hydro Pump\n- Ice Beam\n- Dragon Pulse\n\nSalamence @ Salamencite\nAbility: Intimidate\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Dragon Dance\n- Double-Edge\n- Earthquake\n- Roost\n\nGarchomp @ Choice Scarf\nAbility: Rough Skin\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Outrage\n- Earthquake\n- Stone Edge\n- Fire Fang\n\nHaxorus @ Life Orb\nAbility: Mold Breaker\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Dragon Dance\n- Outrage\n- Earthquake\n- Poison Jab\n\nHydreigon @ Choice Specs\nAbility: Levitate\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\n- Draco Meteor\n- Dark Pulse\n- Flamethrower\n- U-turn"
+		},
+		{
+			"name": "Blue",
+			"title": "Champion",
+			"type": null,
+			"doubles": false,
+			"sprite": "blue-gen3champion",
+			"team": "Blastoise @ Blastoisinite\nAbility: Torrent\nEVs: 252 SpA / 4 SpD / 252 Spe\nModest Nature\nIVs: 0 Atk\n- Shell Smash\n- Water Pulse\n- Dark Pulse\n- Aura Sphere\n\nPidgeot @ Heavy-Duty Boots\nAbility: Keen Eye\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Hurricane\n- Heat Wave\n- U-turn\n- Roost\n\nAlakazam @ Focus Sash\nAbility: Magic Guard\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\nIVs: 0 Atk\n- Psychic\n- Shadow Ball\n- Focus Blast\n- Nasty Plot\n\nRhydon @ Eviolite\nAbility: Rock Head\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Stealth Rock\n- Earthquake\n- Stone Edge\n- Megahorn\n\nArcanine @ Choice Band\nAbility: Intimidate\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Flare Blitz\n- Extreme Speed\n- Close Combat\n- Wild Charge\n\nExeggutor @ Sitrus Berry\nAbility: Harvest\nEVs: 252 HP / 252 SpA / 4 SpD\nModest Nature\nIVs: 0 Atk\n- Sleep Powder\n- Leech Seed\n- Giga Drain\n- Psychic"
+		}
+	],
+	"challenges": [
+		{
+			"name": "Liga Kanto",
+			"baseFormat": "gen9nationaldexag",
+			"customRules": "Standard NatDex, Terastal Clause, Z-Move Clause, Dynamax Clause",
+			"typeMode": "fixed",
+			"gymCount": 8,
+			"orderMode": "free",
+			"hasElite4": true,
+			"teamLock": false,
+			"baseAILevel": "medium",
+			"timerMode": "free",
+			"turnSeconds": null,
+			"lossLimit": null,
+			"eliminateOnElite4Loss": false,
+			"eliminateOnChampionLoss": false,
+			"stages": [
+				{
+					"kind": "gym",
+					"position": 1,
+					"trainer": "Brock",
+					"aiLevel": null,
+					"badge": "kanto-boulder"
+				},
+				{
+					"kind": "gym",
+					"position": 2,
+					"trainer": "Misty",
+					"aiLevel": null,
+					"badge": "kanto-cascade"
+				},
+				{
+					"kind": "gym",
+					"position": 3,
+					"trainer": "Lt. Surge",
+					"aiLevel": null,
+					"badge": "kanto-thunder"
+				},
+				{
+					"kind": "gym",
+					"position": 4,
+					"trainer": "Erika",
+					"aiLevel": null,
+					"badge": "kanto-rainbow"
+				},
+				{
+					"kind": "gym",
+					"position": 5,
+					"trainer": "Koga",
+					"aiLevel": null,
+					"badge": "kanto-soul"
+				},
+				{
+					"kind": "gym",
+					"position": 6,
+					"trainer": "Sabrina",
+					"aiLevel": null,
+					"badge": "kanto-marsh"
+				},
+				{
+					"kind": "gym",
+					"position": 7,
+					"trainer": "Blaine",
+					"aiLevel": null,
+					"badge": "kanto-volcano"
+				},
+				{
+					"kind": "gym",
+					"position": 8,
+					"trainer": "Giovanni",
+					"aiLevel": null,
+					"badge": "kanto-earth"
+				},
+				{
+					"kind": "elite4",
+					"position": 1,
+					"trainer": "Lorelei",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"kind": "elite4",
+					"position": 2,
+					"trainer": "Bruno",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"kind": "elite4",
+					"position": 3,
+					"trainer": "Agatha",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"kind": "elite4",
+					"position": 4,
+					"trainer": "Lance",
+					"aiLevel": null,
+					"badge": null
+				},
+				{
+					"kind": "champion",
+					"position": 1,
+					"trainer": "Blue",
+					"aiLevel": null,
+					"badge": null
+				}
+			],
+			"pool": []
+		}
+	]
+}

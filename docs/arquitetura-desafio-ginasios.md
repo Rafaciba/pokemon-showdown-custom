@@ -567,3 +567,23 @@ Pedido do usuário: o admin marca no cadastro do treinador se as batalhas contra
 - **Resultados em dupla** (`ai-benchmark.js`, formato `gen9randomdoublesbattle`, 500 batalhas por confronto, nenhuma escolha recusada em 3000 batalhas): Fácil x Aleatório 70,8%, Médio x Aleatório 93,8%, Difícil x Aleatório 94,2%, Médio x Fácil 78,2%, Difícil x Fácil 77,6% e Difícil x Médio 51,6%. Em dupla, as regras extras do Difícil quase não fazem diferença sobre o Médio; calibrar isso fica para depois. As batalhas individuais continuaram com os mesmos resultados (300 batalhas por confronto). O banco de testes passou a contar as escolhas recusadas e, com `BENCH_DEBUG=1`, mostra cada uma.
 - **Páginas:** campo "Batalha em dupla" no formulário do treinador; "Dupla" no banco de treinadores e na página do treinador; "(batalha em dupla)" ao lado do treinador na página do desafio. A página `/regras` explica a regra.
 - **Validado:** testes de unidade (opção gravada e copiada para a jornada, variante gerada com as mesmas regras, sem variante em formato base em dupla; na IA, as duas posições e a troca de posição no retrato, o alvo, o golpe em área com o aliado vulnerável ou imune, uma Megaevolução por turno e trocas obrigatórias diferentes) e o teste de ponta a ponta com o Campeão em dupla e a IA Difícil.
+
+## Pacotes de treinadores e desafios (2026-10-19)
+
+Pedido do usuário: gerar treinadores e desafios de um jeito fácil de importar em produção.
+
+- **Decisões do usuário:**
+  - a importação é por uma página do painel, com prévia;
+  - um nome que já existe é pulado, com aviso;
+  - o painel também exporta;
+  - quatro pacotes prontos (Kanto, Johto, Hoenn e Sinnoh) com times competitivos completos e desafios na configuração padrão.
+- **Como funciona:** `transfer.ts` (exportar, ler, validar e gravar) e as páginas `pacotes`, `exportar` e `importar` do painel (`admin.ts`). O formato do arquivo, as regras e os pacotes das ligas estão em `docs/pacotes-ginasios.md`.
+- **Validação compartilhada:** as checagens do treinador (`checkTrainer`) e do desafio (`checkChallengeInput`, em `challenges.ts`) saíram dos comandos do painel para funções usadas pelos formulários e pela importação.
+- **Validado:** testes de unidade:
+  - importação com os desafios como rascunho;
+  - exportação e importação de volta, iguais;
+  - nomes já existentes pulados, sem alterar o banco;
+  - erros que impedem tudo;
+  - exportação recusada com nomes repetidos.
+
+  O teste de ponta a ponta ganhou um passo: exportar o desafio E2E e importar uma cópia com um líder novo e o Campeão reaproveitado. A prévia do pacote de Kanto foi conferida no navegador.

@@ -260,6 +260,35 @@ Decisões do usuário: manter as montagens (fluxo de `git pull`), tratar as depe
 
 Validado localmente: usuário e capabilities de cada container; escrita recusada no código, no build, nas dependências, no `config.js` e no sistema do container; escrita aceita nos bancos; site, sprites e páginas do login respondendo; e2e com cadastro por convite, intruso bloqueado, batalha entre dois jogadores, `/convite` e exclusão de contas (dados de jogo apagados pelo servidor); build completo do cliente; 2575 testes do servidor e 21 do login.
 
+### Pacotes de treinadores e desafios (2026-10-19)
+
+A página **Importar e exportar** do painel (`view-ginasiosadmin-pacotes`) importa e exporta treinadores e desafios em JSON (`transfer.ts`; ver `docs/pacotes-ginasios.md`).
+
+- **A01:** as páginas (`pacotes`, `exportar`, `importar`) e os comandos (`exportarpacote`, `previaimportacao`, `confirmarimportacao`, `cancelarimportacao`) exigem admin.
+- **A03 (injeção):**
+  - o JSON é lido com `JSON.parse` e campo a campo: só os campos conhecidos, com o tipo conferido, e nenhum objeto do pacote é copiado inteiro (sem poluição de protótipo);
+  - nomes, títulos, regras, tipos, sprites, insígnias, níveis de IA e times passam pelas mesmas validações dos formulários (`checkTrainer` e `checkChallengeInput`, compartilhadas);
+  - tudo o que vem do pacote é escapado nas páginas, inclusive as mensagens de erro com os caminhos dos campos;
+  - os ids da exportação vão na página como números.
+- **A04 (design):**
+  - a importação nunca altera nem apaga o que existe: nomes já cadastrados são pulados;
+  - os desafios entram como rascunho e só ficam visíveis aos jogadores quando o admin os abre;
+  - qualquer erro impede a importação inteira, e a gravação é uma transação;
+  - o pacote fica só na memória entre a prévia e a confirmação (30 minutos) e é validado de novo ao confirmar;
+  - limites de tamanho: o PS descarta mensagens acima de 100 KB, e o pacote tem no máximo 200 treinadores e 20 desafios.
+- **A09:** a importação entra no modlog (`GYMIMPORT`, só as quantidades).
+- **LGPD:** o pacote só tem dados dos treinadores NPC e da configuração dos desafios. Jogadores, jornadas, conquistas e times vencedores nunca são exportados. Nenhum dado novo é guardado.
+
+Validado: 5 testes de unidade:
+
+- importação com os desafios como rascunho;
+- exportação e importação de volta, iguais;
+- nomes já existentes pulados, sem alterar o banco;
+- JSON inválido, tipo e versão errados, campo de tipo errado, time fora do tipo, sprite e insígnia inválidos e etapas inexistentes, tudo recusado sem gravar nada;
+- exportação com nomes repetidos recusada.
+
+O teste de ponta a ponta tem 11 passos, com o de exportação e importação.
+
 ## Testes desta revisão
 - **Login:** 19 testes (5 novos: aviso de privacidade, nomes reservados, anulação de códigos, bloqueio por conta e IP sem afetar outro IP e sem escapar por `X-Forwarded-For` forjado, POST de outro site sem `Origin`).
 - **Servidor:** 2541 testes, incluindo os nomes proibidos e a retenção dos logs de batalha.

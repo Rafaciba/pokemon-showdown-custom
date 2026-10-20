@@ -239,6 +239,49 @@ test('desafio: o admin cria treinadores e um desafio e o abre', async () => {
 	formatId = 'gen9desafioe2edesafio';
 });
 
+test('pacotes: o admin exporta o desafio e importa um pacote com um treinador novo', async () => {
+	const id = 'view-ginasiosadmin-pacotes';
+	await openPsPage(admin, 'view-ginasiosadmin', /Import and export|Importar e exportar/);
+	await clickPsButton(admin, 'view-ginasiosadmin', `button[value="${id}"]`);
+	await expectRoomText(admin, id, /Preview import|Ver prévia da importação/);
+
+	// Exporta o desafio E2E: os treinadores dele vão junto
+	let before = await roomIds(admin);
+	await admin.evaluate(rid => {
+		const $form = (window as any).app.rooms[rid].$el.find('form[data-submitsend^="/ginasioadmin exportarpacote"]');
+		$form.find('tr').filter((i: number, tr: Element) => tr.textContent!.includes('E2E Desafio'))
+			.find('input[type=checkbox]').prop('checked', true);
+		$form.find('button[type=submit]').click();
+	}, id);
+	const exported = await waitNewRoom(admin, /^view-ginasiosadmin-exportar-\d+-0$/, before);
+	await expectRoomText(admin, exported, /1 challenge\(s\) and 2 trainer\(s\)|1 desafio\(s\) e 2 treinador\(es\)/);
+	const pack = JSON.parse(await admin.evaluate(rid => (window as any).app.rooms[rid].$el.find('textarea').val(), exported));
+	expect(pack.challenges.map((c: any) => c.name)).toEqual(['E2E Desafio']);
+	expect(pack.trainers.map((t: any) => t.name)).toEqual(['E2E Campeao', 'E2E Lider']);
+
+	// Importa uma cópia com outro nome e um líder novo; o Campeão já está no banco e é reaproveitado
+	pack.trainers.push({ name: 'E2E Importado', title: 'E2E', type: 'Water', team: TRAINER_TEAM });
+	pack.challenges[0].name = 'E2E Importado';
+	pack.challenges[0].stages.find((s: any) => s.kind === 'gym').trainer = 'E2E Importado';
+	before = await roomIds(admin);
+	await submitPsForm(admin, id, 'form[data-submitsend^="/ginasioadmin previaimportacao"]', {
+		pacote: JSON.stringify(pack, null, '\t'),
+	});
+	const preview = 'view-ginasiosadmin-importar';
+	await expectRoomText(admin, preview, /Confirm import|Confirmar importação/);
+	await expectRoomText(admin, preview, /Already in the bank: skipped|Já está no banco: pulado/);
+	await expectRoomText(admin, preview, /Ready to open|Pronto para abrir/);
+	await clickPsButton(admin, preview, 'button[value="/ginasioadmin confirmarimportacao"]');
+	await expectRoomText(admin, preview, /1 trainer\(s\) and 1 challenge\(s\)|1 treinador\(es\) e 1 desafio\(s\)/);
+
+	// O desafio importado é um rascunho pronto para abrir
+	const button = await admin.evaluate(rid => (
+		(window as any).app.rooms[rid].$el.find('.infobox button[value^="view-ginasiosadmin-desafio-"]').attr('value')
+	), preview);
+	await openPsPage(admin, button, /Everything is ready|Tudo pronto/);
+	await expectRoomText(admin, button, /Status: Draft|Situação: Rascunho/);
+});
+
 test('desafio: o jogador vence o ginásio e o Campeão em dupla, e o perfil mostra os times', async () => {
 	expect(await register(player, playerInvite, PLAYER, PASSWORD)).toMatch(/Account created|Conta criada/);
 	await openClient(player);
