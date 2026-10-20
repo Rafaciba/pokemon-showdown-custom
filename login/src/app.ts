@@ -20,7 +20,7 @@ import { toID, validateUserid } from './util.ts';
 import { t, detectLang, langCookie, parseLang, LANG_COOKIE, type Lang, type MessageKey } from './i18n.ts';
 import {
 	authenticate, changePassword, completePurge, deleteAccount, getUser, listPendingPurges, register, resetPassword,
-	normalizeUsername, type User,
+	normalizeUsername, renameAccount, type User,
 } from './accounts.ts';
 import {
 	createSession, getSession, deleteSession, deleteOtherSessions, sessionCookie, clearSessionCookie, readCookie,
@@ -342,6 +342,15 @@ export function createApp(deps: AppDeps) {
 			securityEvent('resetissued', { userid: user.userid, actor: toID(params.actor) || null });
 			console.log('[admin] código de redefinição gerado');
 			return { status: 200, body: { ok: true, ...issued, url: `https://${config.serverHost}/redefinir`, username: user.username } };
+		}
+		case '/internal/rename': {
+			// Troca de nome pelo admin (/renomearconta no servidor de jogo)
+			const result = renameAccount(db, toID(params.userid), params.username || '', config.reservedNames);
+			if (!result.ok) return { status: 400, body: { ok: false, error: t(lang, result.error) } };
+			const { userid, username, previous } = result.value;
+			securityEvent('accountrenamed', { userid, actor: toID(params.actor) || null, detail: previous });
+			console.log('[admin] conta renomeada');
+			return { status: 200, body: { ok: true, userid, username, previous } };
 		}
 		case '/internal/security-events': {
 			// Trilha de segurança, para a página do painel admin

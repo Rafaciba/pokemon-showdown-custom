@@ -208,6 +208,17 @@ Página **Convites** no painel admin (`view-ginasiosadmin-convites`): gerar conv
 
 Validado: 2 testes novos no login (lista sem o código, revogação, convite usado sai da lista, erros em pt e en) e e2e no navegador, em inglês e em português: abrir pelo botão do painel, gerar convite aberto e reservado, código só uma vez, nome em uso recusado, revogar (e revogar inexistente), redefinição para jogador inexistente e existente.
 
+### Troca de nome pelo admin (2026-10-19)
+
+Motivo: um jogador se cadastrou como "ZéPe" e ficou "ZPe" (identificador `zpe`). O filtro de nomes do PS recusa letras acentuadas prontas, e o identificador da conta só tem a-z e 0-9.
+
+**Correção no cadastro (mesmo dia):** o login passou a guardar as letras latinas acentuadas como letra base + acento combinante (NFD), que o filtro do PS aceita. "ZéPe" fica "ZéPe" no jogo (`zepe`); "João" fica "Joao" (o filtro tira o acento em alguns casos, mas a letra fica). Nomes que passariam de 18 caracteres com os acentos separados perdem só os acentos (o PS tiraria todos os símbolos, até os espaços). Como "ZéPe" e "ZePe" têm o mesmo identificador, o segundo é recusado como nome em uso. Conferido com o filtro de verdade do PS e no cliente pelo teste de ponta a ponta.
+
+- `/renomearconta nome atual, nome novo` (só admin). No login (`/internal/rename`), a conta passa para o identificador novo com a mesma senha, as sessões são encerradas e os códigos de redefinição acompanham a conta. No servidor de jogo, jornadas, conquistas, ladder e cargos passam para o identificador novo, e quem está conectado com o nome antigo volta a visitante, com um aviso.
+- **A01:** só admin; nomes reservados (`PS_ADMINS`) não trocam de nome nem são tomados. O nome novo passa pelas mesmas regras do cadastro.
+- **A04:** a troca é recusada com batalha em andamento ou salva (elas guardam o nome antigo).
+- **A09 e LGPD:** a troca entra na trilha de segurança (com o admin e o nome anterior) e no modlog (`ACCOUNTRENAME`, sem nomes). O modlog e a trilha antigos ficam com o identificador anterior (histórico). Nenhum dado novo é guardado.
+
 ### Trilha de segurança do login (2026-10-19)
 
 Antes, o login não registrava nenhum evento de segurança, por minimização. Decisões do usuário:

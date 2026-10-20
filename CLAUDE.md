@@ -55,7 +55,8 @@ Regras definidas pelo usuário em 2026-10-17:
 - **Sessão:** **30 dias**, renovada a cada uso, com cookie `ps_session` HttpOnly, Secure e SameSite=Lax.
 - **Esqueci a senha:** o admin gera um código de redefinição (`/redefinirsenha`, válido por 24h), e o jogador usa em `/redefinir`.
 - **Quem não tem conta é bloqueado:** o `getassertion` de um nome sem conta devolve erro com o link de cadastro.
-- **Troca de nome:** permitida, mas fica para depois.
+- **Troca de nome:** permitida. Pelo admin, feita em 2026-10-19: `/renomearconta nome atual, nome novo` (senha mantida, sessões encerradas; jornadas, conquistas, ladder e cargos passam para o nome novo; recusa se houver batalha em andamento ou salva). A troca pelo próprio jogador fica para depois.
+  - **Acentos:** o filtro de nomes do PS recusa letras acentuadas prontas ("é"), e o identificador só tem a-z e 0-9: no PS oficial, "José" vira "Jos" (`jos`). Desde 2026-10-19, o login guarda as letras latinas acentuadas como letra base + acento combinante (NFD, `normalizeUsername` em `login/src/accounts.ts`), que o PS aceita: "ZéPe" fica "ZéPe" no jogo, com identificador `zepe`. Em alguns nomes o filtro do PS ainda tira o acento ("João" vira "Joao"), mas a letra fica. Nomes que passariam de 18 caracteres com os acentos separados perdem só os acentos. Contas antigas não mudam: use `/renomearconta`.
 - **Exclusão de conta pelo jogador** em `/conta`, com aviso de que tudo é apagado (times, conquistas e insígnias).
 - **Admin:** a conta é Rafaciba. `PS_ADMINS` no `.env` garante o rank `~` no `usergroups.csv`. A conta é criada com `cli.ts convite --nome Rafaciba`, e a senha é escolhida na página, nunca no terminal.
 

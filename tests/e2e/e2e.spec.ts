@@ -159,6 +159,48 @@ test('segurança: a trilha mostra os eventos do login, com filtro por conta', as
 	expect(new Set(accounts)).toEqual(new Set(['e2eadmin']));
 });
 
+test('contas: o admin troca o nome de uma conta, e a senha continua valendo', async ({ browser, request }) => {
+	// Conta nova com um convite gerado pelo painel
+	const id = 'view-ginasiosadmin-convites';
+	await openPsPage(admin, id, /Pending invites|Convites pendentes/);
+	await submitPsForm(admin, id, 'form[data-submitsend^="/ginasioadmin gerarconvite"]', { username: '' });
+	await expectRoomText(admin, id, /Invite code|Código de convite/);
+	const invite = await admin.evaluate(rid => (window as any).app.rooms[rid].$el.find('.infobox code').text(), id);
+	const [context, page] = await newPage(browser);
+	expect(await register(page, invite, 'E2E Jos', PASSWORD)).toMatch(/Account created|Conta criada/);
+
+	await admin.evaluate(() => (window as any).app.send('/renomearconta E2E Jos, E2E Jose', 'lobby'));
+	await expectRoomText(admin, 'lobby', /e2ejos renamed to E2E Jose|e2ejos renomeada para E2E Jose/);
+	// A sessão do nome antigo acabou; o nome novo entra com a mesma senha
+	await page.goto('/conta');
+	await expect(page.locator('body')).toContainText(/not logged in|não está logado/);
+	const login = await request.post('/~~custom/action.php', {
+		form: { act: 'login', name: 'E2E Jose', pass: PASSWORD, challstr: '1|abc' },
+	});
+	expect(JSON.parse((await login.text()).slice(1)).actionsuccess).toBe(true);
+	const old = await request.post('/~~custom/action.php', { form: { act: 'getassertion', userid: 'e2ejos', challstr: '1|abc' } });
+	expect(await old.text()).toMatch(/^;;/);
+	await context.close();
+});
+
+test('contas: nome com acento mantém a letra no jogo', async ({ browser }) => {
+	const id = 'view-ginasiosadmin-convites';
+	await openPsPage(admin, id, /Pending invites|Convites pendentes/);
+	await submitPsForm(admin, id, 'form[data-submitsend^="/ginasioadmin gerarconvite"]', { username: '' });
+	await expectRoomText(admin, id, /Invite code|Código de convite/);
+	const invite = await admin.evaluate(rid => (window as any).app.rooms[rid].$el.find('.infobox code').text(), id);
+	const [context, page] = await newPage(browser);
+	expect(await register(page, invite, 'E2E ZéPe', PASSWORD)).toMatch(/Account created|Conta criada/);
+	await openClient(page);
+	const [name, userid] = await page.evaluate(() => {
+		const user = (window as any).app.user;
+		return [user.get('name'), user.get('userid')];
+	});
+	expect(name.normalize('NFC')).toBe('E2E ZéPe');
+	expect(userid).toBe('e2ezepe');
+	await context.close();
+});
+
 test('desafio: o admin cria treinadores e um desafio e o abre', async () => {
 	const trainerIds: number[] = [];
 	for (const [name, type] of [['E2E Lider', 'Water'], ['E2E Campeao', '']]) {

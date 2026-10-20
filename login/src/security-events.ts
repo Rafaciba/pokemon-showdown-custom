@@ -21,6 +21,7 @@ export const SECURITY_EVENT_TYPES = [
 	'resetissued', // código de redefinição gerado pelo admin
 	'resetused', // senha redefinida com o código
 	'accountdeleted',
+	'accountrenamed', // nome trocado pelo admin (detalhe: identificador anterior)
 	'inviteissued',
 	'inviterevoked',
 	'csrfrejected', // formulário vindo de outro site

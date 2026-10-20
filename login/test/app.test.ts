@@ -11,6 +11,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createApp } from '../src/app.ts';
 import { openDatabase, type Database } from '../src/db.ts';
+import { getUser } from '../src/accounts.ts';
 import { ensureKeyPair } from '../src/keys.ts';
 import type { LoginConfig } from '../src/config.ts';
 import {
@@ -475,4 +476,55 @@ test('trilha de segurança: eventos com mais de 30 dias são apagados', () => {
 	purgeSecurityEvents(db, now);
 	assert.equal(listSecurityEvents(db, { userid: 'antigo' }).length, 0);
 	assert.equal(listSecurityEvents(db, { userid: 'recente' }).length, 1);
+});
+
+test('troca de nome pelo admin: senha mantida, sessões encerradas e trilha', async () => {
+	const session = await registerUser('Jos', 'cinder-123');
+	const reset = await internal('/internal/reset', { username: 'Jos' });
+	assert.equal(reset.status, 200);
+
+	const renamed = await internal('/internal/rename', { userid: 'jos', username: 'Jose', actor: 'Admin Test' });
+	assert.equal(renamed.status, 200);
+	assert.deepEqual([renamed.json.userid, renamed.json.username, renamed.json.previous], ['jose', 'Jose', 'jos']);
+	assert.equal(getUser(db, 'jos'), null);
+	// A sessão antiga não vale mais; a senha é a mesma
+	assert.equal((await action('upkeep', { challstr: CHALLSTR }, session)).json.loggedin, false);
+	const login = await action('login', { name: 'Jose', pass: 'cinder-123', challstr: CHALLSTR });
+	assert.equal(login.json.actionsuccess, true);
+	// O código de redefinição acompanha a conta
+	const used = await post('/redefinir', { code: reset.json.code, username: 'Jose', password: 'cinder-456', confirm: 'cinder-456' });
+	assert.match(used.text, /Senha redefinida/);
+	const event = listSecurityEvents(db, { type: 'accountrenamed', userid: 'jose' })[0];
+	assert.deepEqual([event.actor, event.detail], ['admintest', 'jos']);
+
+	// Só o nome exibido (mesmo identificador): sessões continuam
+	const display = await internal('/internal/rename', { userid: 'jose', username: 'JOSE' });
+	assert.equal(display.json.username, 'JOSE');
+	assert.equal(getUser(db, 'jose')?.username, 'JOSE');
+
+	// Recusas
+	await registerUser('Gardenia2', 'turtwig-12');
+	assert.equal((await internal('/internal/rename', { userid: 'jose', username: 'Gardenia2' })).status, 400);
+	assert.equal((await internal('/internal/rename', { userid: 'naoexiste', username: 'Outro', lang: 'en' })).json.error, 'User not found.');
+	assert.equal((await internal('/internal/rename', { userid: 'jose', username: 'admintest' })).status, 400);
+	assert.equal((await internal('/internal/rename', { userid: 'jose', username: 'a|b' })).status, 400);
+});
+
+test('nomes com acento: a letra base fica no identificador', async () => {
+	const zepe = await internal('/internal/invite', {});
+	const res = await post('/cadastro', { invite: zepe.json.code, username: 'ZéPe', password: 'senha-forte-1', confirm: 'senha-forte-1' });
+	assert.match(res.text, /Conta criada/);
+	const user = getUser(db, 'zepe');
+	assert.ok(user, 'identificador com a letra base');
+	assert.equal(user.username, 'ZéPe', 'acento combinante (o PS aceita)');
+	assert.equal(user.username.normalize('NFC'), 'ZéPe');
+	// Mesmo identificador: o nome sem acento já está em uso
+	const again = await post('/cadastro', {
+		invite: (await internal('/internal/invite', {})).json.code, username: 'ZePe', password: 'senha-forte-1', confirm: 'senha-forte-1',
+	});
+	assert.match(again.text, /já está em uso/);
+	// Longo demais com os acentos separados: saem só os acentos
+	const long = await internal('/internal/rename', { userid: 'zepe', username: 'Árvore Grande Bela' });
+	assert.equal(long.json.username, 'Arvore Grande Bela');
+	assert.equal(long.json.userid, 'arvoregrandebela');
 });

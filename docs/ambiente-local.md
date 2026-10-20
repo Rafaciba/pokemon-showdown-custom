@@ -73,6 +73,7 @@ O servidor **exige conta**, e o cadastro só acontece com um convite de uso úni
 | Convite só para um nome | `/convite Nome` | `... convite --nome Nome` |
 | Código para redefinir senha (24h) | `/redefinirsenha Nome` | `... redefinir Nome` |
 | Contar contas e convites | — | `... usuarios` |
+| Trocar o nome de uma conta (senha mantida) | `/renomearconta Nome Atual, Nome Novo` | — |
 
 O código aparece só para quem gerou. Envie-o em particular.
 

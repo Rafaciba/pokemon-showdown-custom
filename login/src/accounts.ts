@@ -29,9 +29,24 @@ function hasForbiddenChars(text: string): boolean {
 	return false;
 }
 
+const COMBINING_MARKS = /[̀-ͯ]/g;
+
+/**
+ * Letras latinas acentuadas viram letra base + acento combinante (NFD). O filtro de
+ * nomes do PS recusa letras acentuadas prontas ("é"), mas aceita acentos combinantes,
+ * e o identificador só tem a-z e 0-9: assim "ZéPe" fica "ZéPe" no jogo, com
+ * identificador "zepe", em vez de "ZPe" e "zpe". Outros alfabetos ficam como estão.
+ */
+function decomposeLatin(text: string) {
+	return text.replace(/[À-ɏḀ-ỿ]/g, char => char.normalize('NFD'));
+}
+
 /** Normaliza o nome exibido (mesmas restrições de caracteres do PS). */
 export function normalizeUsername(raw: string): Result<User> {
-	const username = raw.normalize('NFKC').replace(/\s+/g, ' ').trim();
+	let username = decomposeLatin(raw.normalize('NFKC').replace(/\s+/g, ' ').trim());
+	// Cada acento separado conta como caractere, e o PS tira todos os símbolos (até os
+	// espaços) de nomes com mais de 18: nesse caso, saem só os acentos
+	if (username.length > 18) username = username.replace(COMBINING_MARKS, '');
 	if (hasForbiddenChars(username)) return fail('nameInvalidChars');
 	if (username.length > 18) return fail('nameTooLong');
 	const userid = toID(username);
@@ -190,4 +205,45 @@ export async function deleteAccount(db: Database, user: User, password: string):
 	// LGPD: tira do WAL as páginas com os dados apagados
 	db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
 	return ok(undefined);
+}
+
+/**
+ * Troca o nome de uma conta (pedido do admin; o jogador não troca sozinho por enquanto).
+ * A senha continua a mesma. Com identificador novo, as sessões são encerradas (o
+ * jogador entra de novo com o nome novo) e os códigos de redefinição passam para o
+ * identificador novo. Contas reservadas (PS_ADMINS) não trocam de nome nem recebem um
+ * nome reservado.
+ */
+export function renameAccount(
+	db: Database, userid: string, newName: string, reservedNames: ReadonlySet<string> = new Set()
+): Result<User & { previous: string }> {
+	const user = getUser(db, userid);
+	if (!user) return fail('userNotFound');
+	const name = normalizeUsername(newName);
+	if (!name.ok) return name;
+	const { userid: newid, username } = name.value;
+	if (reservedNames.has(userid) || (newid !== userid && reservedNames.has(newid))) return fail('nameReserved');
+	if (newid !== userid) {
+		if (getUser(db, newid)) return fail('nameTaken');
+		if (isPendingPurge(db, newid)) return fail('nameReleasing');
+	}
+	db.exec('BEGIN IMMEDIATE');
+	try {
+		if (newid === userid) {
+			db.prepare('UPDATE users SET username = ? WHERE userid = ?').run(username, userid);
+		} else {
+			db.prepare(`
+				INSERT INTO users (userid, username, password_hash, created_at, password_changed_at)
+				SELECT ?, ?, password_hash, created_at, password_changed_at FROM users WHERE userid = ?
+			`).run(newid, username, userid);
+			db.prepare('UPDATE codes SET userid = ? WHERE userid = ?').run(newid, userid);
+			db.prepare('DELETE FROM sessions WHERE userid = ?').run(userid);
+			db.prepare('DELETE FROM users WHERE userid = ?').run(userid);
+		}
+		db.exec('COMMIT');
+	} catch (err) {
+		db.exec('ROLLBACK');
+		throw err;
+	}
+	return ok({ userid: newid, username, previous: userid });
 }

@@ -25,6 +25,8 @@ Para rodar só uma parte, passe os argumentos do Playwright, por exemplo `sh scr
 | Assertion forjada | o servidor de jogo recusa um login com assinatura falsa |
 | Convites | gerar um convite pela página do painel; o código aparece uma vez só; convite reservado listado e revogado; nome em uso recusado; redefinição de senha para jogador inexistente e para o admin |
 | Segurança | uma senha errada para o admin aparece na página Segurança, no filtro por conta |
+| Troca de nome | conta nova pelo convite do painel, `/renomearconta`, sessão antiga encerrada, nome novo entra com a mesma senha e o antigo deixa de existir |
+| Nome com acento | cadastro de "E2E ZéPe": no cliente, o nome aparece com o acento e o identificador é `e2ezepe` |
 | Desafio (admin) | criar dois treinadores e um desafio pelos formulários do painel, atribuir o líder e o Campeão e abrir o desafio |
 | Desafio (jogador) | o jogador se cadastra com o convite gerado pelo admin, começa a jornada, vence o ginásio e o Campeão e vê os times vencedores no perfil |
 | Exclusão | troca de senha em `/conta`, exclusão da conta e, em até um minuto, as jornadas apagadas pelo servidor de jogo |
