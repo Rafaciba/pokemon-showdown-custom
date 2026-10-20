@@ -593,7 +593,7 @@ Pedido do usuário: gerar treinadores e desafios de um jeito fácil de importar 
 Pedido do usuário: um nível acima do Difícil que começa com a inteligência dele, treina em batalhas simuladas contra Médio e Difícil e depois aprende com as batalhas reais do servidor. O trabalho foi dividido em etapas, feitas uma por vez:
 
 1. **Nível Mestre no sistema**, com os pesos da Difícil extraídos. Feita.
-2. **Treino dos pesos por simulação:** um otimizador joga contra Médio e Difícil, em individual e em dupla, com times aleatórios e com os times dos pacotes.
+2. **Treino dos pesos por simulação** (feita): um otimizador joga contra Médio e Difícil, em individual e em dupla, com times aleatórios e com os times dos pacotes.
 3. **Avaliação de posição aprendida:** um modelo pequeno em TypeScript, sem dependências. A Mestre passa a olhar à frente, com até 1 segundo por jogada.
 4. **Aprendizado no servidor**, com uma página no painel: versão do modelo, batalhas usadas, taxa de vitória, retreinar e reverter.
 5. **Dupla, calibração e documentação final.**
@@ -615,3 +615,35 @@ Decisões do usuário:
   - banco de testes, 1000 batalhas em individual: a Difícil fez 57,7% contra a Médio (antes da refatoração, 55,6% em 2000 batalhas, dentro da margem), e a Mestre fez 49,8% contra a Difícil;
   - banco de testes, 500 batalhas em dupla: Mestre 49,6% contra a Difícil;
   - o desafio do teste de ponta a ponta passou a usar a Mestre.
+
+**Etapa 2 (feita):**
+
+- **Ferramentas** (em `server/tools/gym-challenge/`):
+  - `battle-runner.js` joga uma batalha IA contra IA, com semente e times fixos e pesos próprios. O banco de testes (`ai-benchmark.js`) passou a usá-lo.
+  - `train-master.js` (com `train-master-worker.js`) treina os pesos com uma estratégia evolutiva: variações espelhadas em escala logarítmica em torno dos pesos padrão. Todos os candidatos de uma geração jogam as mesmas batalhas, com as mesmas sementes e times e cada semente dos dois lados. A nova média vem das melhores variações.
+  - **Mistura de batalhas:** Random Battle 40%, Random Doubles 20% e confrontos entre os times dos pacotes 40% (formato padrão dos desafios). Um terço das batalhas é contra a Médio e o resto contra a Difícil. O trabalho é dividido entre processos paralelos.
+  - **Fora do servidor:** `GYM_CHALLENGE_FORMATS=off` desliga a geração dos formatos de desafio (`config/custom-formats.ts`). As simulações não precisam do banco do plugin.
+- **Treino de 2026-10-20:**
+  - **Tamanho:** 50 gerações, com 12 variações e 480 batalhas por candidato em cada uma (cerca de 40 minutos com 10 processos).
+  - **Resultado:** os pesos ficaram em `master-weights.ts` (`TRAINED_WEIGHTS`), e o histórico e a validação em `tools/gym-challenge/master-training.json`.
+  - **O que mais mudou:**
+    - a Mestre troca menos: a margem para trocar subiu de 15 para 41, e a penalidade por entrar para ser nocauteado de 100 para 188;
+    - valoriza menos os hazards: Stealth Rock caiu de 70 para 29, e Spikes de 55 para 23;
+    - valoriza mais o sono e as telas: sono de 65 para 141, telas de 40 para 79;
+    - dá menos peso ao bônus por nocautear: caiu de 25 para 10.
+
+    Contra outra IA, que quase não troca, hazards rendem pouco (como já se viu na fase 5). Contra pessoas, devem render mais: é o que o aprendizado com as batalhas do servidor (etapa 4) vai corrigir.
+- **Resultados:**
+
+  | Validação | Batalhas | Pesos treinados | Pesos padrão |
+  |---|---|---|---|
+  | Do treino, batalhas novas, mesmas batalhas para os dois conjuntos de pesos | 4000 | 53,8% | 50,8% |
+  | Mestre x Difícil, individual (banco de testes, sementes aleatórias) | 2000 | 53,9% | 49,8% |
+  | Mestre x Médio, individual | 2000 | 62,5% | 57,7% (Difícil x Médio) |
+  | Mestre x Difícil, em dupla | 1000 | 49,8% | 49,6% |
+
+  - **Em dupla não houve ganho**, porque só 20% das batalhas do treino eram em dupla. Pesos próprios para dupla ficam para a etapa 5.
+  - **Times dos pacotes:** nos confrontos com eles, os pesos padrão dão exatamente 50%. O time decide quase sempre, então essas batalhas trazem pouco sinal ao treino.
+  - **Limite:** a melhora é modesta porque a Mestre continua decidindo uma jogada de cada vez, com as mesmas regras. O ganho maior deve vir da etapa 3 (avaliação de posição e olhar à frente).
+- **Validado:** um teste confere que os pesos treinados estão completos e dentro dos limites do treino. O teste da etapa 1 passou a comparar a Mestre com os pesos padrão e a Difícil. O servidor tem 2590 testes passando.
+
