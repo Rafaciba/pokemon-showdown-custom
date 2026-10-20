@@ -6,6 +6,7 @@ import { createServer } from 'node:http';
 import { loadConfig } from './config.ts';
 import { ensureKeyPair, ensureInternalToken } from './keys.ts';
 import { openDatabase, purgeExpired } from './db.ts';
+import { purgeSecurityEvents } from './security-events.ts';
 import { createApp } from './app.ts';
 
 const config = loadConfig();
@@ -21,9 +22,14 @@ const handle = createApp({
 	internalToken: ensureInternalToken(config.sharedDir),
 });
 
-// Retenção mínima: sessões e códigos vencidos são apagados a cada hora
-purgeExpired(db);
-setInterval(() => purgeExpired(db), 60 * 60 * 1000).unref();
+// Retenção mínima: sessões e códigos vencidos e eventos de segurança com mais de
+// 30 dias são apagados a cada hora
+const purge = () => {
+	purgeExpired(db);
+	purgeSecurityEvents(db);
+};
+purge();
+setInterval(purge, 60 * 60 * 1000).unref();
 
 const server = createServer((req, res) => {
 	handle(req, res).catch(err => {

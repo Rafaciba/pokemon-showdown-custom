@@ -7,7 +7,9 @@
  *   codes     hash de códigos de convite/redefinição + validade
  *   pending_purges  só o userid de contas excluídas, até o servidor de jogo
  *             apagar os dados de jogo delas e confirmar (aí a linha some)
- * Registros expirados são apagados periodicamente (purgeExpired).
+ *   security_events  trilha de eventos de segurança (data, tipo, conta, IP), 30 dias
+ *             (security-events.ts)
+ * Registros expirados são apagados periodicamente (purgeExpired e purgeSecurityEvents).
  */
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
@@ -48,6 +50,21 @@ const MIGRATIONS: string[] = [
 		userid      TEXT PRIMARY KEY,
 		deleted_at  INTEGER NOT NULL
 	) STRICT;
+	`,
+	// 3: trilha de eventos de segurança (30 dias; fica depois da exclusão da conta)
+	`
+	CREATE TABLE security_events (
+		id      INTEGER PRIMARY KEY,
+		at      INTEGER NOT NULL,
+		type    TEXT NOT NULL,
+		userid  TEXT,
+		ip      TEXT,
+		actor   TEXT,
+		detail  TEXT
+	) STRICT;
+	CREATE INDEX security_events_at ON security_events(at);
+	CREATE INDEX security_events_userid ON security_events(userid);
+	CREATE INDEX security_events_type ON security_events(type);
 	`,
 ];
 

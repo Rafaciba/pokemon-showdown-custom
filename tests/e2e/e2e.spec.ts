@@ -137,6 +137,28 @@ test('convites: gerar, código só uma vez, revogar e redefinir senha', async ()
 	await expectRoomText(admin, id, /Password reset code for|Código de redefinição/);
 });
 
+test('segurança: a trilha mostra os eventos do login, com filtro por conta', async ({ request }) => {
+	// Uma senha errada para a conta do admin entra na trilha
+	await request.post('/~~custom/action.php', { form: { act: 'login', name: ADMIN, pass: 'senha-errada', challstr: '1|abc' } });
+	const id = 'view-ginasiosadmin-seguranca';
+	await openPsPage(admin, 'view-ginasiosadmin', /Security|Segurança/);
+	await clickPsButton(admin, 'view-ginasiosadmin', `button[value="${id}"]`);
+	await expectRoomText(admin, id, /Last 24 hours|Últimas 24 horas/);
+	await expectRoomText(admin, id, /Invite issued|Convite gerado/);
+
+	await submitPsForm(admin, id, 'form[data-submitsend^="/ginasioadmin filtrarseguranca"]', { tipo: '', conta: ADMIN });
+	const filtered = 'view-ginasiosadmin-seguranca-todos-e2eadmin-0';
+	await expectRoomText(admin, filtered, /Wrong password|Senha errada/);
+	await expectRoomText(admin, filtered, /Account created|Conta criada/);
+	const accounts = await admin.evaluate(rid => {
+		const $ = (window as any).$;
+		return (window as any).app.rooms[rid].$el.find('table').last().find('tr td:nth-child(3)')
+			.map((i: number, td: Element) => $(td).text().trim()).get();
+	}, filtered);
+	expect(accounts.length).toBeGreaterThan(0);
+	expect(new Set(accounts)).toEqual(new Set(['e2eadmin']));
+});
+
 test('desafio: o admin cria treinadores e um desafio e o abre', async () => {
 	const trainerIds: number[] = [];
 	for (const [name, type] of [['E2E Lider', 'Water'], ['E2E Campeao', '']]) {

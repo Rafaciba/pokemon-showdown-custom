@@ -24,6 +24,7 @@ Para rodar só uma parte, passe os argumentos do Playwright, por exemplo `sh scr
 | Contas | cadastro do admin pelo convite; o mesmo convite recusado na segunda vez; nome sem conta não recebe assertion; o admin entra no jogo e abre o painel |
 | Assertion forjada | o servidor de jogo recusa um login com assinatura falsa |
 | Convites | gerar um convite pela página do painel; o código aparece uma vez só; convite reservado listado e revogado; nome em uso recusado; redefinição de senha para jogador inexistente e para o admin |
+| Segurança | uma senha errada para o admin aparece na página Segurança, no filtro por conta |
 | Desafio (admin) | criar dois treinadores e um desafio pelos formulários do painel, atribuir o líder e o Campeão e abrir o desafio |
 | Desafio (jogador) | o jogador se cadastra com o convite gerado pelo admin, começa a jornada, vence o ginásio e o Campeão e vê os times vencedores no perfil |
 | Exclusão | troca de senha em `/conta`, exclusão da conta e, em até um minuto, as jornadas apagadas pelo servidor de jogo |
@@ -38,7 +39,7 @@ O treinador de teste tem só um Magikarp com Splash, e o jogador usa um Pikachu 
 2. Prepara o admin temporário: acrescenta `E2E Admin,~,` ao `usergroups.csv`, reinicia o servidor e gera um convite reservado para esse nome pelo CLI do login. A senha das contas de teste é sorteada a cada rodada.
 3. Roda `tests/e2e` no container do Playwright (`mcr.microsoft.com/playwright`, versão e digest fixos), na rede do Docker do projeto. O domínio do site aponta para o serviço `web`, e o teste da assertion forjada fala direto com o servidor de jogo.
 4. Limpa tudo, passe ou falhe (também com Ctrl+C):
-   - no login (`tests/e2e/cleanup/login.mjs`): exclui as contas `e2e*` pela mesma rotina da exclusão pelo jogador, inclusive a fila que apaga os dados de jogo, e os códigos criados durante o teste;
+   - no login (`tests/e2e/cleanup/login.mjs`): exclui as contas `e2e*` pela mesma rotina da exclusão pelo jogador, inclusive a fila que apaga os dados de jogo, os códigos criados durante o teste e os eventos de segurança das contas `e2e*`;
    - no Desafio de Ginásios (`tests/e2e/cleanup/gym.cjs`): apaga os desafios e treinadores `E2E*` e as jornadas deles;
    - tira a linha do admin do `usergroups.csv`, reinicia o servidor e espera a exclusão das contas terminar (o nome só fica livre de novo depois dela).
 

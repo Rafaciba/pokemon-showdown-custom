@@ -17,6 +17,8 @@ for (const { userid } of users) {
 }
 // Convites reservados para nomes E2E e os gerados durante o teste
 const codes = db.prepare("DELETE FROM codes WHERE userid LIKE 'e2e%' OR (? > 0 AND created_at >= ?)").run(start, start);
+// Eventos de segurança das contas E2E (os eventos sem conta seguem o prazo normal de 30 dias)
+const events = db.prepare("DELETE FROM security_events WHERE userid LIKE 'e2e%' OR actor LIKE 'e2e%'").run();
 db.exec('COMMIT');
 db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
-console.log(`[e2e] login: ${users.length} conta(s) e ${codes.changes} código(s) removidos`);
+console.log(`[e2e] login: ${users.length} conta(s), ${codes.changes} código(s) e ${events.changes} evento(s) de segurança removidos`);

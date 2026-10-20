@@ -50,10 +50,12 @@ wait_purges() {
 	done
 }
 
-if ! docker compose ps server --format '{{.Status}}' | grep -q '(healthy)'; then
+if [ "$(docker compose ps server --format '{{.State}}')" != "running" ]; then
 	echo "[e2e] suba o ambiente antes (docker compose up -d)."
 	exit 1
 fi
+# Recém-iniciado: espera ficar saudável
+wait_server
 
 start=$(date +%s)
 password=$(od -An -tx1 -N12 /dev/urandom | tr -d ' \n')

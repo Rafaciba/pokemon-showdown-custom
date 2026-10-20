@@ -157,7 +157,8 @@ Dados guardados (LGPD):
 
 - **contas:** nome de usuário e hash scrypt da senha. Sem e-mail e sem IP;
 - **sessões:** hash do token, com validade de 30 dias renovada a cada uso;
-- **códigos de convite e de redefinição:** guardados como hash e apagados ao serem usados ou ao vencerem.
+- **códigos de convite e de redefinição:** guardados como hash e apagados ao serem usados ou ao vencerem;
+- **trilha de segurança:** senhas erradas e bloqueios, códigos inválidos, mudanças nas contas, convites e pedidos recusados, com data, conta e IP, por 30 dias (também depois da exclusão da conta). O admin consulta pelo botão **Segurança** do painel.
 
 Os registros vencidos são apagados a cada hora.
 

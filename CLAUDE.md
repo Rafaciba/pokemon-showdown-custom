@@ -41,7 +41,8 @@ O PS original tem três partes. Usamos duas e substituímos a terceira:
 O oficial foi feito para a escala da Smogon. Ele exige MySQL e Postgres, depende do PHP CLI e precisa de Node 24+. Também guarda e-mail e vários registros de IP. Nosso login server é mínimo:
 
 - **SQLite** via `node:sqlite`. O serviço não tem nenhuma dependência de runtime.
-- Guarda **apenas o nome de usuário e o hash da senha** (scrypt). Sem e-mail e sem IP persistido; o rate limit fica só em memória.
+- Guarda **apenas o nome de usuário e o hash da senha** (scrypt). Sem e-mail; o rate limit fica só em memória.
+- **Trilha de segurança (2026-10-19):** eventos de senha, conta, convites e pedidos recusados, com conta e IP, por 30 dias, mantidos depois da exclusão da conta (`login/src/security-events.ts`). O admin consulta pela página **Segurança** do painel (`view-ginasiosadmin-seguranca`). Ver a seção "Trilha de segurança do login" de `docs/revisao-seguranca-lgpd.md`.
 - Os arquivos estáticos do cliente são servidos pelo Caddy, não pelo login.
 
 Regras definidas pelo usuário em 2026-10-17:

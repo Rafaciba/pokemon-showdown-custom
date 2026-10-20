@@ -13,6 +13,9 @@ import { createApp } from '../src/app.ts';
 import { openDatabase, type Database } from '../src/db.ts';
 import { ensureKeyPair } from '../src/keys.ts';
 import type { LoginConfig } from '../src/config.ts';
+import {
+	listSecurityEvents, purgeSecurityEvents, recordSecurityEvent, SECURITY_RETENTION_SECONDS,
+} from '../src/security-events.ts';
 
 const HOST = 'ps.test';
 const ORIGIN = `https://${HOST}`;
@@ -407,4 +410,69 @@ test('erros da API interna no idioma de quem pediu', async () => {
 	assert.equal((await internal('/internal/invite', { username: 'Wallace' })).json.error, 'Esse nome já está em uso.');
 	assert.equal((await internal('/internal/reset', { username: 'ninguem', lang: 'en' })).json.error, 'User not found.');
 	assert.equal((await internal('/internal/reset', { username: 'ninguem', lang: 'pt' })).json.error, 'Usuário não encontrado.');
+});
+
+test('trilha de segurança: falhas, bloqueio, mudanças na conta e pedidos recusados', async () => {
+	const events = (filter: { type?: string, userid?: string } = {}) =>
+		listSecurityEvents(db, filter as Parameters<typeof listSecurityEvents>[1]);
+
+	// Cadastro, código inválido e troca de senha
+	const session = await registerUser('Volkner', 'luxray-123');
+	assert.equal(events({ type: 'accountcreated', userid: 'volkner' }).length, 1);
+	assert.ok(events({ type: 'accountcreated', userid: 'volkner' })[0].ip, 'guarda o IP');
+	await post('/cadastro', { invite: 'AAAA-BBBB-CCCC-DDDD', username: 'Flint', password: 'x', confirm: 'x' });
+	assert.equal(events({ type: 'codefailed', userid: 'flint' })[0].detail, 'convite');
+	await post('/conta/senha', { current: 'luxray-123', password: 'luxray-456', confirm: 'luxray-456' }, { cookie: session });
+	assert.equal(events({ type: 'passwordchanged', userid: 'volkner' }).length, 1);
+
+	// Senha errada e bloqueio: o bloqueio entra uma vez por minuto, mesmo com várias tentativas
+	for (let i = 0; i < 10; i++) await action('login', { name: 'Volkner', pass: `errada-${i}`, challstr: CHALLSTR });
+	assert.equal(events({ type: 'loginfailed', userid: 'volkner' }).length, 10);
+	for (let i = 0; i < 3; i++) await action('login', { name: 'Volkner', pass: 'luxray-456', challstr: CHALLSTR });
+	const blocked = events({ type: 'loginblocked', userid: 'volkner' });
+	assert.equal(blocked.length, 1);
+	assert.equal(blocked[0].detail, 'login');
+
+	// Exclusão: os eventos da conta ficam até o prazo
+	const other = await registerUser('Cynthia', 'garchomp-1');
+	await post('/conta/excluir', { password: 'garchomp-1', confirm: 'yes' }, { cookie: other });
+	assert.equal(events({ type: 'accountdeleted', userid: 'cynthia' }).length, 1);
+	assert.equal(events({ type: 'accountcreated', userid: 'cynthia' }).length, 1, 'eventos ficam depois da exclusão');
+
+	// Pedidos recusados (os testes anteriores, do mesmo IP, já podem ter gravado o do minuto)
+	await post('/conta/senha', { current: 'x', password: 'y', confirm: 'y' }, { origin: 'https://evil.example' });
+	assert.ok(events({ type: 'csrfrejected' }).length >= 1);
+	await internal('/internal/purges', {}, 'token-errado');
+	assert.ok(events({ type: 'internalunauthorized' }).length >= 1);
+	assert.ok(events({ type: 'internalunauthorized' }).length <= 1, 'no máximo um por minuto para o mesmo IP');
+
+	// Convites e redefinição pelo admin, com o autor
+	const invite = await internal('/internal/invite', { username: 'Byron', actor: 'Admin Test' });
+	assert.equal(invite.status, 200);
+	assert.equal(events({ type: 'inviteissued', userid: 'byron' })[0].actor, 'admintest');
+	const pending = (await internal('/internal/invites', {})).json.invites as { id: number, userid: string }[];
+	const byron = pending.find(item => item.userid === 'byron')!;
+	await internal('/internal/invites/revoke', { id: String(byron.id), actor: 'Admin Test' });
+	assert.equal(events({ type: 'inviterevoked' })[0].detail, `#${byron.id}`);
+	await internal('/internal/reset', { username: 'Volkner', actor: 'Admin Test' });
+	assert.equal(events({ type: 'resetissued', userid: 'volkner' })[0].actor, 'admintest');
+
+	// Consulta pela API interna, com filtro e resumo das últimas 24 horas
+	const list = await internal('/internal/security-events', { type: 'loginfailed', userid: 'Volkner' });
+	assert.equal(list.status, 200);
+	assert.equal(list.json.events.length, 10);
+	assert.ok(list.json.events.every((event: { type: string }) => event.type === 'loginfailed'));
+	assert.ok(list.json.summary.some((row: { type: string, count: number }) => row.type === 'loginfailed' && row.count >= 10));
+	const page2 = await internal('/internal/security-events', { userid: 'volkner', before: String(list.json.events[4].id) });
+	assert.ok(page2.json.events.every((event: { id: number }) => event.id < list.json.events[4].id));
+	assert.equal((await internal('/internal/security-events', {}, 'token-errado')).status, 401);
+});
+
+test('trilha de segurança: eventos com mais de 30 dias são apagados', () => {
+	const now = Math.floor(Date.now() / 1000);
+	recordSecurityEvent(db, 'loginfailed', { userid: 'antigo' }, now - SECURITY_RETENTION_SECONDS - 60);
+	recordSecurityEvent(db, 'loginfailed', { userid: 'recente' }, now - 60);
+	purgeSecurityEvents(db, now);
+	assert.equal(listSecurityEvents(db, { userid: 'antigo' }).length, 0);
+	assert.equal(listSecurityEvents(db, { userid: 'recente' }).length, 1);
 });

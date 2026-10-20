@@ -1,8 +1,8 @@
 /**
  * Limitador de requisições em memória (janela fixa).
  *
- * LGPD: o IP é usado só como chave temporária em memória e descartado ao fim
- * da janela. Nada é persistido em disco ou log.
+ * LGPD: aqui o IP é só uma chave temporária em memória, descartada ao fim da
+ * janela. Os bloqueios entram na trilha de segurança (security-events.ts, 30 dias).
  */
 export class RateLimiter {
 	private hits = new Map<string, { count: number, resetAt: number }>();

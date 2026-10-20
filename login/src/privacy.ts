@@ -41,6 +41,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 					'Batalhas do Desafio de Ginásios em andamento: o estado da batalha (nomes, times e jogadas, sem as mensagens de chat), para que ela continue se for interrompida. Ele é apagado quando a batalha termina.',
 					'Registros de batalhas da ladder: nomes dos jogadores e times usados, guardados por 30 dias. As batalhas são públicas enquanto acontecem.',
 					'Registro de acesso ao site: o IP, a data e a hora, o endereço pedido (sem códigos de convite ou de redefinição), o resultado e o navegador (user agent) de cada acesso, guardados por 14 dias e apagados automaticamente. Ele serve só para a segurança do servidor (identificar ataques e abusos), não fica ligado à sua conta e só o administrador tem acesso.',
+					'Registro de segurança do login: senhas erradas e bloqueios por excesso de tentativas, códigos de convite ou de redefinição inválidos, criação, troca de senha, redefinição e exclusão de conta, convites gerados e revogados e pedidos recusados (vindos de outro site ou em excesso), com a data, a conta envolvida e o IP. Ele fica 30 dias, inclusive depois da exclusão da conta, serve só para a segurança do servidor (detectar e investigar ataques a contas) e só o administrador tem acesso.',
 					'Registros de moderação (modlog): as ações da equipe de moderação, como avisos e punições, com o nome de quem foi alvo, as contas ligadas a ele conhecidas na hora e o IP. Cada registro fica 6 meses, e o IP é apagado dele depois de 30 dias. As punições em vigor (por exemplo, um bloqueio) ficam até vencerem ou serem retiradas.',
 					'Cópias de segurança: os dados acima (exceto o registro de acesso e os registros de batalhas) entram numa cópia de segurança diária criptografada, guardada por 14 dias e apagada automaticamente.',
 					'Os times montados e as preferências ficam só no seu navegador; o servidor recebe o time só para a batalha, e o que fica guardado dele está descrito acima. O idioma escolhido também fica num cookie (ps_lang), só para as páginas de conta abrirem no mesmo idioma do jogo, e é informado ao servidor de jogo enquanto você está conectado.',
@@ -49,13 +50,13 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 			{
 				title: 'O que não guardamos',
 				paragraphs: [
-					'Não guardamos o seu IP junto da sua conta. Fora do registro de acesso (14 dias) e de um eventual registro de moderação (30 dias), ele é usado apenas em memória, para manter a conexão e limitar tentativas de senha (por até 15 minutos). As conversas no chat não são registradas, e não guardamos as trocas de nome entre contas.',
+					'Fora do registro de acesso (14 dias), do registro de segurança do login (30 dias) e de um eventual registro de moderação (30 dias), o seu IP é usado apenas em memória, para manter a conexão e limitar tentativas de senha (por até 15 minutos). As conversas no chat não são registradas, e não guardamos as trocas de nome entre contas.',
 				],
 			},
 			{
 				title: 'Para que usamos',
 				paragraphs: [
-					'Para oferecer o serviço que você pediu ao criar a conta: entrar no jogo, jogar, participar do ranking e dos desafios (LGPD, art. 7º, V). E para proteger o servidor e os jogadores: registro de acesso, limite de tentativas de senha e moderação (legítimo interesse, art. 7º, IX).',
+					'Para oferecer o serviço que você pediu ao criar a conta: entrar no jogo, jogar, participar do ranking e dos desafios (LGPD, art. 7º, V). E para proteger o servidor e os jogadores: registro de acesso, registro de segurança do login, limite de tentativas de senha e moderação (legítimo interesse, art. 7º, IX).',
 				],
 			},
 			{
@@ -67,8 +68,8 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 			{
 				title: 'Por quanto tempo',
 				paragraphs: [
-					'Os dados da conta e do jogo ficam até você excluir a conta. Os registros de batalhas da ladder são apagados depois de 30 dias; o registro de acesso, depois de 14 dias; os registros de moderação, depois de 6 meses (o IP deles, depois de 30 dias); e as cópias de segurança, depois de 14 dias. Os demais registros técnicos do servidor têm tamanho limitado e não guardam o seu IP.',
-					'Ao excluir a conta em /conta, apagamos em poucos minutos: a conta, as sessões, o ranking, os cargos, as jornadas (com as batalhas salvas), as conquistas e os registros de batalhas em que você jogou. As batalhas em andamento terminam com a sua desistência. O registro de acesso não é ligado à conta e se apaga sozinho em 14 dias. Os registros de moderação sobre você ficam até o fim do prazo deles (6 meses), pela segurança do servidor, e as cópias de segurança são substituídas em até 14 dias.',
+					'Os dados da conta e do jogo ficam até você excluir a conta. Os registros de batalhas da ladder são apagados depois de 30 dias; o registro de acesso, depois de 14 dias; o registro de segurança do login, depois de 30 dias; os registros de moderação, depois de 6 meses (o IP deles, depois de 30 dias); e as cópias de segurança, depois de 14 dias. Os demais registros técnicos do servidor têm tamanho limitado e não guardam o seu IP.',
+					'Ao excluir a conta em /conta, apagamos em poucos minutos: a conta, as sessões, o ranking, os cargos, as jornadas (com as batalhas salvas), as conquistas e os registros de batalhas em que você jogou. As batalhas em andamento terminam com a sua desistência. O registro de acesso não é ligado à conta e se apaga sozinho em 14 dias. Os registros de moderação sobre você (até 6 meses) e o registro de segurança do login (até 30 dias) ficam até o fim do prazo deles, pela segurança do servidor, e as cópias de segurança são substituídas em até 14 dias.',
 				],
 			},
 			{
@@ -98,6 +99,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 					'Gym Challenge battles in progress: the battle state (names, teams and moves, without chat messages), so the battle can continue if it is interrupted. It is deleted when the battle ends.',
 					'Ladder battle logs: player names and the teams used, kept for 30 days. Battles are public while they happen.',
 					'Website access log: the IP address, date and time, requested address (without invite or reset codes), result and browser (user agent) of each access, kept for 14 days and deleted automatically. It is used only for the server\'s security (spotting attacks and abuse), is not linked to your account, and only the administrator can access it.',
+					'Login security log: wrong passwords and blocks after too many attempts, invalid invite or reset codes, account creation, password changes, resets and account deletion, invites issued and revoked, and refused requests (from another site or too many), with the date, the account involved and the IP address. It is kept for 30 days, also after the account is deleted, is used only for the server\'s security (spotting and investigating attacks on accounts), and only the administrator can access it.',
 					'Moderation records (modlog): actions taken by the moderation team, such as warnings and punishments, with the name of the target, the linked accounts known at the time and the IP address. Each record is kept for 6 months, and the IP address is removed from it after 30 days. Active punishments (for example, a lock) are kept until they expire or are lifted.',
 					'Backups: the data above (except the access log and battle logs) goes into a daily encrypted backup, kept for 14 days and deleted automatically.',
 					'The teams you build and your preferences stay in your browser only; the server receives a team only for the battle, and what is kept from it is described above. Your chosen language is also kept in a cookie (ps_lang), only so that the account pages open in the same language as the game, and it is sent to the game server while you are connected.',
@@ -106,13 +108,13 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 			{
 				title: 'What we do not store',
 				paragraphs: [
-					'We do not keep your IP address with your account. Outside the access log (14 days) and any moderation record (30 days), it is only used in memory, to keep your connection and to limit password attempts (for up to 15 minutes). Chat messages are not logged, and we do not keep name changes between accounts.',
+					'Outside the access log (14 days), the login security log (30 days) and any moderation record (30 days), your IP address is only used in memory, to keep your connection and to limit password attempts (for up to 15 minutes). Chat messages are not logged, and we do not keep name changes between accounts.',
 				],
 			},
 			{
 				title: 'Why we use it',
 				paragraphs: [
-					'To provide the service you asked for when creating the account: logging in, playing, the ladder and the challenges (LGPD, art. 7, V). And to protect the server and its players: access log, password attempt limits and moderation (legitimate interest, art. 7, IX).',
+					'To provide the service you asked for when creating the account: logging in, playing, the ladder and the challenges (LGPD, art. 7, V). And to protect the server and its players: access log, login security log, password attempt limits and moderation (legitimate interest, art. 7, IX).',
 				],
 			},
 			{
@@ -124,8 +126,8 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 			{
 				title: 'How long we keep it',
 				paragraphs: [
-					'Account and game data are kept until you delete your account. Ladder battle logs are deleted after 30 days; the access log after 14 days; moderation records after 6 months (their IP addresses after 30 days); and backups after 14 days. The server\'s other technical logs have a limited size and do not keep your IP address.',
-					'When you delete your account at /conta, within a few minutes we delete: the account, sessions, ranking, ranks, journeys (with their saved battles), achievements and the battle logs you played in. Battles in progress end with your forfeit. The access log is not linked to your account and deletes itself after 14 days. Moderation records about you are kept until the end of their period (6 months), for the server\'s security, and backups are replaced within 14 days.',
+					'Account and game data are kept until you delete your account. Ladder battle logs are deleted after 30 days; the access log after 14 days; the login security log after 30 days; moderation records after 6 months (their IP addresses after 30 days); and backups after 14 days. The server\'s other technical logs have a limited size and do not keep your IP address.',
+					'When you delete your account at /conta, within a few minutes we delete: the account, sessions, ranking, ranks, journeys (with their saved battles), achievements and the battle logs you played in. Battles in progress end with your forfeit. The access log is not linked to your account and deletes itself after 14 days. Moderation records about you (up to 6 months) and the login security log (up to 30 days) are kept until the end of their period, for the server\'s security, and backups are replaced within 14 days.',
 				],
 			},
 			{

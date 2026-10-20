@@ -12,7 +12,7 @@
  */
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
-import type { Database } from './db.ts';
+import { type Database, nowSeconds } from './db.ts';
 import type { LoginConfig } from './config.ts';
 import { buildAssertion, type AssertionContext } from './assertion.ts';
 import { RateLimiter } from './rate-limit.ts';
@@ -30,6 +30,10 @@ import {
 	issueCode, listPendingInvites, revokeCodes, revokeInvite, INVITE_TTL_SECONDS, RESET_TTL_SECONDS,
 } from './codes.ts';
 import { renderAccount, renderPrivacy, renderRegister, renderReset, renderRules, type PageMessage } from './pages.ts';
+import {
+	EventThrottle, isSecurityEventType, listSecurityEvents, recordSecurityEvent, securitySummary,
+	type EventData, type SecurityEventType,
+} from './security-events.ts';
 
 const MAX_BODY_BYTES = 16 * 1024;
 // O CSS e as imagens vêm do próprio cliente (mesmo domínio); nada de script
@@ -63,7 +67,8 @@ type ActionResult = { json: unknown } | { text: string };
 export function createApp(deps: AppDeps) {
 	const { db, config } = deps;
 
-	// Limites em memória (o IP nunca é persistido)
+	// Limites em memória (os contadores não são gravados; a trilha de segurança registra
+	// as falhas e os bloqueios, ver security-events.ts)
 	const requestLimiter = new RateLimiter(deps.limits?.requestsPerMinute ?? 120, 60_000);
 	const formLimiter = new RateLimiter(deps.limits?.formsPerMinute ?? 20, 60_000);
 	// Falhas de senha, janela de 15 min: por conta + IP (assim ninguém bloqueia a conta
@@ -71,6 +76,15 @@ export function createApp(deps: AppDeps) {
 	const failuresByUser = new RateLimiter(10, 15 * 60_000);
 	const failuresByIp = new RateLimiter(30, 15 * 60_000);
 	const userKey = (ctx: RequestContext, userid: string) => `${userid}|${ctx.ip}`;
+
+	// Trilha de eventos de segurança (security-events.ts). Bloqueios e pedidos recusados
+	// podem vir em rajadas: no máximo um evento por minuto para cada tipo, conta e IP.
+	const throttle = new EventThrottle(60_000);
+	const THROTTLED: SecurityEventType[] = ['loginblocked', 'csrfrejected', 'ratelimited', 'internalunauthorized'];
+	function securityEvent(type: SecurityEventType, data: EventData) {
+		if (THROTTLED.includes(type) && !throttle.allow(`${type}|${data.userid || ''}|${data.ip || ''}`)) return;
+		recordSecurityEvent(db, type, data);
+	}
 
 	const signedAssertion = (ctx: RequestContext, userid: string, userType: '1' | '2') =>
 		buildAssertion(deps.assertion, ctx.params.challstr || ctx.params.challenge || '', userid, userType, ctx.lang);
@@ -96,11 +110,17 @@ export function createApp(deps: AppDeps) {
 	/** Verifica senha com limite de tentativas; usado por login, troca de senha e exclusão. */
 	async function checkedAuthenticate(ctx: RequestContext, name: string, password: string): Promise<User | MessageKey> {
 		const userid = toID(name);
-		if (loginBlocked(ctx, userid)) return 'tooManyLoginAttempts';
+		if (loginBlocked(ctx, userid)) {
+			securityEvent('loginblocked', { userid, ip: ctx.ip, detail: 'login' });
+			return 'tooManyLoginAttempts';
+		}
 		// Conta a tentativa antes do scrypt (assíncrono): pedidos em paralelo não passam do limite
 		recordAttempt(ctx, userid);
 		const user = await authenticate(db, name, password);
-		if (!user) return 'wrongPassword';
+		if (!user) {
+			securityEvent('loginfailed', { userid, ip: ctx.ip, detail: 'login' });
+			return 'wrongPassword';
+		}
 		forgiveAttempt(ctx, userid);
 		return user;
 	}
@@ -181,13 +201,20 @@ export function createApp(deps: AppDeps) {
 		ctx: RequestContext, session: ActiveSession, current = '', password = '', confirm = ''
 	): Promise<MessageKey | null> {
 		const userid = session.user.userid;
-		if (loginBlocked(ctx, userid)) return 'tooManyLoginAttempts';
+		if (loginBlocked(ctx, userid)) {
+			securityEvent('loginblocked', { userid, ip: ctx.ip, detail: 'senha' });
+			return 'tooManyLoginAttempts';
+		}
 		recordAttempt(ctx, userid);
 		const result = await changePassword(db, session.user, current, password, confirm);
 		// Senha atual correta: a tentativa não conta, mesmo que a troca falhe por outro motivo
 		if (result.ok || result.error !== 'wrongPassword') forgiveAttempt(ctx, userid);
-		if (!result.ok) return result.error;
+		if (!result.ok) {
+			if (result.error === 'wrongPassword') securityEvent('loginfailed', { userid, ip: ctx.ip, detail: 'senha' });
+			return result.error;
+		}
 		deleteOtherSessions(db, userid, session.token);
+		securityEvent('passwordchanged', { userid, ip: ctx.ip });
 		return null;
 	}
 
@@ -201,9 +228,15 @@ export function createApp(deps: AppDeps) {
 		if (ctx.req.method !== 'POST') return renderRegister(ctx.lang, { invite: ctx.url.searchParams.get('convite') ?? '' });
 		const { invite = '', username = '', password = '', confirm = '' } = ctx.params;
 		const result = await register(db, invite, username, password, confirm, config.reservedNames);
-		if (!result.ok) return renderRegister(ctx.lang, { msg: error(result.error), invite, username });
+		if (!result.ok) {
+			if (result.error === 'inviteInvalid' || result.error === 'inviteForOtherName') {
+				securityEvent('codefailed', { userid: toID(username) || null, ip: ctx.ip, detail: 'convite' });
+			}
+			return renderRegister(ctx.lang, { msg: error(result.error), invite, username });
+		}
 		if (ctx.session) deleteSession(db, ctx.session.token);
 		startSession(ctx, result.value);
+		securityEvent('accountcreated', { userid: result.value.userid, ip: ctx.ip });
 		console.log('[conta] nova conta criada');
 		return renderRegister(ctx.lang, { done: true, msg: success('registered') });
 	}
@@ -212,7 +245,13 @@ export function createApp(deps: AppDeps) {
 		if (ctx.req.method !== 'POST') return renderReset(ctx.lang, {});
 		const { code = '', username = '', password = '', confirm = '' } = ctx.params;
 		const result = await resetPassword(db, code, username, password, confirm);
-		if (!result.ok) return renderReset(ctx.lang, { msg: error(result.error), username });
+		if (!result.ok) {
+			if (result.error === 'resetInvalid') {
+				securityEvent('codefailed', { userid: toID(username) || null, ip: ctx.ip, detail: 'redefinicao' });
+			}
+			return renderReset(ctx.lang, { msg: error(result.error), username });
+		}
+		securityEvent('resetused', { userid: toID(username), ip: ctx.ip });
 		return renderReset(ctx.lang, { done: true, msg: success('passwordReset') });
 	}
 
@@ -233,11 +272,19 @@ export function createApp(deps: AppDeps) {
 		case 'excluir': {
 			if (ctx.params.confirm !== 'yes') return renderAccount(ctx.lang, { user: session.user, msg: error('confirmDeletion') });
 			const userid = session.user.userid;
-			if (loginBlocked(ctx, userid)) return renderAccount(ctx.lang, { user: session.user, msg: error('tooManyLoginAttempts') });
+			if (loginBlocked(ctx, userid)) {
+				securityEvent('loginblocked', { userid, ip: ctx.ip, detail: 'excluir' });
+				return renderAccount(ctx.lang, { user: session.user, msg: error('tooManyLoginAttempts') });
+			}
 			recordAttempt(ctx, userid);
 			const result = await deleteAccount(db, session.user, ctx.params.password || '');
-			if (!result.ok) return renderAccount(ctx.lang, { user: session.user, msg: error(result.error) });
+			if (!result.ok) {
+				if (result.error === 'wrongPassword') securityEvent('loginfailed', { userid, ip: ctx.ip, detail: 'excluir' });
+				return renderAccount(ctx.lang, { user: session.user, msg: error(result.error) });
+			}
 			forgiveAttempt(ctx, userid);
+			// LGPD: o evento fica até o prazo de 30 dias, como o resto da trilha
+			securityEvent('accountdeleted', { userid, ip: ctx.ip });
 			ctx.cookies.push(clearSessionCookie(config.cookieSecure));
 			console.log('[conta] conta excluída a pedido do titular');
 			return renderAccount(ctx.lang, { user: null, msg: success('accountDeleted') });
@@ -271,6 +318,7 @@ export function createApp(deps: AppDeps) {
 				userid = name.value.userid;
 			}
 			const issued = issueCode(db, 'invite', userid, INVITE_TTL_SECONDS);
+			securityEvent('inviteissued', { userid, actor: toID(params.actor) || null });
 			console.log(`[admin] convite gerado${userid ? ' (nome reservado)' : ''}`);
 			return { status: 200, body: { ok: true, ...issued, url: inviteUrl(issued.code), userid } };
 		}
@@ -281,6 +329,7 @@ export function createApp(deps: AppDeps) {
 			const id = /^[1-9][0-9]{0,15}$/.test(params.id || '') ? Number(params.id) : 0;
 			if (!id) return { status: 400, body: { ok: false, error: 'id required' } };
 			if (!revokeInvite(db, id)) return { status: 404, body: { ok: false, error: 'not found' } };
+			securityEvent('inviterevoked', { actor: toID(params.actor) || null, detail: `#${id}` });
 			console.log('[admin] convite revogado');
 			return { status: 200, body: { ok: true } };
 		}
@@ -290,8 +339,17 @@ export function createApp(deps: AppDeps) {
 			// Só o código mais recente vale
 			revokeCodes(db, 'reset', user.userid);
 			const issued = issueCode(db, 'reset', user.userid, RESET_TTL_SECONDS);
+			securityEvent('resetissued', { userid: user.userid, actor: toID(params.actor) || null });
 			console.log('[admin] código de redefinição gerado');
 			return { status: 200, body: { ok: true, ...issued, url: `https://${config.serverHost}/redefinir`, username: user.username } };
+		}
+		case '/internal/security-events': {
+			// Trilha de segurança, para a página do painel admin
+			const type = params.type && isSecurityEventType(params.type) ? params.type : undefined;
+			const before = /^[1-9][0-9]{0,15}$/.test(params.before || '') ? Number(params.before) : undefined;
+			const events = listSecurityEvents(db, { type, userid: toID(params.userid) || undefined, before, limit: 100 });
+			const summary = securitySummary(db, nowSeconds() - 24 * 60 * 60);
+			return { status: 200, body: { ok: true, events, summary } };
 		}
 		case '/internal/purges':
 			// Contas excluídas cujos dados de jogo o servidor de jogo ainda precisa apagar
@@ -356,15 +414,18 @@ export function createApp(deps: AppDeps) {
 		// CSRF: navegadores sempre mandam Origin em POST; outra origem é recusada
 		const origin = req.headers.origin;
 		if (req.method === 'POST' && origin !== undefined && origin !== config.publicOrigin) {
+			securityEvent('csrfrejected', { ip: ctx.ip, detail: path });
 			return send(ctx, 403, t(ctx.lang, 'badOrigin'), 'text/plain; charset=utf-8');
 		}
 		// Sem Origin: um navegador que informa Sec-Fetch-Site de outro site também é recusado
 		const fetchSite = req.headers['sec-fetch-site'];
 		if (req.method === 'POST' && origin === undefined && fetchSite && !['same-origin', 'none'].includes(String(fetchSite))) {
+			securityEvent('csrfrejected', { ip: ctx.ip, detail: path });
 			return send(ctx, 403, t(ctx.lang, 'badOrigin'), 'text/plain; charset=utf-8');
 		}
 
 		if (!requestLimiter.allow(ctx.ip)) {
+			securityEvent('ratelimited', { ip: ctx.ip, detail: path });
 			return sendAction(ctx, 429, { actionerror: t(ctx.lang, 'tooManyRequests') });
 		}
 
@@ -376,7 +437,10 @@ export function createApp(deps: AppDeps) {
 		}
 
 		if (isInternal) {
-			if (req.method !== 'POST' || !internalAuthorized(req)) return send(ctx, 401, 'unauthorized', 'text/plain; charset=utf-8');
+			if (req.method !== 'POST' || !internalAuthorized(req)) {
+				securityEvent('internalunauthorized', { ip: ctx.ip, detail: path });
+				return send(ctx, 401, 'unauthorized', 'text/plain; charset=utf-8');
+			}
 			const params: Params = {};
 			try {
 				const parsed: unknown = body ? JSON.parse(body) : {};
@@ -398,6 +462,7 @@ export function createApp(deps: AppDeps) {
 
 		if (pageMatch) {
 			if (req.method === 'POST' && !formLimiter.allow(ctx.ip)) {
+				securityEvent('ratelimited', { ip: ctx.ip, detail: path });
 				return send(ctx, 429, t(ctx.lang, 'tooManyRequests'), 'text/plain; charset=utf-8');
 			}
 			const [, page, sub = ''] = pageMatch;

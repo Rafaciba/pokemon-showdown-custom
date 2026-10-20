@@ -94,8 +94,8 @@ const messages = {
 	linkPlay: { pt: 'Ir para o jogo', en: 'Go to the game' },
 	privacyTitle: { pt: 'Privacidade', en: 'Privacy' },
 	privacyText: {
-		pt: 'A conta guarda apenas o seu nome de usuário e um hash da sua senha (a senha em si nunca é armazenada). Não pedimos e-mail. Você pode excluir sua conta e todos os seus dados a qualquer momento em /conta.',
-		en: 'Your account only stores your username and a hash of your password (the password itself is never stored). We do not ask for an e-mail address. You can delete your account and all your data at any time at /conta.',
+		pt: 'A conta guarda apenas o seu nome de usuário e um hash da sua senha (a senha em si nunca é armazenada). Não pedimos e-mail. Você pode excluir sua conta e os seus dados a qualquer momento em /conta (os registros de segurança e de moderação ficam até o fim do prazo deles).',
+		en: 'Your account only stores your username and a hash of your password (the password itself is never stored). We do not ask for an e-mail address. You can delete your account and your data at any time at /conta (security and moderation records are kept until the end of their period).',
 	},
 	privacyLink: { pt: 'Aviso de privacidade completo', en: 'Full privacy notice' },
 	registered: {
@@ -116,8 +116,8 @@ const messages = {
 	accountLoggedInAs: { pt: 'Logado como {name}.', en: 'Logged in as {name}.' },
 	deleteTitle: { pt: 'Excluir conta', en: 'Delete account' },
 	deleteWarning: {
-		pt: 'Atenção: a exclusão é definitiva. Serão apagados junto com a conta todos os seus dados no servidor, inclusive times salvos, conquistas e insígnias, histórico e placar dos desafios. Batalhas em andamento terminam com a sua desistência. Só os registros de moderação ficam, até o fim do prazo deles (6 meses), pela segurança do servidor. Não é possível desfazer.',
-		en: 'Warning: deletion is permanent. All your data on the server will be deleted along with the account, including saved teams, achievements and badges, challenge history and scores. Battles in progress end with your forfeit. Only moderation records are kept, until the end of their period (6 months), for the security of the server. This cannot be undone.',
+		pt: 'Atenção: a exclusão é definitiva. Serão apagados junto com a conta todos os seus dados no servidor, inclusive times salvos, conquistas e insígnias, histórico e placar dos desafios. Batalhas em andamento terminam com a sua desistência. Só os registros de moderação (até 6 meses) e o registro de segurança do login (até 30 dias) ficam até o fim do prazo deles, pela segurança do servidor. Não é possível desfazer.',
+		en: 'Warning: deletion is permanent. All your data on the server will be deleted along with the account, including saved teams, achievements and badges, challenge history and scores. Battles in progress end with your forfeit. Only moderation records (up to 6 months) and the login security log (up to 30 days) are kept until the end of their period, for the security of the server. This cannot be undone.',
 	},
 	deleteConfirm: {
 		pt: 'Entendo que todos os meus dados serão excluídos definitivamente.',

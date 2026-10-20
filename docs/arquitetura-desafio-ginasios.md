@@ -240,6 +240,7 @@ achievements       userid, challenge_id, run_id, earned_at
 - `view-ginasiosadmin-desafio-<id>`: nome, formato base, regras, modo de tipos (fixos ou sorteados), quantidade de ginásios, ordem (livre ou fixa), Elite 4, trava de time, dificuldade base, limite de derrotas e eliminações. Inclui a atribuição de treinadores às etapas (tipos fixos) ou ao banco por tipo (tipos sorteados) e os botões "Abrir" e "Encerrar".
 - `view-ginasiosadmin-jornadas-<id>`: jornadas do desafio, com a ação "Encerrar jornada" de um jogador.
 - `view-ginasiosadmin-convites`: convites (gerar, listar os pendentes, revogar) e códigos de redefinição de senha, pela API interna do login (`custom-accounts.ts`). Não é do Desafio de Ginásios, mas fica no mesmo painel, que é o painel admin do servidor.
+- `view-ginasiosadmin-seguranca[-<tipo>-<conta>-<antes de>]`: trilha de segurança do login (30 dias), com resumo das últimas 24 horas e filtros.
 
 Os formulários usam os recursos nativos das páginas do PS (`<form data-submitsend>`, `<textarea>`, `<select>`). O plugin de times do PS (`server/chat-plugins/teams.ts`) tem um exemplo de formulário com área de texto para time.
 

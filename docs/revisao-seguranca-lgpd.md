@@ -84,7 +84,7 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 - O aviso de comando lento do PS (`server/chat.ts`) registrava nome, IP e o texto da mensagem, que pode ser uma PM. Agora registra só o tempo, a sala e o comando.
 - O modlog e o crashlog do nosso código não guardam o identificador de jogadores.
 - O login nunca registra nome, IP nem corpo de pedido.
-- **Pendente:** o login não tem trilha de eventos de segurança (bloqueios, trocas de senha). Isso foi uma escolha de minimização; se quisermos, contadores anônimos de curta retenção.
+- **Trilha de eventos de segurança do login (2026-10-19):** falhas e bloqueios de senha, códigos inválidos, mudanças nas contas, convites e pedidos recusados, com conta e IP, por 30 dias (ver "Trilha de segurança do login").
 
 ### A10 – SSRF
 - O único destino externo é fixo (`play.pokemonshowdown.com`), e só `/sprites/*` e `/audio/*` passam pelo proxy. O login não faz pedidos para fora.
@@ -108,6 +108,7 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 | Códigos de convite e redefinição (hash) | banco do login | até o uso, 3 dias ou 24h | Sim / vencem |
 | Fila de exclusão (userid) | banco do login | até o servidor de jogo confirmar (cerca de 1 min) | Sai após a limpeza |
 | IP | memória do login (limite de tentativas) e do servidor (sessão) | 15 min / enquanto conectado | Não é gravado |
+| **Trilha de segurança do login** (data, tipo do evento, conta, IP, admin que agiu, onde aconteceu) | banco do login (`security_events`) | **30 dias** (limpeza a cada hora), até 100 mil eventos | **Não** (legítimo interesse; fica até o prazo) |
 | **Log de acesso do site** (IP, data, método, caminho sem query string, status, tamanho, user agent) | arquivo do Caddy na VPS (`/var/log/ps-custom/caddy`, só root) | **14 dias** (logrotate diário) | Não (não é ligado à conta; some sozinho) |
 | Rank e autoridade de sala | `server/config` | até a exclusão | Sim |
 | Ladder | `server/config/ladders` | até a exclusão | Sim |
@@ -207,6 +208,24 @@ Página **Convites** no painel admin (`view-ginasiosadmin-convites`): gerar conv
 
 Validado: 2 testes novos no login (lista sem o código, revogação, convite usado sai da lista, erros em pt e en) e e2e no navegador, em inglês e em português: abrir pelo botão do painel, gerar convite aberto e reservado, código só uma vez, nome em uso recusado, revogar (e revogar inexistente), redefinição para jogador inexistente e existente.
 
+### Trilha de segurança do login (2026-10-19)
+
+Antes, o login não registrava nenhum evento de segurança, por minimização. Decisões do usuário:
+
+- **Eventos:** senha errada (login, troca de senha, exclusão), bloqueio por excesso de tentativas, criação de conta, troca de senha, código de redefinição gerado e usado, exclusão de conta, convite gerado e revogado, formulário de outro site recusado (CSRF), excesso de pedidos e API interna sem o token. Acrescentei **código de convite ou de redefinição inválido** (tentar adivinhar códigos é o mesmo tipo de ataque que adivinhar senhas).
+- **Dados:** data, tipo, conta, **IP**, o admin que agiu (convites e redefinições pedidos pelo painel ou pelo chat) e onde aconteceu (login, troca de senha, exclusão, cadastro, redefinição ou o caminho pedido). Nunca senhas nem códigos.
+- **Prazo de 30 dias**, também depois da exclusão da conta (legítimo interesse: quem atacou uma conta não apaga o rastro excluindo a própria). O aviso de privacidade, o aviso da exclusão e o texto da página de cadastro dizem isso.
+- **Consulta:** página **Segurança** no painel admin (`view-ginasiosadmin-seguranca`), com o resumo das últimas 24 horas, filtro por tipo e por conta e paginação de 100 em 100. Só o admin.
+
+Como foi feito:
+- `login/src/security-events.ts` e a tabela `security_events` (migração 3 do banco do login). A limpeza horária apaga o que passou de 30 dias e o que passar do teto de 100 mil eventos.
+- **Contra inundação** (A04): bloqueios e pedidos recusados entram no máximo uma vez por minuto para cada tipo, conta e IP, e a tabela tem teto. Senhas erradas já são limitadas pelo próprio limite de tentativas.
+- **A01:** a API interna nova (`/internal/security-events`) exige o token; a página e o filtro exigem admin.
+- **A03:** filtros validados (tipo da lista, conta como id, "antes de" como número); tudo escapado na página.
+- O teste de ponta a ponta ganhou o passo da página (senha errada do admin aparece no filtro por conta) e a limpeza dele apaga os eventos das contas E2E.
+
+Validado: 2 testes novos no login (cada tipo de evento, o limite de um por minuto, os eventos mantidos depois da exclusão, a consulta com filtros e paginação, o prazo de 30 dias) e o teste de ponta a ponta com 8 passos.
+
 ### Containers e dependências (2026-10-19)
 
 Decisões do usuário: manter as montagens (fluxo de `git pull`), tratar as dependências no nosso script sem mudar o `package.json` do fork, tirar o `probe-image-size`, rodar o Caddy sem root e pôr limites de recursos.
@@ -223,6 +242,7 @@ Decisões do usuário: manter as montagens (fluxo de `git pull`), tratar as depe
 
 **Dependências do servidor** (`docker/server/derive-package.cjs`):
 - Saem: `mysql2` e `pg` (bancos externos), `sqlite` e `sqlite3` (não usados pelo código; traziam o `tar` crítico e o `node-gyp`), `nodemailer`, `githubhook`, `cloud-env` e `probe-image-size`.
+- O `mysql2` voltou como dependência **só de desenvolvimento** (2026-10-19): o `lib/database.ts` da Smogon importa os tipos dele, e sem eles a checagem de tipos do servidor (`tsc`) falhava. Ele nunca é carregado, porque o PS só o usa com MySQL configurado, e o `npm audit --omit=dev` não o conta.
 - `better-sqlite3` fixo na 12.11.1 (antes instalado pelo entrypoint) e `tar-fs` na 2.1.4 ou mais nova (usado só na instalação).
 - Resta 1 aviso moderado: `uuid` dentro do `sockjs`. Não se aplica: a falha exige passar um buffer ao `uuid`, e o `sockjs` só chama `uuidv4()`.
 - O teste `test/lib/postgres.js` da Smogon fica de fora, porque testa a biblioteca do Postgres, que não instalamos.
