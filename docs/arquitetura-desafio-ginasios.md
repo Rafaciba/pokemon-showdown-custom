@@ -588,7 +588,7 @@ Pedido do usuário: gerar treinadores e desafios de um jeito fácil de importar 
 
   O teste de ponta a ponta ganhou um passo: exportar o desafio E2E e importar uma cópia com um líder novo e o Campeão reaproveitado. A prévia do pacote de Kanto foi conferida no navegador.
 
-## IA Mestre (2026-10-20, em andamento)
+## IA Mestre (2026-10-20)
 
 Pedido do usuário: um nível acima do Difícil que começa com a inteligência dele, treina em batalhas simuladas contra Médio e Difícil e depois aprende com as batalhas reais do servidor. O trabalho foi dividido em etapas, feitas uma por vez:
 
@@ -596,7 +596,7 @@ Pedido do usuário: um nível acima do Difícil que começa com a inteligência 
 2. **Treino dos pesos por simulação** (feita): um otimizador joga contra Médio e Difícil, em individual e em dupla, com times aleatórios e com os times dos pacotes.
 3. **Avaliação de posição aprendida e busca** (feita): um modelo pequeno em TypeScript, sem dependências, e uma busca no simulador do PS com palpites do time do jogador, com até 1 segundo por jogada.
 4. **Aprendizado no servidor** (feita), com uma página no painel: versão do modelo, batalhas usadas, taxa de vitória, retreinar e reverter.
-5. **Dupla, calibração e documentação final.**
+5. **Dupla, calibração e documentação final** (feita).
 
 Decisões do usuário:
 
@@ -666,7 +666,7 @@ Decisões do usuário:
   - **No servidor:** a Mestre calcula a jogada das regras na hora, pede a busca e espera no máximo o tempo da busca mais 1,5 s. Sem resposta, ou com erro, vale a jogada das regras.
   - **Contrato:** a `NpcAI` passou a poder responder com uma Promise. O `NpcBattle` só aceita a resposta se o pedido ainda for o mesmo.
   - **Quantidade de processos:** `Config.subprocesses.gymmaster`, padrão 1. No ambiente local, o servidor passou a usar 478 MiB, de um limite de 1,5 GiB. Sem processos (testes e ferramentas), a busca roda no próprio processo.
-  - **Em dupla:** a Mestre continua com as regras e os pesos da etapa 2. A dupla fica para a etapa 5.
+  - **Em dupla:** nesta etapa, a Mestre continuou com as regras e os pesos da etapa 2. A dupla veio na etapa 5.
 - **Resultados** (banco de testes, batalhas individuais; `ai-benchmark.js --workers N` joga em paralelo):
 
   | Confronto | Batalhas | Mestre com busca |
@@ -727,3 +727,101 @@ Decisões do usuário:
   - retreino manual no servidor local, pelo painel: o processo foi criado, o retreino foi pulado por falta de batalhas e ficou no histórico.
 - **No ambiente local:** as batalhas do teste de ponta a ponta também entram nos dados de aprendizado. São anônimas, então a limpeza do teste não tem como apagá-las. Isso só acontece no ambiente local.
 
+**Etapa 5 (feita):**
+
+- **Decisões do usuário:**
+  - **dupla:** pesos próprios, treinados só em dupla, e uma busca simplificada no simulador, com o retrato da posição em versão para dupla e as batalhas em dupla entrando no aprendizado;
+  - **calibração:**
+    - o tempo da busca na VPS (2 vCPU);
+    - a escala de força dos níveis, com a tabela no painel e aqui;
+    - os parâmetros da busca, também com os times dos pacotes.
+- **Retrato da posição em dupla** (`position.ts`, `doublesFeatures`):
+  - as mesmas 22 características, na mesma ordem, com os dois Pokémon ativos de cada lado;
+  - HP, dano (o melhor alvo de cada um) e boosts dos ativos são somados;
+  - velocidade, "quem nocauteia primeiro" e o confronto do banco são a média dos pares;
+  - `weKo` e `theyKo` contam os Pokémon ameaçados.
+- **Modelo de avaliação em dupla** (`MASTER_DOUBLES_MODEL`, `master-model.ts`; `train-value.js --doubles`):
+  - 20 mil batalhas simuladas (Random Doubles e os times dos pacotes em dupla), com 334 mil posições;
+  - fora do treino, acertou o vencedor em 75,0% das posições, com perda logarítmica de 0,489;
+  - o modelo das batalhas individuais acertava 72,6%.
+- **Busca em dupla** (`sim-search.ts`, `simSearchDoubles`):
+  - parte da jogada das regras ("move 1 2, switch 3") e avalia cada Pokémon com o aliado fixo: primeiro a posição 1, depois a 2, já com a escolha da 1;
+  - **nossas opções:** os golpes (os de um alvo, em cada adversário) e as trocas, sem repetir a troca nem a Megaevolução do aliado;
+  - **respostas dos adversários:** 4 combinações sorteadas dos golpes dos dois (os de um alvo vão no Pokémon avaliado), sem trocas;
+  - a parte de cada Pokémon só muda quando a busca estima uma vantagem acima da margem (0,05), como em individual;
+  - **trocas obrigatórias e posições com um lado só com um Pokémon:** ficam com as regras;
+  - formato das batalhas simuladas: `gen9nationaldexdoubles`;
+  - no servidor, roda no mesmo processo da busca individual (`master-search-process.ts`, consulta `doubles`).
+- **Pesos em dupla** (`TRAINED_DOUBLES_WEIGHTS`, `master-weights.ts`; `train-master.js --mode doubles`):
+  - 40 gerações, com 12 variações e 400 batalhas em dupla por candidato em cada uma (6 de cada 10 de Random Doubles, 4 com os times dos pacotes em dupla);
+  - **sem ganho mensurável:** na validação (2000 batalhas), os pesos treinados fizeram 50,7% contra a Difícil e a Médio, e os padrão, 51,1%;
+  - num confronto direto com a busca, a Mestre com os pesos de dupla fez 49,5% contra a mesma Mestre com os pesos das batalhas individuais (400 batalhas);
+  - ficam os pesos de dupla, conforme a decisão. Em dupla, o que melhora a Mestre é a busca, e não os pesos (as regras extras da Difícil já quase não pesavam em dupla).
+- **Aprendizado em dupla** (migração 9):
+  - `ai_positions.doubles` separa as posições das batalhas em dupla, `ai_models.kind` e `ai_trainings.kind` separam modelos e retreinos;
+  - a coleta grava as batalhas individuais e em dupla. Triplas e outros tipos ficam de fora;
+  - o retreino de segunda-feira faz um retreino para cada tipo, com o mínimo de 30 batalhas novas e a verificação de cada um. A verificação em dupla usa os times de todos os treinadores com pelo menos 2 Pokémon;
+  - a reversão pelo painel troca só o modelo do mesmo tipo de batalha.
+- **Painel** (página IA Mestre):
+  - seções "Individual" e "Dupla", cada uma com o modelo em uso e os dados coletados;
+  - coluna "Tipo de batalha" no histórico de retreinos e na lista de modelos;
+  - a tabela "Força dos níveis" (`level-strength.ts`).
+- **Parâmetros da busca, em individual** (400 batalhas por variante contra a Mestre atual, de Random Battle e com os times dos pacotes):
+
+  | Variante | Random Battle | Times dos pacotes |
+  |---|---|---|
+  | pessimismo 0,3 | 46,5% | 50,7% |
+  | pessimismo 0,7 | 49,0% | 50,2% |
+  | margem 0,02 | 49,0% | 51,5% |
+  | margem 0,1 | 50,0% | 49,0% |
+  | 1 palpite | 50,7% | 48,3% |
+
+  Nenhuma variante ganhou da configuração atual além da margem (cerca de 5 pontos), e ela fica: pessimismo 0,5, margem 0,05 e 2 palpites.
+- **Tempo na VPS** (`tools/gym-challenge/search-timing.js`, num container com `--cpus 2`, Mestre contra a Difícil, cada escolha da Mestre cronometrada):
+
+  | Busca | Buscas ao mesmo tempo | Média | 95% até | Acima de 1 s |
+  |---|---|---|---|---|
+  | Individual | 1 | 124 ms | 202 ms | 0% |
+  | Individual | 2 | 195 ms | 312 ms | 0% |
+  | Dupla, 6 respostas | 1 | 832 ms | 1137 ms | 22% |
+  | Dupla, 6 respostas | 2 | 1155 ms | 1599 ms | 75% |
+  | Dupla, 4 respostas | 1 | 555 ms | 792 ms | 0% |
+  | Dupla, 4 respostas | 2 | 677 ms | 1157 ms | 16% |
+
+  - **Resultado:** a dupla usa 4 respostas dos adversários (`DOUBLES_RESPONSES`). Com 4, a busca em dupla fez 57,8% contra a Mestre sem busca, e com 6, 58,0% (400 batalhas cada): a mesma força em menos tempo.
+  - **Processos:** continua 1 processo de busca (`Config.subprocesses.gymmaster`, padrão). O segundo vCPU fica para o servidor, o login e o Caddy. Com dois jogadores enfrentando a Mestre ao mesmo tempo, as buscas entram em fila; se uma passa do prazo (tempo da busca mais 1,5 s), vale a jogada das regras.
+  - **Ressalva:** o processador da máquina local pode ser mais rápido que o vCPU da VPS. Na VPS, o histórico do painel não mostra o tempo; se as jogadas da Mestre demorarem, o primeiro ajuste é diminuir `budgetMs` ou as respostas em dupla em `MASTER_SIM`.
+- **Força dos níveis** (`ai-benchmark.js`, times aleatórios, alternando os lados; 1000 batalhas por confronto entre Aleatório, Fácil, Médio e Difícil, 400 nos da Mestre). Vitórias do nível da linha contra o da coluna (arredondadas como no painel; os confrontos de taxa terminada em ,5 podem somar 101%):
+
+  Individual (Random Battle):
+
+  | | Aleatório | Fácil | Médio | Difícil | Mestre |
+  |---|---|---|---|---|---|
+  | **Aleatório** | - | 41% | 7% | 8% | 4% |
+  | **Fácil** | 60% | - | 9% | 10% | 5% |
+  | **Médio** | 93% | 91% | - | 43% | 31% |
+  | **Difícil** | 92% | 90% | 57% | - | 35% |
+  | **Mestre** | 96% | 95% | 69% | 65% | - |
+
+  Dupla (Random Doubles):
+
+  | | Aleatório | Fácil | Médio | Difícil | Mestre |
+  |---|---|---|---|---|---|
+  | **Aleatório** | - | 28% | 6% | 6% | 5% |
+  | **Fácil** | 72% | - | 19% | 21% | 10% |
+  | **Médio** | 94% | 82% | - | 47% | 37% |
+  | **Difícil** | 94% | 79% | 53% | - | 44% |
+  | **Mestre** | 95% | 90% | 64% | 56% | - |
+
+  - Cada nível vence o anterior, menos em dois pontos: a Difícil vence o Fácil um pouco menos que o Médio, e em dupla a Difícil fica quase igual ao Médio (53%). Separar os dois em dupla não fazia parte desta etapa.
+  - Em dupla, a Mestre passou de 49,8% para 56,5% contra a Difícil, por causa da busca.
+- **Ferramentas:** `ai-benchmark.js` aceita os times dos pacotes (formatos `packs` e `packsdoubles`, com `--packs`). O `battle-runner.js` ganhou as variantes `master@ms` (tempo), `master%N` (respostas em dupla) e `master-dw` (pesos individuais em dupla). `train-value.js` e `train-master.js` ganharam o modo dupla, e `search-timing.js` mede o tempo.
+- **Validado:**
+  - **testes de unidade:**
+    - posições, modelos e retreinos separados por tipo, com a reversão de um tipo sem mexer no outro;
+    - busca em dupla (o golpe que nocauteia, no alvo certo, e a jogada das regras mantida sem vantagem);
+    - Mestre com o modelo de dupla e sem o de individual;
+    - tabela de força completa e simétrica;
+  - os 2601 testes do servidor;
+  - **teste de ponta a ponta:** 12 passos. O Campeão em dupla joga com a busca em dupla, e a página IA Mestre conta a batalha individual e a em dupla, cada uma no seu tipo, e mostra a força dos níveis;
+  - **batalhas simuladas:** nenhuma escolha recusada nas batalhas em dupla da Mestre com busca.

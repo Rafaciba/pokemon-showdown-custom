@@ -30,7 +30,7 @@ Para rodar só uma parte, passe os argumentos do Playwright, por exemplo `sh scr
 | Desafio (admin) | criar dois treinadores (o Campeão em dupla) e um desafio com a IA Mestre pelos formulários do painel, atribuir o líder e o Campeão e abrir o desafio |
 | Pacotes | exportar o desafio E2E pela página Importar e exportar (com os dois treinadores) e importar uma cópia com outro nome e um líder novo: o Campeão, que já está no banco, é pulado e reaproveitado, e o desafio importado entra como rascunho pronto para abrir |
 | Desafio (jogador) | o jogador se cadastra com o convite gerado pelo admin, começa a jornada, vence o ginásio e o Campeão (em dupla, na variante em dupla do formato) e vê os times vencedores no perfil |
-| IA Mestre | a página IA Mestre do painel mostra o modelo em uso e conta a batalha individual contra o líder nos dados de aprendizado |
+| IA Mestre | a página IA Mestre do painel mostra os modelos em uso, conta a batalha individual contra o líder e a batalha em dupla contra o Campeão, cada uma nos dados do seu tipo, e mostra a força dos níveis |
 | Exclusão | troca de senha em `/conta`, exclusão da conta e, em até um minuto, as jornadas apagadas pelo servidor de jogo |
 
 Os treinadores de teste só têm Pokémon com Splash (o líder, um Magikarp; o Campeão, em dupla, Magikarp e Feebas), e o jogador usa Pikachu e Raichu com Thunderbolt. Assim as batalhas terminam sempre com a vitória do jogador, em poucos turnos.

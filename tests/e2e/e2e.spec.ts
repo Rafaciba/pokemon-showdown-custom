@@ -219,7 +219,7 @@ test('desafio: o admin cria treinadores e um desafio e o abre', async () => {
 	const before = await roomIds(admin);
 	await openPsPage(admin, 'view-ginasiosadmin-desafio-novo', /Save challenge|Salvar desafio/);
 	await submitPsForm(admin, 'view-ginasiosadmin-desafio-novo', 'form[data-submitsend^="/ginasioadmin salvardesafio"]', {
-		// IA Mestre (regras do Difícil com pesos aprendidos): a batalha em dupla do Campeão usa a IA heurística em dupla
+		// IA Mestre: o líder joga com a busca em individual, e o Campeão, com a busca em dupla
 		name: 'E2E Desafio', gyms: '1', elite: 'no', lock: 'no', level: 'master',
 	});
 	const page = await waitNewRoom(admin, /^view-ginasiosadmin-desafio-\d+$/, before);
@@ -325,16 +325,19 @@ test('desafio: o jogador vence o ginásio e o Campeão em dupla, e o perfil most
 	expect(rows[2].icons).toBe(2);
 });
 
-test('IA Mestre: a página mostra o modelo em uso e as batalhas coletadas', async () => {
+test('IA Mestre: a página mostra os modelos, as batalhas coletadas e a força dos níveis', async () => {
 	const id = 'view-ginasiosadmin-mestre';
 	await openPsPage(admin, 'view-ginasiosadmin', /Master AI|IA Mestre/);
 	await clickPsButton(admin, 'view-ginasiosadmin', `button[value="${id}"]`);
 	await expectRoomText(admin, id, /Model in use|Modelo em uso/);
 	const text = await admin.evaluate(rid => (window as any).app.rooms[rid].$el.text(), id);
-	// A batalha individual contra o líder (Mestre) entrou nos dados de aprendizado
-	const battles = Number((/(\d+) (?:battles and|batalhas e) \d+/.exec(text) || [])[1]);
-	expect(battles, 'batalhas coletadas').toBeGreaterThanOrEqual(1);
+	// As batalhas contra o líder (individual) e o Campeão (dupla) entraram nos dados de aprendizado, cada uma no seu tipo
+	const counts = [...text.matchAll(/(\d+) (?:battles and|batalhas e) \d+/g)].map(match => Number(match[1]));
+	expect(counts, 'batalhas coletadas em individual e em dupla').toHaveLength(2);
+	expect(counts[0], 'batalhas individuais').toBeGreaterThanOrEqual(1);
+	expect(counts[1], 'batalhas em dupla').toBeGreaterThanOrEqual(1);
 	expect(text).toMatch(/Retrain now|Retreinar agora/);
+	expect(text).toMatch(/Strength of the levels|Força dos níveis/);
 });
 
 test('contas: troca de senha e exclusão apagam os dados de jogo', async () => {

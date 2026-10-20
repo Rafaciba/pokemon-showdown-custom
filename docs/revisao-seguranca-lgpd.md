@@ -293,6 +293,11 @@ A Mestre simula jogadas no simulador do PS (`sim-search.ts`) num processo filho 
   - só entra em uso se prever melhor as batalhas reais fora do treino e não perder da Mestre atual em batalhas simuladas;
   - o admin pode voltar a qualquer versão pelo painel.
 - **A09:** retreino manual e troca de modelo entram no modlog (`GYMMASTER`, sem nomes de jogadores), e o histórico dos retreinos fica no banco.
+- **Etapa 5 (dupla), 2026-10-20:**
+  - as batalhas em dupla também entram no aprendizado;
+  - a única informação nova por posição é se a batalha era em dupla (`ai_positions.doubles`), o que não identifica ninguém;
+  - o aviso de privacidade já falava das batalhas do Desafio em geral e não muda;
+  - a busca em dupla roda no mesmo processo filho, com o mesmo prazo: o tempo foi calibrado para 2 vCPU (4 respostas dos adversários), e sem resposta no prazo vale a jogada das regras (A04).
 
 ### Pacotes de treinadores e desafios (2026-10-19)
 
