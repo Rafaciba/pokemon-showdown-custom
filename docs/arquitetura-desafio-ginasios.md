@@ -548,3 +548,22 @@ Pedido do usuário: mostrar nas conquistas o time que venceu cada insígnia e o 
 - **Página:** a insígnia mostra o time da primeira vitória naquele ginásio, que é a que deu a insígnia. O Campeão mostra o time da vitória que encerrou a jornada.
 - **LGPD:** o aviso de privacidade passou a citar as espécies (pt e en), que ficam visíveis no perfil para os usuários logados e são apagadas com a conta, junto com as jornadas.
 - **Validado:** teste de unidade (espécies só nas vitórias; derrota, interrompida e batalha sem espécies ficam sem registro); batalha real contra NPC gravando as espécies ao começar; perfil no navegador em inglês e português, com uma vitória registrada, uma sem registro e o Campeão.
+
+## Treinadores em dupla (2026-10-19)
+
+Pedido do usuário: o admin marca no cadastro do treinador se as batalhas contra ele são em dupla. O padrão é não.
+
+- **Decisões do usuário:** as batalhas em dupla seguem as regras do próprio desafio (o mesmo formato, em dupla), e as IAs Fácil, Médio e Difícil serão adaptadas para dupla. Feito em duas etapas: a primeira (esta) traz o treinador, o formato e a batalha; a segunda adapta as IAs.
+- **Banco (migração 7):** `trainers.doubles` e a cópia `run_stages.doubles` na jornada, como o sprite e a insígnia.
+- **Formato:** cada desafio aberto com formato base individual ganha uma variante oculta, "[Desafio] Nome (Dupla)" (`doublesFormatId`), com as mesmas regras e `gameType: 'doubles'`, fora do menu (`searchShow: false`, `gymDoubles: true`). O jogador continua clicando "Battle!" no formato do desafio; se a etapa é de um treinador em dupla, o plugin cria a batalha na variante. Em desafio com formato base em dupla, todas as batalhas já são em dupla e não há variante. O nome de um desafio novo não pode colidir com a variante de outro.
+- **Times:** o treinador em dupla precisa de pelo menos 2 Pokémon (conferido ao salvar), e o jogador também (conferido antes da batalha, com aviso).
+- **IA (etapa 2):** Fácil, Médio e Difícil jogam em dupla com as mesmas regras de cada nível, para cada um dos dois Pokémon ativos (`heuristic-ai.ts`, `chooseDoubles`; o caminho das batalhas individuais não mudou):
+  - o retrato da batalha (`battle-view.ts`) acompanha as duas posições de cada lado (`activeSlots`), inclusive trocas de posição (`|swap|`, Ally Switch), e o tipo da batalha (`|gametype|`);
+  - golpes de um alvo vão no adversário com a melhor pontuação (de preferência o que dá para nocautear);
+  - golpes em área somam o dano nos dois adversários, com a redução de 25% das batalhas em dupla, e descontam o dano no próprio aliado (Earthquake, Surf): com o aliado vulnerável, a IA prefere outro golpe;
+  - o adversário que mais ameaça cada Pokémon guia o perigo (Difícil) e as trocas; as trocas, voluntárias ou obrigatórias, nunca escolhem o mesmo Pokémon do banco para as duas posições;
+  - a Megaevolução é de um Pokémon por turno, e a prévia de times põe os dois melhores confrontos na frente;
+  - casos do simulador tratados: golpe preso (segundo turno de Electro Shot, Outrage) não leva alvo, Helping Hand sempre leva o alvo do aliado e Revival Blessing escolhe um Pokémon desmaiado. Uma escolha recusada não se repete (o simulador escolhe).
+- **Resultados em dupla** (`ai-benchmark.js`, formato `gen9randomdoublesbattle`, 500 batalhas por confronto, nenhuma escolha recusada em 3000 batalhas): Fácil x Aleatório 70,8%, Médio x Aleatório 93,8%, Difícil x Aleatório 94,2%, Médio x Fácil 78,2%, Difícil x Fácil 77,6% e Difícil x Médio 51,6%. Em dupla, as regras extras do Difícil quase não fazem diferença sobre o Médio; calibrar isso fica para depois. As batalhas individuais continuaram com os mesmos resultados (300 batalhas por confronto). O banco de testes passou a contar as escolhas recusadas e, com `BENCH_DEBUG=1`, mostra cada uma.
+- **Páginas:** campo "Batalha em dupla" no formulário do treinador; "Dupla" no banco de treinadores e na página do treinador; "(batalha em dupla)" ao lado do treinador na página do desafio. A página `/regras` explica a regra.
+- **Validado:** testes de unidade (opção gravada e copiada para a jornada, variante gerada com as mesmas regras, sem variante em formato base em dupla; na IA, as duas posições e a troca de posição no retrato, o alvo, o golpe em área com o aliado vulnerável ou imune, uma Megaevolução por turno e trocas obrigatórias diferentes) e o teste de ponta a ponta com o Campeão em dupla e a IA Difícil.

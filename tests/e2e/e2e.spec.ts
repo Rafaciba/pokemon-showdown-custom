@@ -19,7 +19,10 @@ const SERVER_WS = 'ws://server:8000/showdown/websocket';
 
 // O validador do formato recusa sets sem EVs
 const TRAINER_TEAM = 'Magikarp\nAbility: Swift Swim\nEVs: 1 HP\n- Splash';
-const PLAYER_TEAM = 'Pikachu||LightBall|Static|Thunderbolt|Timid|,,,252,4,252|||||';
+// Campeão em dupla: dois Pokémon (a cláusula de espécie impede dois Magikarp)
+const DOUBLES_TEAM = `${TRAINER_TEAM}\n\nFeebas\nAbility: Swift Swim\nEVs: 1 HP\n- Splash`;
+const PLAYER_TEAM = 'Pikachu||LightBall|Static|Thunderbolt|Timid|,,,252,4,252|||||]' +
+	'Raichu||LifeOrb|Static|Thunderbolt|Timid|,,,252,4,252|||||';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -203,11 +206,11 @@ test('contas: nome com acento mantém a letra no jogo', async ({ browser }) => {
 
 test('desafio: o admin cria treinadores e um desafio e o abre', async () => {
 	const trainerIds: number[] = [];
-	for (const [name, type] of [['E2E Lider', 'Water'], ['E2E Campeao', '']]) {
+	for (const [name, type, doubles] of [['E2E Lider', 'Water', 'no'], ['E2E Campeao', '', 'yes']]) {
 		const before = await roomIds(admin);
 		await openPsPage(admin, 'view-ginasiosadmin-treinador-novo', /Save trainer|Salvar treinador/);
 		await submitPsForm(admin, 'view-ginasiosadmin-treinador-novo', 'form[data-submitsend^="/ginasioadmin salvartreinador"]', {
-			name, title: 'E2E', type, team: TRAINER_TEAM,
+			name, title: 'E2E', type, doubles, team: doubles === 'yes' ? DOUBLES_TEAM : TRAINER_TEAM,
 		});
 		const saved = await waitNewRoom(admin, /^view-ginasiosadmin-treinador-\d+$/, before);
 		trainerIds.push(Number(saved.split('-').pop()));
@@ -216,7 +219,8 @@ test('desafio: o admin cria treinadores e um desafio e o abre', async () => {
 	const before = await roomIds(admin);
 	await openPsPage(admin, 'view-ginasiosadmin-desafio-novo', /Save challenge|Salvar desafio/);
 	await submitPsForm(admin, 'view-ginasiosadmin-desafio-novo', 'form[data-submitsend^="/ginasioadmin salvardesafio"]', {
-		name: 'E2E Desafio', gyms: '1', elite: 'no', lock: 'no',
+		// IA Difícil: a batalha em dupla do Campeão usa a IA heurística em dupla
+		name: 'E2E Desafio', gyms: '1', elite: 'no', lock: 'no', level: 'hard',
 	});
 	const page = await waitNewRoom(admin, /^view-ginasiosadmin-desafio-\d+$/, before);
 	challengeId = Number(page.split('-').pop());
@@ -235,7 +239,7 @@ test('desafio: o admin cria treinadores e um desafio e o abre', async () => {
 	formatId = 'gen9desafioe2edesafio';
 });
 
-test('desafio: o jogador vence o ginásio e o Campeão, e o perfil mostra os times', async () => {
+test('desafio: o jogador vence o ginásio e o Campeão em dupla, e o perfil mostra os times', async () => {
 	expect(await register(player, playerInvite, PLAYER, PASSWORD)).toMatch(/Account created|Conta criada/);
 	await openClient(player);
 	const page = `view-ginasios-desafio-${challengeId}`;
@@ -251,9 +255,14 @@ test('desafio: o jogador vence o ginásio e o Campeão, e o perfil mostra os tim
 			app.send('/utm ' + team);
 			app.send('/search ' + format);
 		}, [PLAYER_TEAM, formatId] as const);
-		const battle = await waitNewRoom(player, new RegExp(`^battle-${formatId}-\\d+$`), before);
+		const battle = await waitNewRoom(player, new RegExp(`^battle-${formatId}(dupla)?-\\d+$`), before);
+		// O Campeão de teste batalha em dupla, na variante em dupla do formato
+		expect(battle.includes(`${formatId}dupla-`), `formato da batalha contra o ${stage}`).toBe(stage === 'Campeão');
 		const winner = await playBattle(player, battle);
 		expect(winner, `vencedor contra o ${stage}`).toBe(PLAYER);
+		// Com a batalha terminada, o cliente já leu o tipo dela
+		const gameType = await player.evaluate(rid => (window as any).app.rooms[rid].battle.gameType, battle);
+		expect(gameType, `tipo da batalha contra o ${stage}`).toBe(stage === 'Campeão' ? 'doubles' : 'singles');
 	}
 
 	await openPsPage(player, page, /Won|Vencida/);
@@ -266,11 +275,11 @@ test('desafio: o jogador vence o ginásio e o Campeão, e o perfil mostra os tim
 			icons: $(tr).find('psicon, .picon, span[style*="pokemonicons"]').length,
 		})).get();
 	}, profile);
-	// Cabeçalho, o ginásio e o Campeão, cada um com o ícone do Pikachu
+	// Cabeçalho, o ginásio e o Campeão, cada um com os ícones do Pikachu e do Raichu
 	expect(rows).toHaveLength(3);
-	expect(rows[1].icons).toBe(1);
+	expect(rows[1].icons).toBe(2);
 	expect(rows[2].text).toMatch(/Champion|Campeão/);
-	expect(rows[2].icons).toBe(1);
+	expect(rows[2].icons).toBe(2);
 });
 
 test('contas: troca de senha e exclusão apagam os dados de jogo', async () => {

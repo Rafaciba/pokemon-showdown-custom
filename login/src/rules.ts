@@ -14,7 +14,7 @@ import type { Notice } from './privacy.ts';
 export const RULES: { [lang in Lang]: Notice } = {
 	pt: {
 		title: 'Regras',
-		updated: 'Atualizado em 18/10/2026.',
+		updated: 'Atualizado em 19/10/2026.',
 		sections: [
 			{
 				title: 'O servidor',
@@ -79,6 +79,7 @@ export const RULES: { [lang in Lang]: Notice } = {
 				paragraphs: [
 					'As batalhas contra os treinadores são sempre públicas: qualquer um pode assistir, e o Lobby anuncia a batalha.',
 					'Empate não conta: nem vitória nem derrota. Você enfrenta o mesmo treinador de novo.',
+					'Alguns treinadores batalham em dupla, com as mesmas regras do desafio; a página do desafio avisa quais são. Para enfrentá-los, o seu time precisa de pelo menos 2 Pokémon. Em desafios com formato em dupla, todas as batalhas são em dupla.',
 					'As batalhas são salvas a cada jogada. Uma batalha interrompida sem terminar (servidor reiniciado, página fechada, conexão perdida) continua do ponto em que parou: ela reabre sozinha quando você entra com a sua conta, ou pelo botão "Continuar sua batalha" na página do desafio. Fechar a página não apaga uma derrota, e a jornada só avança quando a batalha termina.',
 					'Para sair de uma batalha sem terminá-la, desista da jornada: a batalha conta como derrota.',
 					'Se o administrador encerrar o desafio enquanto a sua batalha estiver interrompida, ela é anulada e não conta.',
@@ -105,7 +106,7 @@ export const RULES: { [lang in Lang]: Notice } = {
 	},
 	en: {
 		title: 'Rules',
-		updated: 'Last updated on 2026-10-18.',
+		updated: 'Last updated on 2026-10-19.',
 		sections: [
 			{
 				title: 'The server',
@@ -170,6 +171,7 @@ export const RULES: { [lang in Lang]: Notice } = {
 				paragraphs: [
 					'Battles against trainers are always public: anyone can watch, and the Lobby announces them.',
 					'A tie does not count as a win or a loss. You face the same trainer again.',
+					'Some trainers battle in doubles, with the same rules as the challenge; the challenge page shows which ones. To face them, your team needs at least 2 Pokémon. In challenges with a doubles format, every battle is in doubles.',
 					'Battles are saved after every move. A battle interrupted before it ends (server restart, page closed, lost connection) continues from where it stopped: it reopens by itself when you log in to your account, or with the "Continue your battle" button on the challenge page. Closing the page does not erase a loss, and the journey only moves on when the battle ends.',
 					'To leave a battle without finishing it, give up the journey: the battle counts as a loss.',
 					'If the administrator closes the challenge while your battle is interrupted, the battle is void and does not count.',

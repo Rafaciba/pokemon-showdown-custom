@@ -115,8 +115,9 @@ export async function expectPopup(page: Page, pattern: RegExp) {
 }
 
 /**
- * Joga a batalha aberta na sala até o fim, sempre com o primeiro golpe (ou a ordem
- * padrão na escolha do time). Devolve o nome do vencedor.
+ * Joga a batalha aberta na sala até o fim com a escolha padrão do simulador (o primeiro
+ * golpe de cada Pokémon, com alvo automático, também em dupla; a ordem padrão na escolha
+ * do time). Devolve o nome do vencedor.
  */
 export async function playBattle(page: Page, roomid: string, timeout = 120_000) {
 	let winner = '';
@@ -130,8 +131,7 @@ export async function playBattle(page: Page, roomid: string, timeout = 120_000) 
 			const request = room.request;
 			if (request && !request.wait && room.e2eAnswered !== request.rqid) {
 				room.e2eAnswered = request.rqid;
-				const choice = request.teamPreview ? 'team 1' : 'move 1';
-				room.send(`/choose ${choice}|${request.rqid}`);
+				room.send(`/choose default|${request.rqid}`);
 			}
 			return '';
 		}, roomid);

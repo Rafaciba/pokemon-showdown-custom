@@ -27,11 +27,11 @@ Para rodar só uma parte, passe os argumentos do Playwright, por exemplo `sh scr
 | Segurança | uma senha errada para o admin aparece na página Segurança, no filtro por conta |
 | Troca de nome | conta nova pelo convite do painel, `/renomearconta`, sessão antiga encerrada, nome novo entra com a mesma senha e o antigo deixa de existir |
 | Nome com acento | cadastro de "E2E ZéPe": no cliente, o nome aparece com o acento e o identificador é `e2ezepe` |
-| Desafio (admin) | criar dois treinadores e um desafio pelos formulários do painel, atribuir o líder e o Campeão e abrir o desafio |
-| Desafio (jogador) | o jogador se cadastra com o convite gerado pelo admin, começa a jornada, vence o ginásio e o Campeão e vê os times vencedores no perfil |
+| Desafio (admin) | criar dois treinadores (o Campeão em dupla) e um desafio com a IA Difícil pelos formulários do painel, atribuir o líder e o Campeão e abrir o desafio |
+| Desafio (jogador) | o jogador se cadastra com o convite gerado pelo admin, começa a jornada, vence o ginásio e o Campeão (em dupla, na variante em dupla do formato) e vê os times vencedores no perfil |
 | Exclusão | troca de senha em `/conta`, exclusão da conta e, em até um minuto, as jornadas apagadas pelo servidor de jogo |
 
-O treinador de teste tem só um Magikarp com Splash, e o jogador usa um Pikachu com Thunderbolt. Assim as batalhas terminam sempre com a vitória do jogador, em poucos turnos.
+Os treinadores de teste só têm Pokémon com Splash (o líder, um Magikarp; o Campeão, em dupla, Magikarp e Feebas), e o jogador usa Pikachu e Raichu com Thunderbolt. Assim as batalhas terminam sempre com a vitória do jogador, em poucos turnos.
 
 ## Como funciona
 
