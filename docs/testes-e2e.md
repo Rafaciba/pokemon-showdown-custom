@@ -28,6 +28,7 @@ Para rodar só uma parte, passe os argumentos do Playwright, por exemplo `sh scr
 | Troca de nome | conta nova pelo convite do painel, `/renomearconta`, sessão antiga encerrada, nome novo entra com a mesma senha e o antigo deixa de existir |
 | Nome com acento | cadastro de "E2E ZéPe": no cliente, o nome aparece com o acento e o identificador é `e2ezepe` |
 | Desafio (admin) | criar dois treinadores (o Campeão em dupla) e um desafio com a IA Mestre pelos formulários do painel, atribuir o líder e o Campeão e abrir o desafio |
+| Desafio sorteado | criar um desafio com tipos sorteados e, na tabela de treinadores, conferir a busca por nome e por Pokémon, os filtros por tipo e pela seleção, a ordenação (alfabética e selecionados primeiro, sem perder a marcação) e a busca por nome na lista do Campeão |
 | Pacotes | exportar o desafio E2E pela página Importar e exportar (com os dois treinadores) e importar uma cópia com outro nome e um líder novo: o Campeão, que já está no banco, é pulado e reaproveitado, e o desafio importado entra como rascunho pronto para abrir |
 | Desafio (jogador) | o jogador se cadastra com o convite gerado pelo admin, começa a jornada, vence o ginásio e o Campeão (em dupla, na variante em dupla do formato) e vê os times vencedores no perfil |
 | IA Mestre | a página IA Mestre do painel mostra os modelos em uso, conta a batalha individual contra o líder e a batalha em dupla contra o Campeão, cada uma nos dados do seu tipo, e mostra a força dos níveis |

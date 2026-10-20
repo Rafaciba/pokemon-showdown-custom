@@ -588,6 +588,35 @@ Pedido do usuário: gerar treinadores e desafios de um jeito fácil de importar 
 
   O teste de ponta a ponta ganhou um passo: exportar o desafio E2E e importar uma cópia com um líder novo e o Campeão reaproveitado. A prévia do pacote de Kanto foi conferida no navegador.
 
+## Busca e ordenação dos treinadores do desafio (2026-10-20)
+
+Pedido do usuário: facilitar a escolha dos treinadores na página do desafio, sobretudo no sorteio de ginásios.
+
+- **Decisões do usuário:**
+  - **tabela do sorteio:**
+    - busca por nome ou por Pokémon do time;
+    - filtro por tipo;
+    - filtro pela seleção (todos, só os selecionados, só os não selecionados);
+    - ordenação por nome, tipo, dificuldade e "selecionados primeiro";
+  - **listas de seleção** (ginásios de tipo fixo, Elite 4 e Campeão): busca por nome.
+- **Como funciona:** tudo roda no navegador (`client-custom.js`), sem recarregar a página:
+  - as linhas escondidas continuam no formulário, e nada do que ainda não foi salvo se perde;
+  - o servidor só marca os elementos com classes (`gym-pool`, `gym-filter-*`, `gym-select-filter`) e põe nos títulos das colunas botões `gymSort`;
+  - os ícones do time ganharam o nome do Pokémon como dica, que é também o que a busca usa;
+  - a busca ignora acentos e maiúsculas;
+  - clicar de novo no título inverte a ordem, e os empates ficam em ordem alfabética;
+  - Enter num campo de busca não envia o formulário;
+  - na lista de seleção, a opção "(nenhum)" e o treinador já escolhido continuam sempre na lista.
+- **Segurança:**
+  - o cliente monta as opções filtradas com texto, nunca com HTML;
+  - a ordenação só aceita as quatro chaves conhecidas;
+  - nada novo chega ao servidor.
+- **Validado:** um passo novo no teste de ponta a ponta cria um desafio com tipos sorteados e confere:
+  - busca por nome e por Pokémon;
+  - filtro por tipo e pela seleção;
+  - ordem alfabética e "selecionados primeiro", sem perder a marcação;
+  - busca na lista do Campeão.
+
 ## IA Mestre (2026-10-20)
 
 Pedido do usuário: um nível acima do Difícil que começa com a inteligência dele, treina em batalhas simuladas contra Médio e Difícil e depois aprende com as batalhas reais do servidor. O trabalho foi dividido em etapas, feitas uma por vez:

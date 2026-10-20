@@ -239,6 +239,63 @@ test('desafio: o admin cria treinadores e um desafio e o abre', async () => {
 	formatId = 'gen9desafioe2edesafio';
 });
 
+test('desafio sorteado: busca, filtros e ordenação dos treinadores', async () => {
+	const before = await roomIds(admin);
+	await openPsPage(admin, 'view-ginasiosadmin-desafio-novo', /Save challenge|Salvar desafio/);
+	await submitPsForm(admin, 'view-ginasiosadmin-desafio-novo', 'form[data-submitsend^="/ginasioadmin salvardesafio"]', {
+		name: 'E2E Sorteio', typemode: 'random', gyms: '1', elite: 'no', lock: 'no',
+	});
+	const page = await waitNewRoom(admin, /^view-ginasiosadmin-desafio-\d+$/, before);
+	await expectRoomText(admin, page, /Click a column title to sort|Clique no título de uma coluna/);
+	const result = await admin.evaluate(rid => {
+		const $ = (window as any).jQuery;
+		const $room = (window as any).app.rooms[rid].$el;
+		const $table = $room.find('table.gym-pool');
+		const rows = () => $table.find('tr').filter((i: number, tr: HTMLElement) => !$(tr).children('th').length);
+		const visible = () => rows().filter(':visible').map((i: number, tr: HTMLElement) => ({
+			name: $(tr).find('.gym-pool-name').text(), type: $(tr).find('.gym-pool-type').attr('title'),
+			checked: $(tr).find('input[type=checkbox]').prop('checked'),
+		})).get();
+		const set = (selector: string, value: string) => $room.find(selector).val(value).trigger('input').trigger('change');
+		const out: any = { total: rows().length };
+		set('.gym-filter-text', 'e2e lider');
+		out.byName = visible().map((row: any) => row.name);
+		set('.gym-filter-text', 'magikarp'); // Pokémon do time do líder E2E
+		out.byPokemon = visible().map((row: any) => row.name);
+		set('.gym-filter-text', '');
+		set('.gym-filter-type', 'Water');
+		out.types = [...new Set(visible().map((row: any) => row.type))];
+		set('.gym-filter-type', '');
+		rows().filter((i: number, tr: HTMLElement) => $(tr).find('.gym-pool-name').text() === 'E2E Lider')
+			.find('input[type=checkbox]').prop('checked', true);
+		set('.gym-filter-checked', 'checked');
+		out.checked = visible();
+		set('.gym-filter-checked', '');
+		$room.find('button[name=gymSort][value=name]').click();
+		const names = visible().map((row: any) => row.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase());
+		out.sorted = names.every((name: string, i: number) => i === 0 || names[i - 1] <= name);
+		$room.find('button[name=gymSort][value=checked]').click();
+		out.firstAfterSelectedSort = visible()[0]?.name;
+		out.stillChecked = rows().filter((i: number, tr: HTMLElement) => $(tr).find('.gym-pool-name').text() === 'E2E Lider')
+			.find('input[type=checkbox]').prop('checked');
+		// Campeão: a busca por nome deixa na lista só "nenhum" e os treinadores que combinam
+		const $champion = $room.find('select[name^=champion]').filter((i: number, el: HTMLSelectElement) => !/level$/.test(el.name));
+		$champion.prevAll('.gym-select-filter').first().val('e2e campeao').trigger('input');
+		out.championOptions = $champion.find('option').map((i: number, o: HTMLOptionElement) => $(o).text()).get();
+		return out;
+	}, page);
+	expect(result.total, 'treinadores com tipo na tabela').toBeGreaterThanOrEqual(1);
+	expect(result.byName).toEqual(['E2E Lider']);
+	expect(result.byPokemon).toContain('E2E Lider');
+	expect(result.types).toEqual(['Water']);
+	expect(result.checked.map((row: any) => row.name)).toEqual(['E2E Lider']);
+	expect(result.sorted, 'ordem alfabética').toBe(true);
+	expect(result.firstAfterSelectedSort, 'selecionados primeiro').toBe('E2E Lider');
+	expect(result.stillChecked, 'ordenar não perde a marcação').toBe(true);
+	expect(result.championOptions).toHaveLength(2);
+	expect(result.championOptions[1]).toContain('E2E Campeao');
+});
+
 test('pacotes: o admin exporta o desafio e importa um pacote com um treinador novo', async () => {
 	const id = 'view-ginasiosadmin-pacotes';
 	await openPsPage(admin, 'view-ginasiosadmin', /Import and export|Importar e exportar/);
