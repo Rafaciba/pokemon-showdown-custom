@@ -24,7 +24,7 @@ export interface Notice {
 export const PRIVACY: { [lang in Lang]: Notice } = {
 	pt: {
 		title: 'Aviso de privacidade',
-		updated: 'Atualizado em 19/10/2026.',
+		updated: 'Atualizado em 20/10/2026.',
 		sections: [
 			{
 				title: 'Quem somos',
@@ -39,6 +39,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 					'Sessão: um cookie (ps_session) que mantém você conectado por 30 dias, renovados a cada uso. No servidor fica só um hash desse cookie.',
 					'Jogo: a sua posição no ranking (ladder), um eventual cargo de moderação e, no Desafio de Ginásios, as suas jornadas, insígnias e conquistas, com os Pokémon do time que venceu cada insígnia e o Campeão (só as espécies, sem itens, golpes ou outros detalhes). O seu perfil e histórico no Desafio de Ginásios ficam visíveis para os outros usuários logados.',
 					'Batalhas do Desafio de Ginásios em andamento: o estado da batalha (nomes, times e jogadas, sem as mensagens de chat), para que ela continue se for interrompida. Ele é apagado quando a batalha termina.',
+					'Aprendizado da IA Mestre: das batalhas do Desafio de Ginásios, guardamos dados anônimos de cada turno, vistos pelo treinador e pelo jogador (números como o HP somado de cada lado, os Pokémon restantes, os boosts, os status e os hazards) e quem venceu. Eles não têm o seu nome, a sua conta, o desafio, a data nem os Pokémon do seu time, e não há como ligá-los a você. Servem só para a IA Mestre aprender a jogar melhor e ficam guardados sem prazo.',
 					'Registros de batalhas da ladder: nomes dos jogadores e times usados, guardados por 30 dias. As batalhas são públicas enquanto acontecem.',
 					'Registro de acesso ao site: o IP, a data e a hora, o endereço pedido (sem códigos de convite ou de redefinição), o resultado e o navegador (user agent) de cada acesso, guardados por 14 dias e apagados automaticamente. Ele serve só para a segurança do servidor (identificar ataques e abusos), não fica ligado à sua conta e só o administrador tem acesso.',
 					'Registro de segurança do login: senhas erradas e bloqueios por excesso de tentativas, códigos de convite ou de redefinição inválidos, criação, troca de senha, redefinição e exclusão de conta, convites gerados e revogados e pedidos recusados (vindos de outro site ou em excesso), com a data, a conta envolvida e o IP. Ele fica 30 dias, inclusive depois da exclusão da conta, serve só para a segurança do servidor (detectar e investigar ataques a contas) e só o administrador tem acesso.',
@@ -56,7 +57,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 			{
 				title: 'Para que usamos',
 				paragraphs: [
-					'Para oferecer o serviço que você pediu ao criar a conta: entrar no jogo, jogar, participar do ranking e dos desafios (LGPD, art. 7º, V). E para proteger o servidor e os jogadores: registro de acesso, registro de segurança do login, limite de tentativas de senha e moderação (legítimo interesse, art. 7º, IX).',
+					'Para oferecer o serviço que você pediu ao criar a conta: entrar no jogo, jogar, participar do ranking e dos desafios (LGPD, art. 7º, V). E para proteger o servidor e os jogadores: registro de acesso, registro de segurança do login, limite de tentativas de senha e moderação (legítimo interesse, art. 7º, IX). Os dados de aprendizado da IA Mestre são anônimos desde a coleta e, por isso, não são dados pessoais (LGPD, art. 12).',
 				],
 			},
 			{
@@ -69,7 +70,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 				title: 'Por quanto tempo',
 				paragraphs: [
 					'Os dados da conta e do jogo ficam até você excluir a conta. Os registros de batalhas da ladder são apagados depois de 30 dias; o registro de acesso, depois de 14 dias; o registro de segurança do login, depois de 30 dias; os registros de moderação, depois de 6 meses (o IP deles, depois de 30 dias); e as cópias de segurança, depois de 14 dias. Os demais registros técnicos do servidor têm tamanho limitado e não guardam o seu IP.',
-					'Ao excluir a conta em /conta, apagamos em poucos minutos: a conta, as sessões, o ranking, os cargos, as jornadas (com as batalhas salvas), as conquistas e os registros de batalhas em que você jogou. As batalhas em andamento terminam com a sua desistência. O registro de acesso não é ligado à conta e se apaga sozinho em 14 dias. Os registros de moderação sobre você (até 6 meses) e o registro de segurança do login (até 30 dias) ficam até o fim do prazo deles, pela segurança do servidor, e as cópias de segurança são substituídas em até 14 dias.',
+					'Ao excluir a conta em /conta, apagamos em poucos minutos: a conta, as sessões, o ranking, os cargos, as jornadas (com as batalhas salvas), as conquistas e os registros de batalhas em que você jogou. As batalhas em andamento terminam com a sua desistência. O registro de acesso não é ligado à conta e se apaga sozinho em 14 dias. Os registros de moderação sobre você (até 6 meses) e o registro de segurança do login (até 30 dias) ficam até o fim do prazo deles, pela segurança do servidor, e as cópias de segurança são substituídas em até 14 dias. Os dados anônimos de aprendizado da IA Mestre não ficam ligados à conta e, por isso, não há como separar os seus para apagar.',
 				],
 			},
 			{
@@ -82,7 +83,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 	},
 	en: {
 		title: 'Privacy notice',
-		updated: 'Last updated on 2026-10-19.',
+		updated: 'Last updated on 2026-10-20.',
 		sections: [
 			{
 				title: 'Who we are',
@@ -97,6 +98,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 					'Session: a cookie (ps_session) that keeps you logged in for 30 days, renewed whenever you use it. The server keeps only a hash of it.',
 					'Game: your ladder ranking, any moderation rank and, in the Gym Challenge, your journeys, badges and achievements, with the Pokémon of the team that won each badge and the Champion (species only, without items, moves or other details). Your Gym Challenge profile and history are visible to other logged-in users.',
 					'Gym Challenge battles in progress: the battle state (names, teams and moves, without chat messages), so the battle can continue if it is interrupted. It is deleted when the battle ends.',
+					'Master AI learning: from Gym Challenge battles, we keep anonymous data about each turn, as seen by the trainer and by the player (numbers such as the total HP of each side, the remaining Pokémon, boosts, status conditions and hazards) and who won. It does not include your name, your account, the challenge, the date or the Pokémon in your team, and it cannot be linked to you. It is used only to help the Master AI learn to play better and is kept with no time limit.',
 					'Ladder battle logs: player names and the teams used, kept for 30 days. Battles are public while they happen.',
 					'Website access log: the IP address, date and time, requested address (without invite or reset codes), result and browser (user agent) of each access, kept for 14 days and deleted automatically. It is used only for the server\'s security (spotting attacks and abuse), is not linked to your account, and only the administrator can access it.',
 					'Login security log: wrong passwords and blocks after too many attempts, invalid invite or reset codes, account creation, password changes, resets and account deletion, invites issued and revoked, and refused requests (from another site or too many), with the date, the account involved and the IP address. It is kept for 30 days, also after the account is deleted, is used only for the server\'s security (spotting and investigating attacks on accounts), and only the administrator can access it.',
@@ -114,7 +116,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 			{
 				title: 'Why we use it',
 				paragraphs: [
-					'To provide the service you asked for when creating the account: logging in, playing, the ladder and the challenges (LGPD, art. 7, V). And to protect the server and its players: access log, login security log, password attempt limits and moderation (legitimate interest, art. 7, IX).',
+					'To provide the service you asked for when creating the account: logging in, playing, the ladder and the challenges (LGPD, art. 7, V). And to protect the server and its players: access log, login security log, password attempt limits and moderation (legitimate interest, art. 7, IX). The Master AI learning data is anonymous from the moment it is collected and is therefore not personal data (LGPD, art. 12).',
 				],
 			},
 			{
@@ -127,7 +129,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 				title: 'How long we keep it',
 				paragraphs: [
 					'Account and game data are kept until you delete your account. Ladder battle logs are deleted after 30 days; the access log after 14 days; the login security log after 30 days; moderation records after 6 months (their IP addresses after 30 days); and backups after 14 days. The server\'s other technical logs have a limited size and do not keep your IP address.',
-					'When you delete your account at /conta, within a few minutes we delete: the account, sessions, ranking, ranks, journeys (with their saved battles), achievements and the battle logs you played in. Battles in progress end with your forfeit. The access log is not linked to your account and deletes itself after 14 days. Moderation records about you (up to 6 months) and the login security log (up to 30 days) are kept until the end of their period, for the server\'s security, and backups are replaced within 14 days.',
+					'When you delete your account at /conta, within a few minutes we delete: the account, sessions, ranking, ranks, journeys (with their saved battles), achievements and the battle logs you played in. Battles in progress end with your forfeit. The access log is not linked to your account and deletes itself after 14 days. Moderation records about you (up to 6 months) and the login security log (up to 30 days) are kept until the end of their period, for the server\'s security, and backups are replaced within 14 days. The anonymous Master AI learning data is not linked to your account, so there is no way to single out and delete yours.',
 				],
 			},
 			{

@@ -325,6 +325,7 @@ test('aviso de privacidade em pt e en, com o administrador', async () => {
 	assert.match(html, /Aviso de privacidade/);
 	assert.match(html, /<strong>admintest<\/strong>/i, 'controlador: o admin de PS_ADMINS');
 	assert.match(html, /30 dias/);
+	assert.match(html, /IA Mestre/, 'dados anônimos de aprendizado da IA');
 	assert.match(pt.headers.get('content-security-policy') || '', /default-src 'none'/);
 	const en = await fetch(`${base}/privacidade`, { headers: { 'Accept-Language': 'en-US' } }).then(r => r.text());
 	assert.match(en, /Privacy notice/);

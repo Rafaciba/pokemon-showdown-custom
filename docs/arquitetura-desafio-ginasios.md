@@ -595,7 +595,7 @@ Pedido do usuário: um nível acima do Difícil que começa com a inteligência 
 1. **Nível Mestre no sistema**, com os pesos da Difícil extraídos. Feita.
 2. **Treino dos pesos por simulação** (feita): um otimizador joga contra Médio e Difícil, em individual e em dupla, com times aleatórios e com os times dos pacotes.
 3. **Avaliação de posição aprendida e busca** (feita): um modelo pequeno em TypeScript, sem dependências, e uma busca no simulador do PS com palpites do time do jogador, com até 1 segundo por jogada.
-4. **Aprendizado no servidor**, com uma página no painel: versão do modelo, batalhas usadas, taxa de vitória, retreinar e reverter.
+4. **Aprendizado no servidor** (feita), com uma página no painel: versão do modelo, batalhas usadas, taxa de vitória, retreinar e reverter.
 5. **Dupla, calibração e documentação final.**
 
 Decisões do usuário:
@@ -679,4 +679,51 @@ Decisões do usuário:
   - testes de unidade: a busca nocauteia, troca de um confronto perdido, mantém a jogada das regras sem vantagem clara e escolhe a troca obrigatória (com semente fixa, para serem determinísticos);
   - uma batalha real contra a Mestre assíncrona, no `NpcBattle`;
   - 2593 testes do servidor e o teste de ponta a ponta, em que o líder joga com a Mestre e a busca roda no processo separado.
+
+**Etapa 4 (feita):**
+
+- **Decisões do usuário:**
+  - verificação em duas partes: o modelo novo precisa prever melhor os resultados das batalhas reais que ficaram fora do treino E não perder da Mestre em uso em cerca de 200 batalhas simuladas (pelo menos 47%);
+  - retreino toda segunda-feira às 4h, horário de Brasília;
+  - posições gravadas dos dois lados (NPC e jogador);
+  - mínimo de 30 batalhas reais novas para retreinar.
+- **Coleta** (`npc-battle.ts`, gancho `onPositions`, e `runs.ts`):
+  - em toda batalha individual do Desafio, com NPC de qualquer nível, cada pedido de jogada (do NPC e do jogador) grava as características da posição vista por aquele lado;
+  - as posições ficam só na memória até o fim da batalha. Numa batalha que vale e tem vencedor, vão para o banco com quem venceu. Empates, batalhas anuladas e batalhas retomadas (as posições anteriores à retomada se perdem) não entram.
+- **Anonimato** (migração 8, `ai_positions`):
+  - cada batalha recebe um código aleatório, e cada linha guarda só a ordem do turno, o lado, as 22 características e se aquele lado venceu;
+  - não entram jogador, desafio, data nem os Pokémon do time;
+  - a tabela não tem rowid, e as linhas ficam na ordem do código aleatório, para que a ordem de gravação não permita cruzar com as jornadas;
+  - os dados não são apagados com a conta, porque não há como ligá-los a ela. O aviso de privacidade explica isso.
+- **Modelos** (`ai_models`):
+  - o modelo das simulações (`master-model.ts`) é gravado como o primeiro;
+  - cada retreino grava o modelo novo, em uso ou recusado;
+  - a Mestre usa o modelo ativo, que vai em cada consulta ao processo da busca, de modo que o processo não lê o banco;
+  - o painel pode pôr em uso qualquer versão guardada (reversão).
+- **Retreino** (`master-learning.ts`, `runTraining`):
+  1. Com menos de 30 batalhas novas, o retreino é pulado e fica registrado.
+  2. As batalhas são separadas em 80% para o treino e 20% para o teste, pelo código aleatório.
+  3. O modelo novo parte sempre do modelo das simulações, com a normalização dele, e é ajustado com as posições reais, com regularização para o modelo de partida (`trainValueModel` com `prior`). Assim, os retreinos não se acumulam uns sobre os outros.
+  4. Para passar, o erro de previsão (perda logarítmica) nas batalhas de teste precisa ser menor que o do modelo em uso.
+  5. Depois, 200 batalhas simuladas, Mestre nova contra Mestre atual, com os times do banco de treinadores (ou Random Battle, se houver menos de dois) e uma busca mais leve. O modelo novo precisa de pelo menos 47%.
+  6. No fim, todas as posições ficam marcadas como usadas.
+- **Processo do retreino** (`master-training-process.ts`):
+  - é criado só na hora do treino e encerrado no fim;
+  - prazo de 3 horas;
+  - sem subprocessos, o retreino é recusado, em vez de travar o servidor;
+  - a agenda confere a cada 10 minutos se é segunda entre 4h e 5h em Brasília, e não começa um segundo retreino em menos de 20 horas.
+- **Painel** (`view-ginasiosadmin-mestre`, botão "IA Mestre" na navegação):
+  - modelo em uso;
+  - batalhas e posições coletadas, e as batalhas novas desde o último retreino;
+  - vitórias e derrotas da Mestre nas jornadas;
+  - "Retreinar agora", com os mesmos passos do automático;
+  - histórico dos últimos 20 retreinos (resultado, batalhas de treino e de teste, erros de previsão e pontuação nas batalhas simuladas);
+  - lista de modelos com "Usar esta versão".
+- **O que não aprende:** as regras e os pesos da etapa 2 continuam fixos, porque só se ajustam com simulação (`train-master.js`).
+- **Validado:**
+  - testes de unidade: posições anônimas e contagem; modelo das simulações gravado e reversão; retreino pulado com poucas batalhas; retreino completo com dados sintéticos (previsão, verificação com 2 batalhas e registro); agenda; posições entregues pelo `NpcBattle` numa batalha terminada;
+  - 2598 testes do servidor e 27 do login;
+  - teste de ponta a ponta com 12 passos, inclusive a página IA Mestre contando a batalha individual contra o líder;
+  - retreino manual no servidor local, pelo painel: o processo foi criado, o retreino foi pulado por falta de batalhas e ficou no histórico.
+- **No ambiente local:** as batalhas do teste de ponta a ponta também entram nos dados de aprendizado. São anônimas, então a limpeza do teste não tem como apagá-las. Isso só acontece no ambiente local.
 

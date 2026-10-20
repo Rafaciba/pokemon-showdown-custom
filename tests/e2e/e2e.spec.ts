@@ -325,6 +325,18 @@ test('desafio: o jogador vence o ginásio e o Campeão em dupla, e o perfil most
 	expect(rows[2].icons).toBe(2);
 });
 
+test('IA Mestre: a página mostra o modelo em uso e as batalhas coletadas', async () => {
+	const id = 'view-ginasiosadmin-mestre';
+	await openPsPage(admin, 'view-ginasiosadmin', /Master AI|IA Mestre/);
+	await clickPsButton(admin, 'view-ginasiosadmin', `button[value="${id}"]`);
+	await expectRoomText(admin, id, /Model in use|Modelo em uso/);
+	const text = await admin.evaluate(rid => (window as any).app.rooms[rid].$el.text(), id);
+	// A batalha individual contra o líder (Mestre) entrou nos dados de aprendizado
+	const battles = Number((/(\d+) (?:battles and|batalhas e) \d+/.exec(text) || [])[1]);
+	expect(battles, 'batalhas coletadas').toBeGreaterThanOrEqual(1);
+	expect(text).toMatch(/Retrain now|Retreinar agora/);
+});
+
 test('contas: troca de senha e exclusão apagam os dados de jogo', async () => {
 	await player.goto('/conta');
 	await player.fill('form[action="/conta/senha"] input[name=current]', PASSWORD);

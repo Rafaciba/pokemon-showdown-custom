@@ -273,6 +273,27 @@ A Mestre simula jogadas no simulador do PS (`sim-search.ts`) num processo filho 
 - **Justiça do jogo** (decisão do usuário): a Mestre não vê o time do jogador. O palpite usa só o que é público (Pokémon e golpes já mostrados no log) e os repertórios gerais de cada espécie.
 - **LGPD:** a busca não grava nada. A consulta ao processo leva o pedido do NPC e o log público da batalha (o mesmo que qualquer espectador vê) e não sai do servidor.
 
+### IA Mestre: aprendizado com as batalhas reais (2026-10-20)
+
+- **LGPD (anonimização):**
+  - as posições de aprendizado (`ai_positions`) guardam só um código aleatório da batalha, a ordem do turno, o lado (NPC ou jogador), 22 números da posição e se aquele lado venceu;
+  - não entram nome, id, desafio, data nem os Pokémon do time;
+  - a tabela é `WITHOUT ROWID`, com chave no código aleatório, para que a ordem de gravação não permita cruzar as batalhas com as jornadas (que têm data e jogador);
+  - como são anônimas desde a coleta, não são dados pessoais (LGPD, art. 12);
+  - o aviso de privacidade (pt e en, 20/10/2026) descreve esses dados, a finalidade, o prazo (sem prazo) e o fato de não serem apagados com a conta, já que não há como ligá-los a ela.
+- **A01:** a página IA Mestre e os comandos `retreinarmestre` e `usarmodelomestre` exigem admin. A versão do modelo é validada (letras minúsculas, números e hífen).
+- **A04 (disponibilidade):**
+  - o retreino roda num processo filho criado sob demanda, com prazo de 3 horas e encerrado no fim;
+  - sem subprocessos, ele é recusado;
+  - só um retreino por vez;
+  - durante o retreino, a busca da Mestre continua noutro processo, e com a demora vale a jogada das regras.
+- **A04 (envenenamento dos dados):**
+  - um jogador que perca de propósito pode distorcer os dados reais;
+  - o modelo novo sempre parte do modelo das simulações, com regularização para ele;
+  - só entra em uso se prever melhor as batalhas reais fora do treino e não perder da Mestre atual em batalhas simuladas;
+  - o admin pode voltar a qualquer versão pelo painel.
+- **A09:** retreino manual e troca de modelo entram no modlog (`GYMMASTER`, sem nomes de jogadores), e o histórico dos retreinos fica no banco.
+
 ### Pacotes de treinadores e desafios (2026-10-19)
 
 A página **Importar e exportar** do painel (`view-ginasiosadmin-pacotes`) importa e exporta treinadores e desafios em JSON (`transfer.ts`; ver `docs/pacotes-ginasios.md`).
