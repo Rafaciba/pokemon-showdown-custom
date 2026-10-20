@@ -587,3 +587,31 @@ Pedido do usuário: gerar treinadores e desafios de um jeito fácil de importar 
   - exportação recusada com nomes repetidos.
 
   O teste de ponta a ponta ganhou um passo: exportar o desafio E2E e importar uma cópia com um líder novo e o Campeão reaproveitado. A prévia do pacote de Kanto foi conferida no navegador.
+
+## IA Mestre (2026-10-20, em andamento)
+
+Pedido do usuário: um nível acima do Difícil que começa com a inteligência dele, treina em batalhas simuladas contra Médio e Difícil e depois aprende com as batalhas reais do servidor. O trabalho foi dividido em etapas, feitas uma por vez:
+
+1. **Nível Mestre no sistema**, com os pesos da Difícil extraídos. Feita.
+2. **Treino dos pesos por simulação:** um otimizador joga contra Médio e Difícil, em individual e em dupla, com times aleatórios e com os times dos pacotes.
+3. **Avaliação de posição aprendida:** um modelo pequeno em TypeScript, sem dependências. A Mestre passa a olhar à frente, com até 1 segundo por jogada.
+4. **Aprendizado no servidor**, com uma página no painel: versão do modelo, batalhas usadas, taxa de vitória, retreinar e reverter.
+5. **Dupla, calibração e documentação final.**
+
+Decisões do usuário:
+
+- **Retreino:** automático no servidor, por exemplo uma vez por semana, de madrugada. O modelo novo só entra se vencer o atual num teste de verificação, e o painel mostra o histórico e permite voltar à versão anterior.
+- **Dados das batalhas reais:** anônimos (a situação de cada turno, a jogada do NPC e o resultado, sem nome nem id do jogador nem ligação com a conta) e guardados sem prazo. O aviso de privacidade precisa explicar isso na etapa 4.
+- **Tempo de reflexão:** até 1 segundo por jogada, pensando na VPS de 2 vCPU.
+- **Fonte dos dados:** todas as batalhas do Desafio, com NPC de qualquer nível, e não só as da Mestre.
+
+**Etapa 1 (feita):**
+
+- **Pesos:** os pontos e limites que a Difícil usava fixos no código viraram `HeuristicWeights` (`heuristic-ai.ts`), com 46 pesos. Alguns exemplos: o bônus por nocautear, o valor de cada hazard e status, os buffs e debuffs, a margem de troca e a penalidade por entrar para ser nocauteado. `DEFAULT_WEIGHTS` tem os valores escolhidos à mão, que continuam valendo para Fácil, Médio e Difícil.
+- **Nível:** `master` (`levels.ts`, acima do `hard`) usa as regras da Difícil com os pesos de `masterWeights()` (`master-weights.ts`). Por enquanto, são os pesos padrão.
+- **Painel:** a opção "Mestre" aparece na dificuldade base do desafio e na de cada treinador. Ela também vale nos pacotes (`baseAILevel`/`aiLevel: "master"`).
+- **Validado:**
+  - teste de unidade: com os pesos padrão, a Mestre faz as mesmas escolhas da Difícil, e com Stealth Rock valendo 0 ela troca a jogada;
+  - banco de testes, 1000 batalhas em individual: a Difícil fez 57,7% contra a Médio (antes da refatoração, 55,6% em 2000 batalhas, dentro da margem), e a Mestre fez 49,8% contra a Difícil;
+  - banco de testes, 500 batalhas em dupla: Mestre 49,6% contra a Difícil;
+  - o desafio do teste de ponta a ponta passou a usar a Mestre.

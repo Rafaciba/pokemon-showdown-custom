@@ -219,8 +219,8 @@ test('desafio: o admin cria treinadores e um desafio e o abre', async () => {
 	const before = await roomIds(admin);
 	await openPsPage(admin, 'view-ginasiosadmin-desafio-novo', /Save challenge|Salvar desafio/);
 	await submitPsForm(admin, 'view-ginasiosadmin-desafio-novo', 'form[data-submitsend^="/ginasioadmin salvardesafio"]', {
-		// IA Difícil: a batalha em dupla do Campeão usa a IA heurística em dupla
-		name: 'E2E Desafio', gyms: '1', elite: 'no', lock: 'no', level: 'hard',
+		// IA Mestre (regras do Difícil com pesos aprendidos): a batalha em dupla do Campeão usa a IA heurística em dupla
+		name: 'E2E Desafio', gyms: '1', elite: 'no', lock: 'no', level: 'master',
 	});
 	const page = await waitNewRoom(admin, /^view-ginasiosadmin-desafio-\d+$/, before);
 	challengeId = Number(page.split('-').pop());
