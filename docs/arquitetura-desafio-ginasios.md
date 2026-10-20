@@ -594,7 +594,7 @@ Pedido do usuário: um nível acima do Difícil que começa com a inteligência 
 
 1. **Nível Mestre no sistema**, com os pesos da Difícil extraídos. Feita.
 2. **Treino dos pesos por simulação** (feita): um otimizador joga contra Médio e Difícil, em individual e em dupla, com times aleatórios e com os times dos pacotes.
-3. **Avaliação de posição aprendida:** um modelo pequeno em TypeScript, sem dependências. A Mestre passa a olhar à frente, com até 1 segundo por jogada.
+3. **Avaliação de posição aprendida e busca** (feita): um modelo pequeno em TypeScript, sem dependências, e uma busca no simulador do PS com palpites do time do jogador, com até 1 segundo por jogada.
 4. **Aprendizado no servidor**, com uma página no painel: versão do modelo, batalhas usadas, taxa de vitória, retreinar e reverter.
 5. **Dupla, calibração e documentação final.**
 
@@ -646,4 +646,37 @@ Decisões do usuário:
   - **Times dos pacotes:** nos confrontos com eles, os pesos padrão dão exatamente 50%. O time decide quase sempre, então essas batalhas trazem pouco sinal ao treino.
   - **Limite:** a melhora é modesta porque a Mestre continua decidindo uma jogada de cada vez, com as mesmas regras. O ganho maior deve vir da etapa 3 (avaliação de posição e olhar à frente).
 - **Validado:** um teste confere que os pesos treinados estão completos e dentro dos limites do treino. O teste da etapa 1 passou a comparar a Mestre com os pesos padrão e a Difícil. O servidor tem 2590 testes passando.
+
+**Etapa 3 (feita):**
+
+- **Retrato da posição** (`position.ts`): visto pelo lado do NPC, com o próprio time exato e, do adversário, o que o log mostrou. Os Pokémon ainda não vistos contam como saudáveis.
+  - **Características:** 22 ao todo. Entram HP somado e Pokémon vivos de cada lado, HP dos ativos, dano estimado de um ativo no outro, quem é mais rápido, quem nocauteia primeiro, melhor confronto do banco, boosts, status, dano de hazards ao entrar e telas.
+  - **Golpes prováveis do adversário:** o repertório da espécie nos sets do Random Battle do PS (`likelyMoves`). Espécies fora desses sets recebem golpes genéricos do tipo.
+  - **Sem dado de jogador:** é isso que a etapa 4 vai gravar das batalhas reais.
+- **Modelo de avaliação** (`value-model.ts`): regressão logística que estima a chance de vitória, com treino por gradiente (Adam e L2) no próprio plugin, porque o servidor vai retreinar na etapa 4.
+  - **Ferramenta:** `tools/gym-challenge/train-value.js` joga batalhas IA contra IA (Difícil, Mestre, Médio e Fácil em vários confrontos; Random Battle e times dos pacotes) e grava as posições dos dois lados, marcadas com o vencedor.
+  - **Treino de 2026-10-20:** 30 mil batalhas e 1,25 milhão de posições. Fora do treino, o modelo acertou o vencedor em 72,6% das posições, com perda logarítmica de 0,525 (o chute dá 0,693). O modelo fica em `master-model.ts`.
+- **Primeira tentativa, descartada:** olhar um turno à frente com um turno simplificado, feito por nós (dano médio, sem itens, habilidades e clima). Contra a Mestre da etapa 2, deu 50,6% em 4000 batalhas, sem ganho. O código foi removido.
+- **Busca no simulador** (`sim-search.ts`), com a decisão do usuário de usar um time estimado, sem ver o time do jogador:
+  - **A batalha montada:** a Mestre monta batalhas no simulador do PS com o estado atual. O nosso time é o exato. O do adversário é um palpite: os Pokémon já vistos, com os golpes revelados, completados com golpes sorteados do repertório da espécie e uma das habilidades possíveis, sem item.
+  - **Avaliação:** cada combinação de jogada nossa (golpes e trocas) e resposta do adversário (os 4 golpes do palpite e até 2 trocas para Pokémon vistos) é jogada por um turno, com as trocas obrigatórias depois. A posição resultante é avaliada pelo modelo.
+  - **Escolha:** o valor de cada jogada mistura a pior resposta e a média (pessimismo 0,5), na média dos palpites. A jogada das regras (os pesos da etapa 2) só é trocada quando a busca estima uma vantagem acima de 0,05 na chance de vitória.
+  - **Configuração:** 2 palpites e até 1 s por jogada, cerca de 250 ms em média (`MASTER_SIM`). Com 4 palpites não houve ganho mensurável.
+- **Processo separado** (`master-search-process.ts`): a busca roda num processo filho (o `QueryProcessManager` do PS, como o `/dexsearch`), para não travar o servidor.
+  - **No servidor:** a Mestre calcula a jogada das regras na hora, pede a busca e espera no máximo o tempo da busca mais 1,5 s. Sem resposta, ou com erro, vale a jogada das regras.
+  - **Contrato:** a `NpcAI` passou a poder responder com uma Promise. O `NpcBattle` só aceita a resposta se o pedido ainda for o mesmo.
+  - **Quantidade de processos:** `Config.subprocesses.gymmaster`, padrão 1. No ambiente local, o servidor passou a usar 478 MiB, de um limite de 1,5 GiB. Sem processos (testes e ferramentas), a busca roda no próprio processo.
+  - **Em dupla:** a Mestre continua com as regras e os pesos da etapa 2. A dupla fica para a etapa 5.
+- **Resultados** (banco de testes, batalhas individuais; `ai-benchmark.js --workers N` joga em paralelo):
+
+  | Confronto | Batalhas | Mestre com busca |
+  |---|---|---|
+  | x Mestre da etapa 2 | 1200 | **55,5%** (±2,9) |
+  | x Difícil | 400 | **63,7%** (±4,8); a Mestre da etapa 2 fazia 53,9% |
+
+  - **Ressalva:** no Random Battle, o repertório usado no palpite é exatamente o dos times sorteados. Contra times montados por jogadores, o palpite é menos preciso, e o ganho real tende a ser menor. A etapa 4 (dados das batalhas reais) deve mostrar isso.
+- **Validado:**
+  - testes de unidade: a busca nocauteia, troca de um confronto perdido, mantém a jogada das regras sem vantagem clara e escolhe a troca obrigatória (com semente fixa, para serem determinísticos);
+  - uma batalha real contra a Mestre assíncrona, no `NpcBattle`;
+  - 2593 testes do servidor e o teste de ponta a ponta, em que o líder joga com a Mestre e a busca roda no processo separado.
 

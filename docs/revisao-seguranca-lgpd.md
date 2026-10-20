@@ -260,6 +260,19 @@ Decisões do usuário: manter as montagens (fluxo de `git pull`), tratar as depe
 
 Validado localmente: usuário e capabilities de cada container; escrita recusada no código, no build, nas dependências, no `config.js` e no sistema do container; escrita aceita nos bancos; site, sprites e páginas do login respondendo; e2e com cadastro por convite, intruso bloqueado, batalha entre dois jogadores, `/convite` e exclusão de contas (dados de jogo apagados pelo servidor); build completo do cliente; 2575 testes do servidor e 21 do login.
 
+### IA Mestre: busca no simulador (2026-10-20)
+
+A Mestre simula jogadas no simulador do PS (`sim-search.ts`) num processo filho (`master-search-process.ts`).
+
+- **A04 (disponibilidade):**
+  - a busca roda fora do processo principal, com até 1 s de CPU por jogada;
+  - o servidor espera no máximo esse tempo mais 1,5 s, e depois usa a jogada das regras;
+  - o `QueryProcessManager` destrói e recria o processo filho se uma consulta passar de 30 s;
+  - um erro na busca vira a jogada das regras e vai para o crashlog;
+  - o processo filho usa a memória do container do servidor (limite de 1,5 GiB; 478 MiB no ambiente local).
+- **Justiça do jogo** (decisão do usuário): a Mestre não vê o time do jogador. O palpite usa só o que é público (Pokémon e golpes já mostrados no log) e os repertórios gerais de cada espécie.
+- **LGPD:** a busca não grava nada. A consulta ao processo leva o pedido do NPC e o log público da batalha (o mesmo que qualquer espectador vê) e não sai do servidor.
+
 ### Pacotes de treinadores e desafios (2026-10-19)
 
 A página **Importar e exportar** do painel (`view-ginasiosadmin-pacotes`) importa e exporta treinadores e desafios em JSON (`transfer.ts`; ver `docs/pacotes-ginasios.md`).
