@@ -435,6 +435,8 @@ test('expedição: o admin começa a expedição de teste, escolhe o time, batal
 	expect(options).toBe(3);
 	await clickPsButton(admin, id, 'button[value="/expedicao inicial teste,0"]');
 	await expectRoomText(admin, id, /Choose the next node on the map|Escolha o próximo ponto no mapa/);
+	// O time mostra o item de cada Pokémon (a mochila aparece quando houver itens)
+	await expectRoomText(admin, id, /Held item.*No item|Item.*Sem item/);
 	// Primeiro andar (sempre selvagem): o encontro aparece, no nível inicial
 	const first = await admin.evaluate(rid => (window as any).app.rooms[rid].$el
 		.find('button[value^="/expedicao avancar teste,"]').map((i: number, b: HTMLButtonElement) => b.value).get(), id);

@@ -183,13 +183,57 @@ Cada etapa é validada antes da próxima, como no Desafio:
 - **Batalhas automáticas:** a mesma batalha, com o lado do jogador também respondido por uma IA (definida pela variação), e o jogador como espectador.
 - **Encontro determinístico:** gerado pela semente da run e pelo nó, para ser o mesmo depois de uma interrupção.
 
-## Perguntas em aberto da variação de teste
+## Decisões para a etapa 3 (2026-10-21)
 
-Para a etapa 3 (as demais foram respondidas acima):
+- **Captura:**
+  - o padrão é "escolhe ao vencer": depois de vencer um selvagem (ou o lendário), o jogador decide se fica com ele. Com o time cheio, troca por alguém do time ou recusa;
+  - guardadas para variações futuras: captura com Poké Bola da mochila e captura com chance, como nos jogos.
+- **Nó de item:** 1 entre 3 itens de segurar. O item que um Pokémon já segurava não se perde, vai para a mochila, e o jogador alterna os itens entre os Pokémon como quiser.
+- **Loja** (o dinheiro vem das batalhas contra treinadores, como nos jogos): vende cura (poções, Revive), itens de segurar, Poké Bolas, Rare Candy, TMs, berries e itens de curar status.
+- **Eventos "?":**
+  - na primeira leva: evoluções especiais, risco e recompensa, tutor de golpes, Pokémon de presente, árvores de berries, eventos que dão dinheiro e eventos com Pokémon selvagem;
+  - formato: eventos com escolhas de resultados diferentes, como no Slay the Spire. Exemplo: numa árvore, chacoalhar para ganhar uma berry, mas enfrentar Pokémon inseto, ou aproveitar a sombra para descansar e curar parte do HP do time.
+- **Status:** continua entre as batalhas, como nos jogos, até ser curado por item, berry, descanso ou evento.
+- **Itens de uso** (poções, Revive, Rare Candy, TMs, cura de status): só fora da batalha, na página da expedição. O simulador do PS não tem mochila durante a batalha.
+- **Dinheiro e preços:** pagamento como nos jogos (base da classe × nível do último Pokémon do treinador) e preços dos jogos, com um multiplicador para um ato típico render umas 3 ou 4 compras médias. Rare Candy e os itens fortes ficam caros.
+- **Mapa da variação de teste:** selvagem 35, treinador 25, evento 15, item 10, descanso 8 e loja 7. A loja não se repete em seguida e só aparece a partir do andar 2.
+- **Divisão da etapa 3** (para validar aos poucos): parte 1, captura, time cheio, nó de item, mochila e status; parte 2, dinheiro e loja; parte 3, eventos "?".
 
-- **Captura:** depois de vencer a batalha selvagem, o jogador escolhe se fica com o Pokémon? Com o time cheio, troca um ou recusa?
-- **Itens:** itens de segurar, escolhidos entre três num nó de item? Também itens passivos da run, como as relíquias do Slay the Spire?
-- **Eventos "?":** além das evoluções especiais, o que mais entra na primeira leva?
+## Etapa 3, parte 1: captura, itens e status (2026-10-21)
+
+- **Captura** (`rules.capture = 'choose'`):
+  - a vitória sobre um selvagem ou o lendário põe a captura na fila de decisões, depois dos golpes e das evoluções do time;
+  - o Pokémon entra no nível em que estava, com HP cheio, sem status e sem item;
+  - com o time cheio, a página lista quem pode sair, e o item de quem sai vai para a mochila;
+  - escolha nossa: o lendário também pode ser capturado (é o prêmio do nó raro).
+- **Nó de item:** 3 itens de segurar sorteados pela semente da run e pelo nó, os mesmos se o jogador sair e voltar. O escolhido vai para a mochila.
+  - A lista (`items.ts`) é escolha nossa: itens úteis em batalhas individuais, berries e reforços de tipo, sem Z-Crystals e itens de uma espécie só. As Mega Stones entram como item raro (abaixo).
+- **Mochila** (`run.items`): a coluna Item do time troca o item de cada Pokémon pela mochila, ou guarda o item atual. Isso só funciona fora de batalha.
+- **Itens na batalha:**
+  - item gasto (berry comida, Focus Sash usada) se perde, como nos jogos;
+  - item tirado por Knock Off ou Trick volta depois da batalha.
+- **Status:**
+  - vai para a batalha e volta no fim, pela regra do formato, sem mensagem: o cliente vê o status na condição do Pokémon;
+  - o sono recomeça a contagem a cada batalha;
+  - o descanso cura;
+  - na página, um selo colorido ao lado do HP.
+- **Nós novos no mapa:** loja (🛒) e evento (❓), por enquanto sem efeito, até as partes 2 e 3.
+- **Validado:**
+  - testes de unidade: status na batalha real e de volta, item gasto e item mantido, captura com vaga e com troca, mochila e nó de item;
+  - no navegador, com runs completas: captura, nó de item (forçado por um ajuste temporário das chances), mochila, troca de item e status depois da batalha (sono).
+
+### Ajustes depois da revisão do usuário (2026-10-21)
+
+- **Mapa:**
+  - ícones maiores (26 px, células de 56 × 44) e legenda maior;
+  - todos os caminhos terminam visivelmente no chefe: do último andar, cada nó sobe até uma barra horizontal que converge na coluna do chefe. A barra é desenhada com bordas, porque o filtro de HTML do cliente (Caja) não aceita SVG. O trecho percorrido fica em destaque;
+  - entre os andares continuam os caracteres `│╱╲`, maiores.
+- **Força dos encontros:** num teste do usuário, um Gyarados selvagem nível 20 no andar 4 do ato 1 venceu um time nível 18.
+  - **Como ficou:** o sorteio olha também a força da espécie no estágio sorteado, pela soma dos atributos base. Acima do teto do nível, sorteia de novo (`maxBstForLevel`, escolha nossa: 330 até o nível 12, depois 9 por nível; nível 20 = 400, nível 37 = 553, pseudo-lendários a partir do 42);
+  - os treinadores do banco do Desafio também só entram com os Pokémon dentro do teto;
+  - o nó de lendário fica fora do teto;
+  - a calibração da experiência usa as mesmas espécies, então o multiplicador se ajusta sozinho.
+- **Mega Stones** (decisão do usuário): item raro. No nó de item, 10% de chance (escolha nossa) de uma das três opções ser uma Mega Stone, de preferência uma que algum Pokémon do time (ou a evolução dele) usa. A loja e os eventos ficam para depois.
 
 ## Etapa 1: núcleo (feita em 2026-10-21)
 
