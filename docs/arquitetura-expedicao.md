@@ -233,6 +233,16 @@ Cada etapa é validada antes da próxima, como no Desafio:
   - os treinadores do banco do Desafio também só entram com os Pokémon dentro do teto;
   - o nó de lendário fica fora do teto;
   - a calibração da experiência usa as mesmas espécies, então o multiplicador se ajusta sozinho.
+- **Tooltips** (pedido do usuário):
+  - **Pokémon do time** (e da captura e da troca): tipos, habilidade com a descrição, natureza (o atributo que sobe e o que desce), item, atributos no nível (base, IVs e natureza, sem EVs, com a barra do atributo base) e golpes (tipo, categoria, poder, precisão, PP restantes e descrição);
+  - **golpe novo:** descrição completa do golpe novo, atributos do Pokémon ao lado, e tooltip com a descrição completa em cada golpe conhecido;
+  - **evolução:** o botão de cada evolução mostra o Pokémon já evoluído, com os atributos novos;
+  - **descrições:** no idioma do jogador, pelo catálogo de textos do PS (`data/text/pt`);
+  - **como funciona:** só CSS. O servidor manda o conteúdo escondido dentro do elemento (`span.exp-tip > span.exp-tip-body`, `tooltips.ts`), e a regra injetada por `client-custom.js` mostra o conteúdo no hover. O filtro de HTML das páginas não deixa passar scripts;
+  - **cuidados:** o conteúdo usa só elementos de linha (`span`), porque um `<table>` ou `<div>` dentro de `<p>` ou `<button>` faz o navegador fechar o parágrafo e desmontar o tooltip. As caixas da página têm `overflow: visible`, porque a `.infobox` do PS cortaria o tooltip. Dentro das tabelas `.ladder`, a cor volta ao normal, porque o PS pinta todo `span` delas de cinza.
+- **Uma aba só** (pedido do usuário; também evita mexer na run pela página durante a batalha):
+  - ao abrir a batalha (ou voltar a ela), o servidor fecha a aba da página da run;
+  - no fim, o botão "Voltar para a expedição" da sala (`expeditionReturn`, em `client-custom.js`, que só aceita páginas de run) fecha a aba da batalha e abre a da run, ou foca e atualiza a aba se ela estiver aberta.
 - **Mega Stones** (decisão do usuário): item raro. No nó de item, 10% de chance (escolha nossa) de uma das três opções ser uma Mega Stone, de preferência uma que algum Pokémon do time (ou a evolução dele) usa. A loja e os eventos ficam para depois.
 
 ## Etapa 1: núcleo (feita em 2026-10-21)
