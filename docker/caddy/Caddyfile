@@ -121,6 +121,17 @@ www.{$PS_HOST:localhost} {
 	# Segurança e LGPD da reserva: o pedido sai do nosso domínio para um terceiro. Nada
 	# que identifique o jogador vai junto: sem cookie de sessão, sem IP (X-Forwarded-*),
 	# sem Referer; e nenhum cookie do terceiro volta para o nosso domínio.
+	# Sprites próprios (assets/sprites, no git, arte nossa): por enquanto, o mato alto
+	# dos selvagens da Expedição, como avatar "#expedition..." (trainers-custom no cliente).
+	# Só o nosso prefixo; o que não existir dá 404, sem ir ao site oficial.
+	@oursprites path_regexp oursprites ^/sprites/trainers-custom/expedition[a-z0-9-]*\.png$
+	handle @oursprites {
+		uri strip_prefix /sprites
+		root * /srv/our-sprites
+		header Cache-Control "public, max-age=86400"
+		file_server
+	}
+
 	@remoteassets path /sprites/* /audio/*
 	handle @remoteassets {
 		root * /srv/client/play.pokemonshowdown.com

@@ -288,6 +288,13 @@ A Mestre simula jogadas no simulador do PS (`sim-search.ts`) num processo filho 
 - **A04:**
   - a run só avança para um nó ligado ao atual e só aceita as escolhas do nó;
   - o mapa e os sorteios saem da semente da run, que fica só no servidor.
+- **Etapa 2 (batalhas):**
+  - o estado do time vai para o simulador nas opções do lado do NPC, escritas pelo servidor; o jogador não consegue mandar outro estado;
+  - a linha privada com o estado final é tratada pelo servidor e não chega ao cliente;
+  - o resultado de uma batalha conta uma vez só, e só se a run ainda está no mesmo nó;
+  - as escolhas de golpe e evolução são conferidas contra a fila de decisões da run;
+  - na batalha automática, as jogadas do usuário são recusadas;
+  - as batalhas da Expedição são públicas, como as do Desafio, e ficam no banco só até terminar (o save state é apagado no fim).
 
 ### IA Mestre: aprendizado com as batalhas reais (2026-10-20)
 

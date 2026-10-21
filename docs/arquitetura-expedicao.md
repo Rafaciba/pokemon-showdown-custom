@@ -110,7 +110,7 @@ Cada etapa é validada antes da próxima, como no Desafio:
    - gerador do mapa com semente, com testes;
    - banco das runs;
    - páginas da lista de variações, do time inicial, do mapa e do nó, com os nós ainda sem batalha.
-2. **Batalhas:**
+2. **Batalhas** (feita, ver abaixo):
    - HP e PP que continuam entre as batalhas (o ponto técnico acima);
    - batalha jogada contra o NPC, com save state;
    - resultado de volta para a run;
@@ -133,22 +133,63 @@ Cada etapa é validada antes da próxima, como no Desafio:
    - passos no teste de ponta a ponta;
    - documentação.
 
+## Decisões para a etapa 2 (2026-10-21)
+
+- **Formato:**
+  - por enquanto, o padrão do Desafio: individual, Pokédex completa da gen 9, com Megaevolução e sem Tera, Z-moves e Dynamax;
+  - a base fica pronta para formatos por variação. Exemplos: expedições temáticas de cada geração, expedições que liberam Tera ou Dynamax e, raramente, treinadores em dupla.
+- **Níveis:**
+  - experiência dos jogos para o time todo. ~~Pokémon desmaiados não ganham~~ (substituído em 2026-10-21): no modo padrão, os desmaiados ganham metade; no Nuzlocke, eles saem do time, e um time menor ganha um pouco mais;
+  - ~~recalibrada para o time chegar entre os níveis 80 e 100 no último andar~~ (substituído na revisão da etapa 2, abaixo): **30 níveis por ato**, em média. Uma expedição de um ato termina por volta do nível 35, e só as mais longas chegam aos níveis altos;
+  - **sem nível fixo:** o ganho de experiência varia com o caminho e com os encontros sorteados. O jogador médio chega perto do nível do chefe; quem otimiza o caminho passa um pouco dele, e quem pega só selvagens ou nós sem batalha fica abaixo (variação baixa).
+- **Golpe novo com quatro já conhecidos:** o jogador escolhe qual esquecer, ou não aprende.
+- **Evolução por nível:** o jogador escolhe evoluir ou adiar.
+- **Derrota:** encerra a run.
+- **Adversários:** há três fontes, que coexistem, e cada variação escolhe as suas. A de teste usa as três:
+  - sorteados da Pokédex;
+  - treinadores do banco do Desafio, ajustados ao nível do andar;
+  - listas próprias da variação.
+- **Lendários:**
+  - um nó bem raro de encontro com um Pokémon lendário, só a partir do segundo ato ou, nas expedições de um ato, na metade final dele (2026-10-21);
+  - treinadores nunca têm lendários nem míticos;
+  - o chefe pode ter, mas não é comum.
+- **Estágio dos Pokémon sorteados:** de acordo com o nível, como nos jogos.
+  - Para os NPCs, as evoluções que nos jogos dependem de troca, amizade, item ou outra mecânica que não teremos acontecem num nível próprio: o nível em que a espécie anterior apareceu mais 16, no mínimo 30 e no máximo 50. Exemplos: Kadabra → Alakazam no 32, Eevee → evoluções no 30.
+  - Para o jogador, essas evoluções especiais vêm de nós "?" de evento (etapa 3), que depois terão outros eventos.
+- **IA por tipo de nó e andar (variação de teste):**
+  - selvagem: Aleatório na primeira metade, Fácil na segunda;
+  - treinador: sobe do Fácil até o Difícil;
+  - chefe: Difícil, e Mestre nos três quartos finais da run (pelo progresso). Com um ato só, o chefe da variação de teste usa a Mestre.
+- **Tamanho dos times adversários:** selvagem 1; treinador começa com 1 ou 2 e chega a 4 ou 5; chefe sempre 6.
+
+## Desenho da etapa 2
+
+- **Formato de cada variação** (`[Gen 9] Expedition: <variação>`):
+  - formato escondido, gerado a partir das variações em `config/custom-formats.ts`, como os formatos de desafio;
+  - tem uma variante em dupla, para encontros em dupla;
+  - a regra da Expedição, no `onBegin` do formato:
+    - aplica o estado do time (HP e PP) que vem nas opções do lado do NPC, gravadas no registro de entrada da batalha. Assim, a batalha retomada pelo save state aplica o mesmo estado;
+    - envolve o `win` da batalha para mandar o estado final do time do jogador numa mensagem privada, que o servidor intercepta.
+- **Pokémon desmaiados não entram na batalha.** O estado guardado é HP e PP; o status, como queimadura e veneno, não continua entre as batalhas.
+- **Experiência:**
+  - fórmula da geração 5 em diante (nível de quem derrota contra o derrotado, bônus de treinador);
+  - os dados do PS não trazem a experiência base nem a curva de crescimento: a experiência base é estimada pela soma dos atributos base. A curva e a calibração foram revistas depois (ver "Revisão da etapa 2").
+- **Nível dos adversários:** segue a curva de níveis por ato, com pequena variação, e o chefe fica um pouco acima.
+- **Decisões pendentes da run:** golpes novos e evoluções ficam numa fila. A página mostra a primeira, e o mapa só segue depois de resolvidas.
+- **Batalhas jogadas:**
+  - `NpcBattle` do Desafio, com save state;
+  - batalha retomada ao entrar com a conta;
+  - registro das batalhas no banco da Expedição.
+- **Batalhas automáticas:** a mesma batalha, com o lado do jogador também respondido por uma IA (definida pela variação), e o jogador como espectador.
+- **Encontro determinístico:** gerado pela semente da run e pelo nó, para ser o mesmo depois de uma interrupção.
+
 ## Perguntas em aberto da variação de teste
 
-Para a etapa 2 e a etapa 3 (o nível inicial e a origem dos iniciais já foram respondidos):
+Para a etapa 3 (as demais foram respondidas acima):
 
-- **Formato das batalhas:** individual, Pokédex completa da gen 9, com Megaevolução e sem Tera, Z-moves e Dynamax (o padrão do Desafio)?
-- **Níveis:**
-  - como se ganha nível (por vitória ou por experiência);
-  - em que nível termina o ato.
-- **Golpes:** aprendidos pelo learnset ao subir de nível? Quando há um golpe novo com quatro já conhecidos, o jogador escolhe qual esquecer?
 - **Captura:** depois de vencer a batalha selvagem, o jogador escolhe se fica com o Pokémon? Com o time cheio, troca um ou recusa?
 - **Itens:** itens de segurar, escolhidos entre três num nó de item? Também itens passivos da run, como as relíquias do Slay the Spire?
-- **Adversários:**
-  - nível e força crescentes com o andar;
-  - nível de IA de cada tipo de nó (selvagem, treinador e chefe);
-  - de onde vêm os times dos treinadores e do chefe (sorteados ou do banco de treinadores do Desafio).
-- **Derrota:** perder uma batalha encerra a run?
+- **Eventos "?":** além das evoluções especiais, o que mais entra na primeira leva?
 
 ## Etapa 1: núcleo (feita em 2026-10-21)
 
@@ -226,3 +267,127 @@ Para a etapa 2 e a etapa 3 (o nível inicial e a origem dos iniciais já foram r
 - **Teste de ponta a ponta mais estável:**
   - o passo dos convites reabria a página e lia o texto antes de a versão nova chegar, porque "Convites pendentes" já estava na antiga;
   - agora ele espera até o código sumir. A falha aparecia em parte das rodadas.
+
+## Etapa 2: batalhas (feita em 2026-10-21)
+
+- **Código novo:**
+
+  | Arquivo | O que faz |
+  |---|---|
+  | `formats.ts` | Formato escondido de cada variação e a variante em dupla, com a regra que aplica e devolve o estado do time. |
+  | `species.ts` | Espécies sorteáveis, lendários e evolução pelo nível (dos NPCs e por nível do jogador). |
+  | `progression.ts` | Progresso da run, nível e tamanho dos adversários, multiplicador de experiência, ganho de experiência e evolução. |
+  | `encounters.ts` | Encontro de cada nó de batalha, pelas três fontes. |
+  | `battles.ts` | Começa, retoma e termina a batalha de um nó e aplica o resultado à run. |
+
+- **Mudança no `NpcBattle`** (compartilhado com o Desafio):
+  - `npc.playerData` leva campos extras nas opções do lado do NPC;
+  - `hooks.onPrivateLine` recebe linhas privadas do formato, que não vão ao cliente;
+  - `autoPlayer` faz uma IA jogar pelo desafiante (batalha automática), e as jogadas do usuário são recusadas.
+- **Estado do time na batalha:**
+  - **ida:** vai nas opções do lado do NPC (`expedition.p1`, HP em fração e PP gastos), que ficam no registro de entrada. O `onBegin` do formato aplica o estado, e a retomada pelo save state aplica de novo;
+  - **volta:** o formato envolve o `win` da batalha e manda o estado final do lado do jogador na linha privada `|expeditionstate|`. Isso vale para vitória, derrota, desistência e empate;
+  - Pokémon desmaiados ficam fora da batalha.
+- **Batalha:**
+  - **começo:** no nó, "Batalhar!" abre a sala;
+  - **interrupção:** a batalha fica aberta e volta ao entrar com a conta, ou pelo botão "Continuar a batalha". Com save state, volta do ponto em que parou; sem ele, começa de novo, com o mesmo encontro e o mesmo estado do time;
+  - **desistência:** desistir da run com batalha aberta dá forfeit.
+- **Resultado:**
+  - **vitória:** o estado final volta para o time, e cada Pokémon que não desmaiou ganha a experiência de todos os derrotados. Golpes novos com espaço entram na hora. Com quatro golpes, e nas evoluções por nível, a decisão vai para a fila. Depois vem a regra de desmaio (Nuzlocke tira os desmaiados) e a de desgaste (cura total, se for o caso), e o nó termina;
+  - **derrota ou empate:** a run acaba. O empate só acontece quando o último Pokémon dos dois lados cai.
+- **Decisões:**
+  - a página mostra a primeira da fila, e o mapa espera;
+  - **golpe novo:** escolher qual esquecer, ou não aprender;
+  - **evolução:** as opções do Pokémon juntas, ou "Agora não". Ela é oferecida de novo a cada subida de nível;
+  - **na evolução:** a habilidade fica no mesmo espaço (comum 1, comum 2 ou oculta), e o HP proporcional se mantém;
+  - **run vencida:** as decisões pendentes são descartadas.
+- **Encontros** (gerados pela semente da run e pelo nó):
+  - **selvagem:** 1 Pokémon, da Pokédex ou da lista da variação;
+  - **lendário:** 1 lendário (nó raro);
+  - **treinador:**
+    - Pokédex: espécies diferentes, com classes de treinador e sprites oficiais;
+    - banco do Desafio: o time do treinador, ou parte dele, no nível do andar, sem treinadores com lendários;
+    - lista da variação;
+  - **chefe:** 6 Pokémon, com a chance de um lendário (`bossLegendaryChance`);
+  - golpes do nível e IVs sorteados, sem EVs. Os treinadores do banco ficam com os golpes e os EVs deles.
+- **Variação de teste:**
+  - **chances:** selvagem 45, treinador 30, item 15, descanso 10 e lendário 3;
+  - **fontes:**
+    - selvagem: Pokédex 70 e lista 30;
+    - treinador: Pokédex 50, banco 25 e lista 25;
+    - chefe: Pokédex 40, banco 40 e lista 20;
+  - **lista própria:** 16 espécies clássicas e 3 treinadores temáticos (inseto, pedra e água);
+  - **lendários:** chance de lendário no chefe de 20%;
+  - **IA:**
+    - selvagem: Aleatório na primeira metade e Fácil na segunda;
+    - treinador: Fácil, Médio e Difícil, em terços;
+    - chefe: Difícil, e Mestre a partir de três quartos da run (o único chefe da variação de teste usa a Mestre);
+    - lendário: Difícil (escolha minha, ajustável);
+  - **níveis:** 30 por ato (`extra.levelsPerAct`, ajustável no painel entre 10 e 50). Ver "Revisão da etapa 2".
+- **Experiência:** a primeira versão mirava o nível 90 no último andar. Ela foi substituída na revisão abaixo.
+- **Validado:**
+  - **testes de unidade:**
+    - estágio pelo nível e níveis das evoluções especiais;
+    - lendários fora da lista comum;
+    - experiência (desmaiados não ganham, golpes com espaço, fila de decisões, evolução);
+    - calibração;
+    - encontros determinísticos e coerentes com as regras (treinadores sem lendários, IA do chefe, tamanhos);
+    - derrota que encerra a run, com o resultado contado uma vez só;
+    - decisões de golpe e evolução, com o mapa esperando;
+    - batalha real com o estado do time: HP de 50% aplicado e devolvido, PP gastos devolvidos e forfeit encerrando a run;
+    - batalha automática até o fim, sem jogadas do usuário;
+  - os 2620 testes do servidor;
+  - **teste de ponta a ponta:** 15 passos. O admin entra no nó selvagem do primeiro andar (nível 4 a 6), abre a batalha, desiste com `/forfeit` e vê a derrota na página.
+
+## Revisão da etapa 2: ritmo e telas (2026-10-21)
+
+Pedido do usuário depois da etapa 2: o time subia níveis demais no começo, e o ritmo precisa escalar por ato. Telas validadas no navegador com vitórias de verdade.
+
+- **Medição da versão anterior** (20 runs simuladas da variação de teste):
+  - o time subia de 11 a 16 níveis por batalha (adversários nos níveis 5, 16, 30, 43 e 50);
+  - chegava ao chefe no nível 61, com o chefe no 92;
+  - as decisões de golpe passavam de 10 por batalha no time de três.
+- **Decisões do usuário:**
+  - níveis por ato, com **30 por ato** como padrão: os chefes dos atos 1, 2 e 3 ficam por volta dos níveis 37, 67 e 97;
+  - **sem nível fixo:** a experiência dos jogos, com cálculo pela média. Azar nos encontros, ou escolha de nós sem batalha, dá menos níveis. Um caminho otimizado pode passar um pouco do nível do chefe. A variação deve ser baixa;
+  - "pular todos" nas decisões de golpe: ver depois do ajuste.
+- **Como ficou** (`progression.ts`):
+  - **curva:** o nível de um andar é o nível inicial mais `levelsPerAct` × (ato − 1 + andar / andares), até o 100. Os adversários seguem a curva (±1), e o chefe fica 2 acima;
+  - **calibração do multiplicador:** 24 caminhos ao acaso em mapas gerados com a configuração da variação, o "jogador médio" vencendo todas as batalhas. O multiplicador faz a chegada média a cada chefe bater com a curva. O cálculo leva até 1 s por configuração, feito na carga do servidor e guardado;
+  - **peso do chefe** (segundo número calibrado, só com mais de um ato): o chefe fica dois andares acima da última batalha, porque o andar antes dele é descanso, e tem 6 Pokémon evoluídos. Sem esse peso, ele dava cerca de 20 níveis e jogava o time muito acima do começo do ato seguinte. O peso faz o time sair do chefe 1 nível acima do nível dele;
+  - **batalhas com vários adversários:** a vitória vale a média dos derrotados vezes a raiz da quantidade. Um treinador com 4 Pokémon vale o dobro de um selvagem, e não 4 vezes;
+  - **curva de experiência:** nível elevado a 2,5, na escala da "média rápida" (1.000.000 no nível 100). Com a cúbica dos jogos, a primeira vitória (nível 5) dava 8 níveis; com a quadrática, os últimos atos estouravam.
+- **Simulação final** (40 runs por cenário, três estratégias: caminho ao acaso, prioridade às batalhas, evitar batalhas):
+
+  | Cenário | Chegada ao chefe: ao acaso | prioridade às batalhas | evitar batalhas | Curva |
+  |---|---|---|---|---|
+  | 1 ato de 6 andares (teste) | 36,6 | 37,6 | 35,0 | 35 |
+  | 3 atos, ato 1 | 33,4 | 34,2 | 32,4 | 35 |
+  | 3 atos, ato 2 | 68,0 | 70,4 | 65,5 | 65 |
+  | 3 atos, ato 3 | 97,6 | 98,8 | 95,5 | 95 |
+
+  - **ganho por batalha:** cerca de 5 níveis na primeira vitória e 6 a 7 por andar depois;
+  - **decisões de golpe:** de 1 a 2 por Pokémon a cada batalha no começo, caindo ao longo da run. O "pular todos" ficou para o usuário avaliar;
+  - **casos extremos:** em mapas com poucos nós de batalha no caminho, a chegada ao chefe do ato 1 pode cair para perto do nível 17.
+- **Telas** (validadas no navegador com runs completas, vitórias de verdade, evolução e derrota no chefe):
+  - **time:** barra de experiência (com o que falta para o próximo nível no título) e barra de HP colorida;
+  - **resumo da vitória:** experiência ganha, níveis (5 → 9), golpes aprendidos na hora e desmaiados sem experiência. Fica na página até o próximo nó;
+  - **golpe novo:** tipo, categoria, poder, precisão e PP do golpe novo e dos quatro conhecidos, mais as decisões restantes;
+  - **evolução:** aviso de que a evolução é oferecida de novo na próxima subida de nível;
+  - **nó de treinador e de chefe:** sprite do treinador;
+  - **fim da batalha:** a sala mostra o resultado ("Vitória! A expedição continua.", "Derrota. A expedição acabou." ou "Expedição concluída. Parabéns!") e o botão "Voltar para a expedição". Sem ele, fechar a sala da batalha leva para a Home;
+  - **run encerrada:** quem venceu o time, até onde chegou (andar e ato) e o time no fim.
+  - Migração 3 do banco: `runs.last_battle` (resumo da última batalha).
+- **Achados levados ao usuário, e as decisões (2026-10-21):**
+  - **desmaiados ficavam para trás:** numa run validada, um Pokémon que desmaiou cedo ficou sem experiência até o descanso. Dois dos três iniciais chegaram ao chefe no nível 9, e o terceiro no 35.
+    - **Decisão:** há o modo padrão e o modo Nuzlocke. No padrão, quem desmaiou ganha metade da experiência (`FAINTED_EXP_SHARE`). No Nuzlocke, os desmaiados saem do time, e um time com menos Pokémon que o máximo da variação ganha um pouco mais (`nuzlockeBonus`: até 50% a mais com um Pokémon só; o tamanho da escala foi escolha nossa).
+    - **Etapa 3:** haverá outros meios de curar os desmaiados, como itens de reviver comprados em lojas. A loja é um tipo de nó, e o dinheiro vem das batalhas contra treinadores, como nos jogos.
+  - **nó de lendário cedo demais:** numa run validada, Articuno no andar 2 venceu o time.
+    - **Decisão:** o nó fica bem raro e só aparece a partir do segundo ato ou, nas expedições de um ato, na metade final dele.
+    - **Como ficou:** regra da base no mapa (`lateTypes`). A variação de teste também limita a um nó por ato (`maxPerAct`, escolha nossa para o "bem raro") e baixou a chance de 3 para 2.
+  - **selvagens com sprite de treinador:** na batalha, o lado do selvagem mostrava um sprite de treinador qualquer, porque o PS sempre mostra um avatar.
+    - **Decisão:** um sprite novo de mato alto.
+    - **Como ficou:**
+      - arte nossa, em pixel art, gerada por `scripts/sprites/mato.py` em `assets/sprites/trainers-custom/expeditiongrass.png` (no git);
+      - o Caddy serve o arquivo em `/sprites/trainers-custom/expedition*.png`, e um nome inexistente dá 404, sem ir ao site oficial;
+      - os selvagens e os lendários usam o avatar `#expeditiongrass`, que o cliente busca em `trainers-custom`.
