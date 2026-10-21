@@ -296,6 +296,29 @@ test('desafio sorteado: busca, filtros e ordenação dos treinadores', async () 
 	expect(result.championOptions[1]).toContain('E2E Campeao');
 });
 
+test('sprites: a galeria troca de página na mesma aba e escolhe quantos sprites mostrar', async () => {
+	const prefix = 'view-ginasiosadmin-sprites-novo-';
+	const galleryTabs = () => admin.evaluate(p => Object.keys((window as any).app.rooms).filter(id => id.startsWith(p)), prefix);
+	const spriteCount = (rid: string) => admin.evaluate(id => (window as any).app.rooms[id].$el
+		.find('button[name=gymPickSprite]').filter((i: number, b: HTMLButtonElement) => b.value !== '').length, rid);
+	await openPsPage(admin, `${prefix}1-48`, /Sprites per page|Sprites por página/);
+	expect(await spriteCount(`${prefix}1-48`)).toBe(48);
+	// Próxima página: a aba é trocada, sem abrir outra
+	await clickPsButton(admin, `${prefix}1-48`, 'button[value="/ginasioadmin paginasprite novo,2,48,"]');
+	await expectRoomText(admin, `${prefix}2-48`, /Page 2 of|Página 2 de/);
+	expect(await galleryTabs()).toEqual([`${prefix}2-48`]);
+	// 96 por página (volta para a página 1)
+	await clickPsButton(admin, `${prefix}2-48`, 'button[value="/ginasioadmin paginasprite novo,1,96,"]');
+	await expectRoomText(admin, `${prefix}1-96`, /Page 1 of|Página 1 de/);
+	expect(await spriteCount(`${prefix}1-96`)).toBe(96);
+	expect(await galleryTabs()).toEqual([`${prefix}1-96`]);
+	// A busca mantém a quantidade por página e também fica na mesma aba
+	await submitPsForm(admin, `${prefix}1-96`, 'form[data-submitsend^="/ginasioadmin buscarsprite"]', { q: 'brock' });
+	await expectRoomText(admin, `${prefix}1-96-brock`, /brock/);
+	expect(await galleryTabs()).toEqual([`${prefix}1-96-brock`]);
+	await admin.evaluate(id => (window as any).app.leaveRoom(id), `${prefix}1-96-brock`);
+});
+
 test('pacotes: o admin exporta o desafio e importa um pacote com um treinador novo', async () => {
 	const id = 'view-ginasiosadmin-pacotes';
 	await openPsPage(admin, 'view-ginasiosadmin', /Import and export|Importar e exportar/);
