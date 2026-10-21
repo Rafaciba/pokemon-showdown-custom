@@ -384,7 +384,8 @@ Pedido do usuário depois da etapa 2: o time subia níveis demais no começo, e 
     - **Etapa 3:** haverá outros meios de curar os desmaiados, como itens de reviver comprados em lojas. A loja é um tipo de nó, e o dinheiro vem das batalhas contra treinadores, como nos jogos.
   - **nó de lendário cedo demais:** numa run validada, Articuno no andar 2 venceu o time.
     - **Decisão:** o nó fica bem raro e só aparece a partir do segundo ato ou, nas expedições de um ato, na metade final dele.
-    - **Como ficou:** regra da base no mapa (`lateTypes`). A variação de teste também limita a um nó por ato (`maxPerAct`, escolha nossa para o "bem raro") e baixou a chance de 3 para 2.
+    - **Como ficou:** regra da base no mapa (`lateTypes`).
+    - **Ajuste (2026-10-21):** o lendário não deve aparecer em toda run. Ele saiu dos pesos e virou nó raro (`rareNodes`): o ato tem uma chance de ganhar um único nó de lendário, num andar permitido e sem outro logo antes ou depois. Na variação de teste, a chance é de 10% (`rare:legendary`, ajustável no painel). Medido em 1000 mapas: 10,8% têm o nó, e o jogador ainda precisa escolher passar por ele.
   - **selvagens com sprite de treinador:** na batalha, o lado do selvagem mostrava um sprite de treinador qualquer, porque o PS sempre mostra um avatar.
     - **Decisão:** um sprite novo de mato alto.
     - **Como ficou:**
