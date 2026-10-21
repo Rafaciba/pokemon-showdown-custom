@@ -220,7 +220,7 @@ Ideias para o futuro, sem implementar agora:
 - desafio **"Hardcore"**: só uma tentativa permitida;
 - **ranking de pontos** por desafio.
 
-**Futuro:** um modo no estilo roguelite, a detalhar com calma.
+**Modo Expedição (roguelike), em andamento desde 2026-10-21:** o jogador monta o time ao longo da run (team builder, em vez de deck builder) num mapa no estilo Slay the Spire gerado por semente, com eventos e encontros. A base serve a várias variações (programadas, com números ajustáveis no painel), e cada uma escolhe batalhas jogadas ou automáticas, progressão, desgaste e desmaio. Uma run em andamento por variação. Plano, decisões e etapas em `docs/arquitetura-expedicao.md`. Etapa 1 (núcleo) feita: plugin `server/server/chat-plugins/expedition/`, variação de teste só para administradores, botão "Expedition" na tela inicial.
 
 ## Achados técnicos importantes
 
@@ -231,6 +231,7 @@ Ideias para o futuro, sem implementar agora:
 - O `.gitignore` do servidor ignora toda a pasta `config/` exceto `formats.ts`. No nosso fork, abrir exceção para `config/custom-formats.ts` e **continuar ignorando `config/config.js`**, que terá segredos.
 - O cliente **não** traz sprites e áudio no repositório. Por padrão ele os carrega de play.pokemonshowdown.com. Para a VPS, avaliar hospedar esses arquivos nós mesmos.
 - O teambuilder conhece a legalidade dos times porque o build do cliente lê os dados de `client/caches/pokemon-showdown` (`build-tools/build-indexes`). Esse cache precisa apontar para o **nosso** servidor, senão formatos e mods próprios não aparecem.
+- **Bug do PS no carregador de plugins (corrigido no fork em 2026-10-21):** `loadPluginDirectory` (`server/chat.ts`) contava cada subpasta irmã como um nível de profundidade, e só as 3 primeiras pastas de `chat-plugins/` eram carregadas. A pasta da Expedição deixou o Trivia de fora. Agora a profundidade conta o aninhamento. Uma pasta nova de plugin que "desliga" outra é sinal desse problema.
 - Persistência padrão do servidor: arquivos em `config/` (`usergroups.csv`, `chatrooms.json`, `ladders/*.tsv`) e `logs/`. SQLite é opcional (`Config.usesqlite`). A ladder local (`ladders-local.ts`) funciona sem login server.
 - Times no servidor do PS: `server/server/chat-plugins/teams.ts`, que exige Postgres. Quando implementarmos a sincronização, avaliar se reaproveitamos isso ou guardamos os times no nosso login server.
 

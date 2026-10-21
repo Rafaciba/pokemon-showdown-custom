@@ -112,9 +112,10 @@ test('convites: gerar, código só uma vez, revogar e redefinir senha', async ()
 	await expectRoomText(admin, id, /Invite code|Código de convite/);
 	playerInvite = (await admin.evaluate(rid => (window as any).app.rooms[rid].$el.find('.infobox code').text(), id));
 	expect(playerInvite).toMatch(/^[A-Z2-9]{4}(-[A-Z2-9]{4}){3}$/);
-	// Ao recarregar, o código não aparece de novo
+	// Ao recarregar, o código não aparece de novo. O texto "Pending invites" já está na página
+	// antiga: espera a versão nova, que não pode ter o código
 	await openPsPage(admin, id, /Pending invites|Convites pendentes/);
-	expect(await admin.evaluate(rid => (window as any).app.rooms[rid].$el.text(), id)).not.toContain(playerInvite);
+	await expect.poll(() => admin.evaluate(rid => (window as any).app.rooms[rid].$el.text(), id)).not.toContain(playerInvite);
 
 	// Convite reservado: aparece na lista com o nome e pode ser revogado
 	await submitPsForm(admin, id, 'form[data-submitsend^="/ginasioadmin gerarconvite"]', { username: 'E2E Reservado' });
@@ -418,6 +419,38 @@ test('IA Mestre: a página mostra os modelos, as batalhas coletadas e a força d
 	expect(counts[1], 'batalhas em dupla').toBeGreaterThanOrEqual(1);
 	expect(text).toMatch(/Retrain now|Retreinar agora/);
 	expect(text).toMatch(/Strength of the levels|Força dos níveis/);
+});
+
+test('expedição: o admin começa a expedição de teste, escolhe o time e anda pelo mapa', async () => {
+	const list = 'view-expedicao';
+	const id = 'view-expedicao-run-teste';
+	await openPsPage(admin, list, /Test expedition|Expedição de teste/);
+	await clickPsButton(admin, list, `button[value="${id}"]`);
+	await expectRoomText(admin, id, /Start expedition|Começar a expedição/);
+	await clickPsButton(admin, id, 'button[value="/expedicao iniciar teste"]');
+	await expectRoomText(admin, id, /Choose your starting team|Escolha o seu time inicial/);
+	// Três times de três iniciais
+	const options = await admin.evaluate(rid => (window as any).app.rooms[rid].$el
+		.find('button[value^="/expedicao inicial teste,"]').length, id);
+	expect(options).toBe(3);
+	await clickPsButton(admin, id, 'button[value="/expedicao inicial teste,0"]');
+	await expectRoomText(admin, id, /Choose the next node on the map|Escolha o próximo ponto no mapa/);
+	// Primeiro andar (sempre selvagem): entra num nó e segue em frente
+	const first = await admin.evaluate(rid => (window as any).app.rooms[rid].$el
+		.find('button[value^="/expedicao avancar teste,"]').map((i: number, b: HTMLButtonElement) => b.value).get(), id);
+	expect(first.length, 'nós do primeiro andar').toBeGreaterThanOrEqual(2);
+	await clickPsButton(admin, id, `button[value="${first[0]}"]`);
+	// O texto do nó (a legenda do mapa já mostra os nomes dos tipos)
+	await expectRoomText(admin, id, /not playable yet|ainda não pode ser jogado/);
+	await clickPsButton(admin, id, 'button[value="/expedicao escolha teste,continue"]');
+	await expectRoomText(admin, id, /Choose the next node on the map|Escolha o próximo ponto no mapa/);
+	const next = await admin.evaluate(rid => (window as any).app.rooms[rid].$el
+		.find('button[value^="/expedicao avancar teste,"]').map((i: number, b: HTMLButtonElement) => b.value).get(), id);
+	expect(next.length, 'nós ligados ao atual').toBeGreaterThanOrEqual(1);
+	expect(next.every((value: string) => /,1-\d+$/.test(value)), 'só o andar seguinte').toBe(true);
+	// Desistir encerra a run
+	await clickPsButton(admin, id, 'button[value="/expedicao desistir teste"]');
+	await expectRoomText(admin, id, /Start expedition|Começar a expedição/);
 });
 
 test('contas: troca de senha e exclusão apagam os dados de jogo', async () => {

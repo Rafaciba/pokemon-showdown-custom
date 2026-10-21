@@ -273,6 +273,22 @@ A Mestre simula jogadas no simulador do PS (`sim-search.ts`) num processo filho 
 - **Justiça do jogo** (decisão do usuário): a Mestre não vê o time do jogador. O palpite usa só o que é público (Pokémon e golpes já mostrados no log) e os repertórios gerais de cada espécie.
 - **LGPD:** a busca não grava nada. A consulta ao processo leva o pedido do NPC e o log público da batalha (o mesmo que qualquer espectador vê) e não sai do servidor.
 
+### Expedição, etapa 1 (2026-10-21)
+
+- **LGPD:**
+  - o banco da Expedição (`databases/expedition.db`) guarda o id do jogador nas runs e nos desbloqueios, sem IP;
+  - tudo do jogador é apagado com a conta (`onAccountPurge`) e passa para o nome novo numa troca de nome (`onAccountRename`);
+  - o aviso de privacidade ganha a seção do modo quando uma variação abrir para os jogadores (por enquanto, só a de teste, para administradores).
+- **A01:**
+  - as ações exigem conta registrada e só mexem na run do próprio jogador;
+  - as variações de teste e as desligadas só aparecem para administradores (página e comando).
+- **A03:**
+  - os nomes de espécie, golpe e escolha vão escapados para o HTML;
+  - os ids de variação e de nó passam por `toID` ou são comparados com os nós do mapa da run.
+- **A04:**
+  - a run só avança para um nó ligado ao atual e só aceita as escolhas do nó;
+  - o mapa e os sorteios saem da semente da run, que fica só no servidor.
+
 ### IA Mestre: aprendizado com as batalhas reais (2026-10-20)
 
 - **LGPD (anonimização):**
