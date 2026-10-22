@@ -140,5 +140,5 @@ Público: jogadores brasileiros de Pokémon competitivo. Tom claro e natural, po
 | Block PMs / Block challenges | Bloquear MPs / Bloquear desafios |
 | Loading... / Connecting... / Disconnected | Carregando... / Conectando... / Desconectado |
 | Untitled | Sem título |
-| Gym Challenge / Gym profile / Official Formats | Desafio de Ginásios / Perfil de ginásio / Formatos oficiais |
+| Gym Challenge / Player profile / Official Formats | Desafio de Ginásios / Perfil do jogador / Formatos oficiais |
 | Elite Four / Champion / Gym / badge | Elite 4 / Campeão / Ginásio / insígnia |

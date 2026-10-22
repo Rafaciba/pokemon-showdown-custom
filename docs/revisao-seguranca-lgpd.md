@@ -364,3 +364,10 @@ O teste de ponta a ponta tem 11 passos, com o de exportação e importação.
 - **Páginas do login:** a CSP ganhou `script-src 'self'`, ainda sem `unsafe-inline` e sem script de terceiros. O único script é o `/conta.js`, servido pelo próprio login (rota no Caddy), que põe "Mostrar/Ocultar" ao lado de cada campo de senha. Ao enviar o formulário, os campos voltam a ser de senha, e o navegador não guarda a senha como texto. Sem JavaScript, as páginas funcionam como antes.
 - **Cliente:** a janela de trocar a senha ganhou o mesmo botão (`client-custom.js`). A de login já tinha o do PS.
 - **Teste:** o login confere a CSP, o `<script src="/conta.js">` nas páginas e o conteúdo do script (`login/test/app.test.ts`).
+
+### Expedição, etapa 4 (2026-10-21)
+
+- **A01 (controle de acesso):** o painel (`view-expedicao-admin`) e os comandos `/expedicaoadmin` conferem se o usuário é administrador. Para os outros, a página mostra "Acesso negado", e os comandos são recusados.
+- **A04:** os ajustes do painel são conferidos contra os limites declarados pela variação, e a run só é encerrada se estiver em andamento.
+- **A09:** ligar, desligar e ajustar variações e encerrar runs vão para o modlog (`EXPEDITION`).
+- **LGPD:** o perfil mostra o histórico de runs aos usuários logados, como no Desafio (decisão do usuário): variação, resultado, progresso, time e data, sem nada além do nome. Runs e desbloqueios são apagados com a conta e passam para o nome novo numa troca de nome (etapa 1).

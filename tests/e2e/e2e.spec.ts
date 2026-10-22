@@ -481,6 +481,29 @@ test('expedição: o admin começa a expedição de teste, escolhe o time, batal
 	await expectRoomText(admin, id, /Start expedition|Começar a expedição/);
 });
 
+test('expedição: painel do admin (variações, histórico) e seção no perfil', async () => {
+	const panel = 'view-expedicao-admin';
+	await openPsPage(admin, 'view-ginasiosadmin', /Master AI|IA Mestre/);
+	await clickPsButton(admin, 'view-ginasiosadmin', `button[value="${panel}"]`);
+	await expectRoomText(admin, panel, /Variants|Variações/);
+	// Números ajustáveis da variação de teste, com os limites
+	await expectRoomText(admin, panel, /Floors per act|Andares por ato/);
+	const fields = await admin.evaluate(id => (window as any).app.rooms[id].$el
+		.find('form[data-submitsend^="/expedicaoadmin ajustar teste"] input[type=number]').length, panel);
+	expect(fields).toBeGreaterThan(5);
+	// Desligar e religar a variação
+	await clickPsButton(admin, panel, 'button[value="/expedicaoadmin desligar teste"]');
+	await expectRoomText(admin, panel, /Turn on|Ligar/);
+	await clickPsButton(admin, panel, 'button[value="/expedicaoadmin ligar teste"]');
+	await expectRoomText(admin, panel, /Turn off|Desligar/);
+	// A derrota do passo anterior aparece no histórico e no perfil
+	await expectRoomText(admin, panel, /e2eadmin.*(Defeated|Derrota)/);
+	const profile = 'view-ginasios-perfil-e2eadmin';
+	await openPsPage(admin, profile, /Player profile|Perfil do jogador/);
+	await expectRoomText(admin, profile, /Expedition|Expedição/);
+	await expectRoomText(admin, profile, /Latest expeditions|Últimas expedições/);
+});
+
 test('contas: troca de senha e exclusão apagam os dados de jogo', async () => {
 	await player.goto('/conta');
 	await player.fill('form[action="/conta/senha"] input[name=current]', PASSWORD);
@@ -497,7 +520,7 @@ test('contas: troca de senha e exclusão apagam os dados de jogo', async () => {
 	// O servidor de jogo apaga as jornadas em até um minuto (fila do login)
 	const profile = 'view-ginasios-perfil-e2ejogador';
 	await expect.poll(async () => {
-		await openPsPage(admin, profile, /Gym profile|Perfil no Desafio/);
+		await openPsPage(admin, profile, /Player profile|Perfil do jogador/);
 		return admin.evaluate(rid => (window as any).app.rooms[rid].$el.text(), profile);
 	}, { timeout: 100_000, intervals: [10_000] }).toMatch(/No journeys yet|Nenhuma jornada/);
 });

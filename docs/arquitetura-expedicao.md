@@ -510,3 +510,25 @@ Pedido do usuário depois da etapa 2: o time subia níveis demais no começo, e 
   - testes de unidade: sorteio determinístico, carteira (resultado e "Continuar"), evolução especial (Kadabra → Alakazam, e o evento fora quando ninguém evolui), Pokémon ferido (sem poção, a ajuda fica indisponível; com poção, a captura entra na fila), árvore de berries (a batalha montada pelo evento, a berry na vitória, o nó terminado) e a sombra;
   - no navegador, com o mapa forçado a eventos por um ajuste temporário das chances: carteira, presente, tutor (com tooltip do golpe), desafio do veterano com batalha, vitória, dinheiro e item no resumo.
 - **Fim da etapa 3:** captura, mochila, PokéMart e eventos estão prontos na variação de teste. A próxima é a etapa 4 (painel, perfil e desbloqueios).
+
+## Etapa 4: painel, perfil e desbloqueios (2026-10-21)
+
+- **Decisões do usuário:** o painel é uma página dentro do painel admin que já existe; o histórico entra como uma seção no perfil que já existe; dos desbloqueios, só a estrutura, com uma regra de exemplo; o admin pode encerrar runs, como no Desafio.
+- **Painel** (`admin.ts`, página `view-expedicao-admin`, botão "Expedição" no painel admin):
+  - **variações:** ligar e desligar (uma variação desligada some para os jogadores; os administradores continuam vendo), e os números marcados em `tunables`. Cada campo mostra o padrão e os limites, e vazio volta ao padrão. Valores fora dos limites são recusados. As mudanças valem para as runs novas, porque cada run guarda as configurações com que começou;
+  - **runs em andamento,** com "Encerrar" (com confirmação): a run fica no histórico como "encerrada", e a batalha aberta, se houver, termina com forfeit. O jogador vê "Sua última expedição: encerrada por um administrador" e pode começar outra;
+  - **histórico:** as 30 runs encerradas mais recentes, com jogador, progresso, time e resultado;
+  - **comandos:** `/expedicaoadmin` (`ligar`, `desligar`, `ajustar`, `encerrar`), só para administradores, com registro no modlog.
+- **Perfil** (`profile.ts`):
+  - o perfil do Desafio virou "Perfil do jogador", com seções dos modos. O Desafio expõe `profileSections`, e a Expedição registra a sua;
+  - **na seção:** placar por variação (runs, concluídas, derrotas, desistências, encerradas), runs em andamento, as últimas 10 encerradas (resultado, até onde chegou, time no fim, data) e os desbloqueios;
+  - o botão do popup de usuário passou de "Gym profile" para "Player profile" ("Perfil do jogador").
+- **Desbloqueios:**
+  - a variação declara regras (`unlocks`: ao vencer, libera um inicial, um item ou uma variação). Vencer a run grava o desbloqueio na conta (tabela `unlocks`), e as próximas runs recebem a lista em `starterOptions`;
+  - **exemplo da variação de teste:** vencer libera o Pikachu, que passa a aparecer num dos três times iniciais;
+  - a página da run vencida avisa o que foi liberado, e o perfil lista os desbloqueios;
+  - o que libera cada coisa nas variações de verdade fica para quando elas forem descritas.
+- **Validado:**
+  - testes de unidade: o desbloqueio ao vencer, o inicial liberado nas opções, o encerramento pelo admin, a lista do painel, a seção do perfil e o padrão das chances raras;
+  - no navegador: painel (ajuste salvo e desfeito, desligar e religar, run em andamento encerrada), página da run encerrada e perfil;
+  - teste de ponta a ponta: passo novo do painel e do perfil.
