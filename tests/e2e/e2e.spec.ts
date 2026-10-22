@@ -56,6 +56,9 @@ test('páginas do site: privacidade, regras e cabeçalhos de segurança', async 
 	}
 	const signup = await request.get('/cadastro');
 	expect(signup.headers()['content-security-policy']).toContain("default-src 'none'");
+	// Botão de ver a senha: script próprio, da mesma origem
+	expect(signup.headers()['content-security-policy']).toContain("script-src 'self'");
+	expect((await request.get('/conta.js')).status()).toBe(200);
 	expect(signup.headers()['strict-transport-security']).toContain('max-age=');
 	const client = await request.get('/');
 	expect(client.status()).toBe(200);
@@ -436,6 +439,8 @@ test('expedição: o admin começa a expedição de teste, escolhe o time, batal
 	await clickPsButton(admin, id, 'button[value="/expedicao inicial teste,0"]');
 	await expectRoomText(admin, id, /Choose the next node on the map|Escolha o próximo ponto no mapa/);
 	// O time mostra o item de cada Pokémon (a mochila aparece quando houver itens)
+	// Dinheiro inicial da variação de teste (loja: etapa 3, parte 2)
+	await expectRoomText(admin, id, /Money: 1,000 ₽|Dinheiro: 1\.000 ₽/);
 	await expectRoomText(admin, id, /Held item.*No item|Item.*Sem item/);
 	// Tooltip de cada Pokémon do time: escondido, com atributos e golpes, e visível no hover
 	const tip = admin.locator(`#room-${id} td .exp-tip`).first();

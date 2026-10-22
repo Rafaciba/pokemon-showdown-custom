@@ -20,7 +20,7 @@ Para rodar só uma parte, passe os argumentos do Playwright, por exemplo `sh scr
 
 | Passo | O que confere |
 |---|---|
-| Páginas do site | `/privacidade` e `/regras` em pt e en; CSP nas páginas do login e HSTS no site |
+| Páginas do site | `/privacidade` e `/regras` em pt e en; CSP nas páginas do login (com `script-src 'self'` e o `/conta.js` do botão de ver a senha) e HSTS no site |
 | Contas | cadastro do admin pelo convite; o mesmo convite recusado na segunda vez; nome sem conta não recebe assertion; o admin entra no jogo e abre o painel |
 | Assertion forjada | o servidor de jogo recusa um login com assinatura falsa |
 | Convites | gerar um convite pela página do painel; o código aparece uma vez só; convite reservado listado e revogado; nome em uso recusado; redefinição de senha para jogador inexistente e para o admin |
@@ -33,7 +33,7 @@ Para rodar só uma parte, passe os argumentos do Playwright, por exemplo `sh scr
 | Pacotes | exportar o desafio E2E pela página Importar e exportar (com os dois treinadores) e importar uma cópia com outro nome e um líder novo: o Campeão, que já está no banco, é pulado e reaproveitado, e o desafio importado entra como rascunho pronto para abrir |
 | Desafio (jogador) | o jogador se cadastra com o convite gerado pelo admin, começa a jornada, vence o ginásio e o Campeão (em dupla, na variante em dupla do formato) e vê os times vencedores no perfil |
 | IA Mestre | a página IA Mestre do painel mostra os modelos em uso, conta a batalha individual contra o líder e a batalha em dupla contra o Campeão, cada uma nos dados do seu tipo, e mostra a força dos níveis |
-| Expedição | o admin abre a expedição de teste, começa uma run, vê os três times iniciais, escolhe um, confere o tooltip de um Pokémon do time (escondido, com os atributos, visível no hover), entra num nó selvagem do primeiro andar (nível 4 a 6), abre a batalha (o lado do selvagem tem o mato alto como avatar, e o arquivo é servido) e desiste com `/forfeit`; a aba da expedição fecha enquanto a batalha está aberta; a sala da batalha mostra a derrota e o botão "Voltar para a expedição", que fecha a sala e leva à página, com o resumo da run (quem venceu e até onde chegou) |
+| Expedição | o admin abre a expedição de teste, começa uma run, vê os três times iniciais, escolhe um, vê o dinheiro inicial, confere o tooltip de um Pokémon do time (escondido, com os atributos, visível no hover), entra num nó selvagem do primeiro andar (nível 4 a 6), abre a batalha (o lado do selvagem tem o mato alto como avatar, e o arquivo é servido) e desiste com `/forfeit`; a aba da expedição fecha enquanto a batalha está aberta; a sala da batalha mostra a derrota e o botão "Voltar para a expedição", que fecha a sala e leva à página, com o resumo da run (quem venceu e até onde chegou) |
 | Exclusão | troca de senha em `/conta`, exclusão da conta e, em até um minuto, as jornadas apagadas pelo servidor de jogo |
 
 Os treinadores de teste só têm Pokémon com Splash (o líder, um Magikarp; o Campeão, em dupla, Magikarp e Feebas), e o jogador usa Pikachu e Raichu com Thunderbolt. Assim as batalhas terminam sempre com a vitória do jogador, em poucos turnos.

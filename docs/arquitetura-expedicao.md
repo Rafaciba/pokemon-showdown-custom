@@ -446,3 +446,40 @@ Pedido do usuário depois da etapa 2: o time subia níveis demais no começo, e 
       - arte nossa, em pixel art, gerada por `scripts/sprites/mato.py` em `assets/sprites/trainers-custom/expeditiongrass.png` (no git);
       - o Caddy serve o arquivo em `/sprites/trainers-custom/expedition*.png`, e um nome inexistente dá 404, sem ir ao site oficial;
       - os selvagens e os lendários usam o avatar `#expeditiongrass`, que o cliente busca em `trainers-custom`.
+
+## Etapa 3, parte 2: dinheiro e loja (2026-10-21)
+
+- **Código novo:** `economy.ts`, com o catálogo dos itens de uso, os preços, o pagamento das batalhas, a calibração do dinheiro, o estoque da loja, a compra e o uso dos itens. Migração 4 do banco: `runs.money` e `runs.node_state` (estado do nó atual, como as compras da loja; limpo ao entrar noutro nó).
+- **Dinheiro:**
+  - **inicial:** `extra.startMoney`, 1000 na variação de teste (cinco Potions, escolha nossa), ajustável no painel;
+  - **prêmio:** só contra treinadores e o chefe, como nos jogos: pagamento base × nível do último Pokémon do treinador × multiplicador da variação. Os pagamentos base são escolha nossa: treinador sorteado 30, treinador do banco do Desafio 45, chefe 45 (1,5 vez um treinador);
+  - **calibração** (decisão do usuário: um ato típico rende umas 3 ou 4 compras médias): o multiplicador faz os treinadores de um ato, antes do chefe, renderem em média 3,5 compras de 1500 ₽ (o preço de uma Hyper Potion, escolha nossa como "compra média"), nos caminhos ao acaso da calibração;
+  - **por que sem o chefe:** na primeira versão, o chefe entrava na conta e pagava cerca de 85% do dinheiro do ato, que só serve depois dele. Antes do chefe, o jogador juntava em média 771 ₽. Agora o prêmio do chefe fica para as lojas do ato seguinte;
+  - **simulação** (200 runs, variação de teste): antes do chefe, média de 5459 ₽ e mediana de 5700 ₽. Cerca de 30% dos caminhos ao acaso não passam por nenhum treinador antes do chefe e chegam às lojas só com o dinheiro inicial. Os eventos que dão dinheiro (parte 3) ajudam nisso;
+  - o resumo da vitória mostra o dinheiro recebido, e a página mostra o dinheiro da run.
+- **Loja** (nó 🛒; a compra não termina o nó, e "Sair da loja" termina):
+  - **sempre:** Potion (200), Super Potion (700), Hyper Potion (1500), Revive (2000), Antidote (200), Paralyze Heal, Burn Heal, Awakening e Ice Heal (300), Full Heal (400), com quantidade livre;
+  - **sorteados pelo nó** (uma unidade de cada): 3 itens de segurar (reforços de tipo 1000; berries de 200 a 800; os fortes, como Leftovers e Choice, 4000; os demais 2000), 2 TMs de golpes que algum Pokémon do time aprende (3000) e um Rare Candy (5000);
+  - **fora desta loja:** as Poké Bolas (decisão do usuário), que ficam no catálogo para as variações com captura por bola; Max Potion, Full Restore e Max Revive, que ficam no catálogo para lojas futuras;
+  - os preços dos itens de uso são os dos jogos. Os que os jogos não vendem (Rare Candy, Max Revive, TMs, itens de batalha) são escolha nossa, caros como pedido;
+  - **na página:** uma tabela por grupo (cura, itens de segurar, TMs e Rare Candy), com o ícone oficial, a descrição, o preço e "Comprar", desabilitado sem dinheiro ou esgotado.
+- **Itens de uso** (mochila, só fora da batalha):
+  - Potion e as outras poções curam HP pelo valor dos jogos sobre o HP máximo do Pokémon no nível;
+  - Revive reanima com metade do HP, e Max Revive com tudo;
+  - as curas de status tiram o status que curam;
+  - Rare Candy sobe um nível, com os golpes novos e a evolução como numa subida normal;
+  - TM ensina o golpe a quem pode aprender. Com quatro golpes, a decisão de qual esquecer vai para a fila;
+  - a mochila só lista, para cada item, os Pokémon em quem ele faz efeito agora. Sem nenhum, avisa;
+  - os itens de uso não existem nos dados do PS (não são itens de batalha): o catálogo é nosso, com nome em inglês e o ícone oficial de `sprites/itemicons`.
+- **Validado:**
+  - testes de unidade: prêmio (selvagem não paga, chefe paga mais), estoque determinístico, compra (sem dinheiro, esgotado), poções, Revive, cura de status, Rare Candy e TM (quem não aprende, quatro golpes);
+  - no navegador, com lojas e treinadores forçados por um ajuste temporário das chances: prêmio no resumo da vitória, compra, esgotado e sem dinheiro desabilitados, uso pela mochila e o aviso quando ninguém pode usar;
+  - teste de ponta a ponta: o dinheiro inicial na página.
+- **Observado no navegador:** com muitos treinadores seguidos, os níveis sobem muito, e as decisões de golpe chegaram a 13 de uma vez (time de 4). O "pular todos" continua para avaliar.
+
+### Ajustes da revisão da parte 2 (2026-10-21)
+
+- **Golpe novo:** layout compacto. À esquerda, numa coluna de largura limitada, ficam o golpe novo com a descrição e os quatro golpes conhecidos em 2 × 2 (cada botão com o tooltip da descrição). À direita ficam os atributos, sem quebrar.
+- **Tooltips dos itens:** a descrição do item (texto do PS, nosso texto dos itens de uso ou o golpe da TM) aparece no item que cada Pokémon segura, na mochila, nas opções do nó de item e na loja.
+- **Nomes** (pedido do usuário): o nó de descanso passou a se chamar **PokéCenter** (ícone 🏥, escolha nossa, no lugar da fogueira 🔥), e a loja, **PokéMart**. Os ids internos continuam `rest` e `shop`.
+- **Senha:** botão de ver a senha nas páginas de conta e na janela de trocar a senha do cliente (ver `docs/revisao-seguranca-lgpd.md`).

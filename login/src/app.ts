@@ -36,8 +36,55 @@ import {
 } from './security-events.ts';
 
 const MAX_BODY_BYTES = 16 * 1024;
-// O CSS e as imagens vêm do próprio cliente (mesmo domínio); nada de script
-const PAGE_CSP = "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
+// O CSS e as imagens vêm do próprio cliente (mesmo domínio). Script só o nosso, de
+// arquivo (/conta.js, o botão de ver a senha), nunca inline
+const PAGE_CSP = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
+
+/**
+ * Botão de ver a senha nas páginas de conta (pedido do usuário, 2026-10-21): ao lado de
+ * cada campo de senha, alterna entre mostrar e esconder o que foi digitado. As páginas
+ * funcionam sem ele (sem JavaScript, os campos continuam normais).
+ */
+const PAGE_SCRIPT = `(function () {
+	'use strict';
+	var pt = (document.documentElement.lang || '').indexOf('pt') === 0;
+	var show = pt ? 'Mostrar' : 'Show';
+	var hide = pt ? 'Ocultar' : 'Hide';
+	var showLabel = pt ? 'Mostrar a senha' : 'Show password';
+	var hideLabel = pt ? 'Ocultar a senha' : 'Hide password';
+	var inputs = document.querySelectorAll('input[type=password]');
+	for (var i = 0; i < inputs.length; i++) {
+		(function (input) {
+			var button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'button';
+			button.style.marginLeft = '4px';
+			button.textContent = show;
+			button.setAttribute('aria-label', showLabel);
+			button.setAttribute('aria-pressed', 'false');
+			button.addEventListener('click', function (event) {
+				event.preventDefault();
+				var visible = input.type === 'password';
+				input.type = visible ? 'text' : 'password';
+				button.textContent = visible ? hide : show;
+				button.setAttribute('aria-label', visible ? hideLabel : showLabel);
+				button.setAttribute('aria-pressed', visible ? 'true' : 'false');
+				input.focus();
+			});
+			input.parentNode.insertBefore(button, input.nextSibling);
+		})(inputs[i]);
+	}
+	// Ao enviar, a senha volta a ser campo de senha (o navegador não a guarda como texto)
+	var forms = document.querySelectorAll('form');
+	for (var j = 0; j < forms.length; j++) {
+		forms[j].addEventListener('submit', function () {
+			var fields = this.querySelectorAll('input[data-password]');
+			for (var k = 0; k < fields.length; k++) fields[k].type = 'password';
+		});
+	}
+	for (var m = 0; m < inputs.length; m++) inputs[m].setAttribute('data-password', '1');
+})();
+`;
 
 export interface AppDeps {
 	db: Database;
@@ -410,6 +457,9 @@ export function createApp(deps: AppDeps) {
 		};
 
 		if (req.method === 'GET' && path === '/healthz') return send(ctx, 200, 'ok', 'text/plain; charset=utf-8');
+		if (req.method === 'GET' && path === '/conta.js') {
+			return send(ctx, 200, PAGE_SCRIPT, 'text/javascript; charset=utf-8', { 'Cache-Control': 'public, max-age=3600' });
+		}
 
 		const isClientAction = /^\/~~[^/]+\/action\.php$/.test(path) || /^\/api\/[a-z]+\/?$/.test(path);
 		const isServerAction = path === '/action.php';

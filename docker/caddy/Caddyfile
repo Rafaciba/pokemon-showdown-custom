@@ -99,7 +99,7 @@ www.{$PS_HOST:localhost} {
 
 	# Login server próprio: contrato do action.php oficial + páginas de conta.
 	# (A API /internal/* do login NÃO é roteada: só a rede do Docker a alcança.)
-	@login path_regexp login ^/(~~[^/]+/action\.php|api(/.*)?|cadastro|redefinir|privacidade|regras|conta(/(sair|senha|excluir))?)/?$
+	@login path_regexp login ^/(~~[^/]+/action\.php|api(/.*)?|cadastro|redefinir|privacidade|regras|conta(/(sair|senha|excluir))?|conta\.js)/?$
 	handle @login {
 		reverse_proxy login:9000
 	}

@@ -318,6 +318,18 @@ test('POST sem Origin vindo de outro site é recusado', async () => {
 	assert.equal(sameSite.status, 200);
 });
 
+test('botão de ver a senha: script próprio, só da mesma origem', async () => {
+	const page = await fetch(`${base}/cadastro`);
+	const csp = page.headers.get('content-security-policy') || '';
+	assert.match(csp, /script-src 'self'/);
+	assert.doesNotMatch(csp, /unsafe-inline'[^;]*script|script-src[^;]*unsafe/);
+	assert.match(await page.text(), /<script src="\/conta\.js" defer><\/script>/);
+	const script = await fetch(`${base}/conta.js`);
+	assert.equal(script.status, 200);
+	assert.match(script.headers.get('content-type') || '', /javascript/);
+	assert.match(await script.text(), /input\[type=password\]/);
+});
+
 test('aviso de privacidade em pt e en, com o administrador', async () => {
 	const pt = await fetch(`${base}/privacidade`, { headers: { 'Accept-Language': 'pt-BR' } });
 	const html = await pt.text();

@@ -51,7 +51,7 @@ Revisão de todo o projeto contra o **OWASP Top 10 (2021)** e a **LGPD**: login 
 
 ### A03 – Injeção
 - **Nomes e títulos** (`rules.ts`). Agora recusam caracteres de controle (a quebra de linha injetaria linhas no protocolo do PS), `< > & "` (o `/formathelp` do PS mostra o nome do formato sem escapar) e `@` (`@@@` separa regras no nome de formato), além de `| , ; [ ]` e da barra invertida.
-- **Conferido e correto:** SQL sempre parametrizado (login e plugin); HTML das páginas sempre escapado; páginas do login sem JavaScript e com CSP `default-src 'none'`; formatos gerados como objetos, sem `eval`.
+- **Conferido e correto:** SQL sempre parametrizado (login e plugin); HTML das páginas sempre escapado; páginas do login com CSP `default-src 'none'`, sem script inline (desde 2026-10-21, `script-src 'self'` só para o `/conta.js`, o botão de ver a senha; as páginas funcionam sem ele); formatos gerados como objetos, sem `eval`.
 
 ### A04 – Design inseguro
 - **Limite de jornadas novas** por jogador.
@@ -358,3 +358,9 @@ O teste de ponta a ponta tem 11 passos, com o de exportação e importação.
 - **E2E de segurança** (9 passos): tentativas de tomar o lado do NPC, trocar de lado e esconder a batalha, todas recusadas; a vitória contou.
 - **Regressão** da jornada (13 passos).
 - **Cabeçalhos:** conferidos com um servidor de eco local no lugar da Smogon; HSTS e Permissions-Policy presentes; sprites continuam carregando.
+
+### Botão de ver a senha (2026-10-21)
+
+- **Páginas do login:** a CSP ganhou `script-src 'self'`, ainda sem `unsafe-inline` e sem script de terceiros. O único script é o `/conta.js`, servido pelo próprio login (rota no Caddy), que põe "Mostrar/Ocultar" ao lado de cada campo de senha. Ao enviar o formulário, os campos voltam a ser de senha, e o navegador não guarda a senha como texto. Sem JavaScript, as páginas funcionam como antes.
+- **Cliente:** a janela de trocar a senha ganhou o mesmo botão (`client-custom.js`). A de login já tinha o do PS.
+- **Teste:** o login confere a CSP, o `<script src="/conta.js">` nas páginas e o conteúdo do script (`login/test/app.test.ts`).

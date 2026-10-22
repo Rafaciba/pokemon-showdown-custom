@@ -46,6 +46,7 @@ function layout(lang: Lang, title: string, body: string): string {
 <link rel="stylesheet" href="/style/battle.css">
 <link rel="stylesheet" href="/style/oldclient.css">
 <style>${EXTRA_STYLE}</style>
+<script src="/conta.js" defer></script>
 </head>
 <body>
 <div class="ps-overlay">
