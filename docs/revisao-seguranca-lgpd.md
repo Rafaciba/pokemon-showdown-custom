@@ -432,3 +432,8 @@ Revisão de todo o plugin (`server/chat-plugins/expedition/`), das mudanças no 
 - **A04:** cada escolha é conferida no servidor contra as escolhas oferecidas (as desabilitadas são recusadas pelo nó) e de novo na hora de aplicar: o item-chave, o fóssil, o Antidote e a vara precisam estar na mochila, o dinheiro da Bicicleta é conferido, o Pokémon entregue ou trocado precisa estar no time (e o último não pode ser entregue), e quem abre o caminho precisa aprender o golpe. Os sorteios saem da semente da run e do nó. Itens-chave não vão para os Pokémon nem são usados pela mochila.
 - **A03:** nomes de espécies, golpes e itens nos textos dos eventos são escapados pela página, como nos demais eventos.
 - **LGPD:** nada novo.
+
+### Expedição: eventos "?", segunda leva, parte 2 (2026-10-22)
+
+- **A04:** no Covil, cada sala e o final saem da semente da run, do nó, do passo e da direção (repetir o comando ou recarregar não muda nada); as escolhas são conferidas contra o estado do covil (dentro, fora, terminado). A batalha que continua o evento só é aplicada uma vez (como as demais); a derrota encerra a run. A Master Ball e os itens vão para a mochila só pelo servidor. Na dupla contra dois treinadores, o envoltório da IA só corrige as escolhas do NPC; o time do jogador não é tocado.
+- **LGPD:** nada novo.

@@ -663,4 +663,14 @@ O usuário descreveu 13 eventos novos. Decisões dele, depois das perguntas: ite
 
 **Correção:** o `toID` do PS apaga o "é" de "Poké Ball" ("pokball"). O ícone da bola no time e a bola enviada ao simulador passaram a usar a lista de bolas (`ballIdByName`).
 
-**Parte 2** (a fazer): Equipe Rocket atacando crianças (batalha em dupla) e Covil da Equipe Rocket (evento que continua depois das batalhas).
+**Parte 2** (`events-rocket.ts`, `tag-team.ts`, feita em 2026-10-22):
+
+| Evento | Chance | Como funciona |
+|---|---|---|
+| Equipe Rocket e a criança | 15 | intervir: batalha em dupla contra dois Rocket (2 ou 3 Pokémon cada, no nível da curva); a vitória dá o prêmio de treinador, um item da sacola (Master Ball com 15% de chance, senão um item de segurar) e uma berry da criança; furtar a sacola (Master Ball com 5%, senão um item de segurar); ou, com a Bicicleta, chamar a polícia (o dinheiro da carteira perdida) |
+| Covil da Equipe Rocket | 5 | só no ato 3: entrar e escolher esquerda ou direita 4 vezes (cada sala: 60% batalha contra um Rocket, 30% item de segurar ou de uso, 10% vazia) e abrir a última porta (40% sala vazia, 35% maleta com a Master Ball, 25% o Giovanni, com time de chefe do ato, nível da curva + 2 e a IA dos chefes, que deixa a Master Ball); dá para voltar a qualquer momento com o que já ganhou |
+
+- Sem captura por bola, a Master Ball vira uma Mega Stone (de preferência uma que o time usa).
+- **Batalha contra dois treinadores** (`tag-team.ts`): o time adversário vai intercalado (o 1º de cada treinador são os titulares), e o dono de cada Pokémon é guardado pelo nome (as espécies não se repetem entre os dois). A IA do nível escolhe normalmente, e um envoltório corrige a escolha: na prévia do time, a ordem intercalada; uma troca para um Pokémon do outro treinador vira uma troca para um do próprio, se houver; na troca obrigatória sem ninguém do próprio treinador, o do outro entra no lugar vago (decisão do usuário); na troca voluntária, o primeiro golpe. Conferida no navegador: dupla de verdade, com os titulares de cada treinador.
+- **Evento que continua depois da batalha** (`resume` na batalha do evento): a vitória não termina o nó; o jogador volta à página da run (a aba da batalha fecha pelo botão "Voltar para a expedição", como nas outras batalhas) e segue no evento. A derrota encerra a run, como sempre. As escolhas que não terminam o evento devolvem `stay`.
+- **Correção de teste:** o teste da captura com chance usava a semente aleatória da run; contra o Mewtwo, os 10% mínimos às vezes capturavam na primeira bola. Agora a semente é fixa.
