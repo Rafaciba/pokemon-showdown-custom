@@ -483,3 +483,30 @@ Pedido do usuário depois da etapa 2: o time subia níveis demais no começo, e 
 - **Tooltips dos itens:** a descrição do item (texto do PS, nosso texto dos itens de uso ou o golpe da TM) aparece no item que cada Pokémon segura, na mochila, nas opções do nó de item e na loja.
 - **Nomes** (pedido do usuário): o nó de descanso passou a se chamar **PokéCenter** (ícone 🏥, escolha nossa, no lugar da fogueira 🔥), e a loja, **PokéMart**. Os ids internos continuam `rest` e `shop`.
 - **Senha:** botão de ver a senha nas páginas de conta e na janela de trocar a senha do cliente (ver `docs/revisao-seguranca-lgpd.md`).
+
+## Etapa 3, parte 3: eventos "?" (2026-10-21)
+
+- **Código novo:** `events.ts`, com a estrutura dos eventos e a primeira leva. O nó de evento (`nodes.ts`) usa o gancho novo `onEnter` dos tipos de nó para sortear o evento ao entrar.
+- **Como funciona:**
+  - **sorteio:** ao entrar no nó, o evento sai pela semente da run e pelo nó, entre os que valem para o time naquele momento (ex.: a evolução especial só aparece se alguém pode evoluir assim). Os dados também são sorteados na entrada: a berry, o Pokémon do presente, os golpes do tutor, as quantias. Tudo fica em `run.nodeState`, e voltar à página mostra o mesmo evento;
+  - **escolhas:** cada uma tem rótulo e, quando ajuda, uma descrição do que faz ("Ganhe uma Sitrus Berry, mas enfrente os Pokémon inseto"). Escolhas indisponíveis aparecem desabilitadas, com o motivo;
+  - **resultado direto** (cura, item, dinheiro, evolução, golpe, Pokémon): a página mostra o texto do resultado e "Continuar", que termina o nó. Golpes com quatro já conhecidos e Pokémon novos entram pela fila de decisões, como na captura;
+  - **batalha** (o desafio do veterano, os insetos da árvore, o Pokémon ferido): a escolha guarda a batalha e a recompensa em `nodeState`. O nó mostra "Batalhar!" como um nó de batalha, o encontro é montado por `encounterFromSpec` (`encounters.ts`), e a vitória entrega a recompensa (dinheiro e itens, no resumo da vitória) e termina o nó. A derrota encerra a run, como qualquer batalha. Os selvagens de evento podem ser capturados, como os do mapa.
+- **Primeira leva** (decisão do usuário; as chances, quantias e curas são escolha nossa):
+
+  | Evento | Chance | Escolhas |
+  |---|---|---|
+  | Pedra misteriosa | 20 | evoluir um Pokémon por uma evolução especial (troca, pedra, amizade; até 3 opções do time) ou seguir. Só aparece se alguém do time pode evoluir assim |
+  | Treinador veterano (risco e recompensa) | 15 | aceitar uma batalha difícil (curva + 3 níveis, um Pokémon a mais que um treinador do andar, IA Difícil), pelo dobro do prêmio de um treinador e um item de segurar; ou recusar |
+  | Tutor de golpes | 15 | ensinar de graça um golpe (de TM, de ataque, poder 60 ou mais, de preferência do tipo do Pokémon) a um de até 3 Pokémon; ou recusar |
+  | Um presente | 10 | aceitar um Pokémon (curva − 2 níveis, dentro do teto de força), com a regra do time cheio; ou recusar |
+  | Árvore de berries (o exemplo do usuário) | 15 | chacoalhar (ganha a berry, mas enfrenta 1 ou 2 Pokémon inseto do andar); descansar à sombra (30% do HP de quem não desmaiou); ou seguir |
+  | Carteira perdida (dinheiro) | 15 | ficar com o dinheiro (80% do prêmio de um treinador do andar) ou devolver (o dono dá um item de segurar) |
+  | Pokémon ferido (selvagem) | 10 | curar com uma poção da mochila (ele pode entrar no time; precisa de uma poção), batalhar (pode capturar se vencer) ou seguir |
+
+- **Teto do multiplicador de experiência:** num teste com o mapa forçado a só eventos, a calibração não tinha batalhas para medir, e o multiplicador subiu até o limite da busca (uma vitória levou o time do nível 6 ao 100). O painel permite zerar os pesos das batalhas, então o multiplicador agora tem teto de 120. A variação de teste fica por volta de 44.
+- **Descrição da variação de teste:** atualizada com eventos, itens, PokéCenters e PokéMarts.
+- **Validado:**
+  - testes de unidade: sorteio determinístico, carteira (resultado e "Continuar"), evolução especial (Kadabra → Alakazam, e o evento fora quando ninguém evolui), Pokémon ferido (sem poção, a ajuda fica indisponível; com poção, a captura entra na fila), árvore de berries (a batalha montada pelo evento, a berry na vitória, o nó terminado) e a sombra;
+  - no navegador, com o mapa forçado a eventos por um ajuste temporário das chances: carteira, presente, tutor (com tooltip do golpe), desafio do veterano com batalha, vitória, dinheiro e item no resumo.
+- **Fim da etapa 3:** captura, mochila, PokéMart e eventos estão prontos na variação de teste. A próxima é a etapa 4 (painel, perfil e desbloqueios).
