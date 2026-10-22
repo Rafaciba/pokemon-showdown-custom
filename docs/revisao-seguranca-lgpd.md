@@ -443,3 +443,20 @@ Revisão de todo o plugin (`server/chat-plugins/expedition/`), das mudanças no 
 - **A04:** o nível de dificuldade pedido é limitado no servidor ao número de insígnias do jogador; a insígnia em disputa é sorteada no servidor e gravada na run; a insígnia só entra no progresso ao vencer o chefe do último ato, e o ato especial só abre para quem começou a run com as 8. A escolha de seguir ao ato especial só vale na fase certa. Os iniciais shiny só saem para quem tem o desbloqueio daquela expedição.
 - **A03:** nomes de insígnias e líderes vêm do catálogo do Desafio e vão escapados.
 - **LGPD:** dado novo do jogador: as insígnias de cada expedição (tabela `progress`). Ficam visíveis no perfil aos logados, como as conquistas do Desafio; são apagadas com a conta e passam ao nome novo numa troca de nome. O aviso de privacidade é atualizado no fechamento (etapa 10).
+
+### Expedição: revisão completa das etapas 6 a 9 (etapa 10, 2026-10-22)
+
+Revisão independente de todo o código das etapas 6 a 9 (expedições criadas pelo admin, mapa, elite, chefes do banco, captura, Computador, shiny, eventos novos, dupla contra dois treinadores, modo Completo), contra o OWASP Top 10 e a LGPD. Nenhum achado de severidade alta ou média.
+
+- **Achados e correções:**
+  - **(baixa) Computador deixava o time só com desmaiados:** o depósito só impedia guardar o último Pokémon; guardar todos os aptos e sair travava a run (nenhuma batalha começava). **Corrigido:** o time fica com pelo menos um Pokémon em condição de batalhar, como na entrega aos Rocket. Há teste.
+  - **(baixa) Importação sem validar campos nem formato:** a importação só conferia o nome. **Corrigido:** passa pela mesma validação de salvar (nome, campos e formato), e o resumo diz por que cada expedição foi pulada. As regras de batalha também passaram a ser conferidas ao salvar a seção de regras.
+  - **(informativa) Índice de golpe fracionário:** `decideLearn` aceitava um espaço como 1.5 (sem efeito além de não aprender). **Corrigido:** só números inteiros. Há teste.
+  - **(informativa) Licença do PokéAPI resumida:** o arquivo gerado agora traz o texto integral da licença BSD de 3 cláusulas.
+  - **(informativa) Regras de batalha de uma expedição aberta valem para as runs em andamento:** o formato é por expedição. **Corrigido o texto do painel**, que agora diz isso.
+  - **(informativa, sem mudança) `parseFields`:** um texto livre com ",chave=" pode sobrescrever outro campo do mesmo formulário; só o admin envia esses formulários, e tudo é normalizado e validado depois.
+  - **(informativa, sem mudança) Nome de rascunho no perfil do admin que o testou:** não é dado pessoal.
+- **Conferido e correto:** controle de acesso de todos os comandos do admin e da run (só a run ativa do próprio jogador; rascunho só para administradores; encerrada para ninguém); escape de HTML e SQL parametrizado; regras do jogo no servidor (compras, mochila, bolas e sorteio da captura pela semente, Computador só no PokéCenter escolhido, eventos com escolhas conferidas, Covil, batalhas aplicadas uma vez, dificuldade limitada às insígnias, insígnia só no chefe do último ato, ato especial só com as 8, iniciais shiny só com o desbloqueio); importação com tetos e normalização; laços com teto e caches; exclusão de conta e troca de nome com Computador, insígnias e desbloqueios.
+- **Regra confirmada com o usuário:** quem tem as 8 insígnias chega ao ato especial em qualquer dificuldade escolhida.
+- **`/regras` e aviso de privacidade** atualizados com as expedições criadas pelo admin, a captura, o Computador, o shiny, os itens-chave, o modo Completo (insígnias, agravantes, ato especial) e os dados novos (insígnias, Computador, desbloqueios por expedição, conquistas no perfil).
+

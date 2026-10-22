@@ -14,7 +14,7 @@ import type { Notice } from './privacy.ts';
 export const RULES: { [lang in Lang]: Notice } = {
 	pt: {
 		title: 'Regras',
-		updated: 'Atualizado em 21/10/2026.',
+		updated: 'Atualizado em 22/10/2026.',
 		sections: [
 			{
 				title: 'O servidor',
@@ -99,31 +99,40 @@ export const RULES: { [lang in Lang]: Notice } = {
 			{
 				title: 'Expedição: como funciona',
 				paragraphs: [
-					'A Expedição é um modo roguelike: você monta o time ao longo do caminho, num mapa sorteado a cada expedição. Ela tem variações, cada uma com regras próprias, mostradas na página dela (botão "Expedition" na tela principal ou /expedicao). Você tem no máximo uma expedição em andamento por variação.',
-					'A expedição começa com a escolha de um time inicial. No mapa, você escolhe o próximo ponto entre os ligados ao atual: Pokémon selvagens, treinadores, eventos (?), itens, PokéCenters (curam o time), PokéMarts (lojas) e, raramente, um Pokémon lendário. Cada ato termina num chefe; vencer o chefe do último ato conclui a expedição.',
-					'Conforme a variação, você pode ficar com os selvagens que vencer; com o time cheio, escolhe quem sai. O dinheiro vem das batalhas contra treinadores e é gasto nos PokéMarts. Os itens de segurar vão e voltam da mochila; os itens de uso (poções, Rare Candy, TMs) são usados pela página, só fora da batalha.',
-					'Os Pokémon sobem de nível com a experiência das batalhas, e você decide os golpes novos e as evoluções. Conforme a variação, HP, PP e status continuam de uma batalha para a outra, e quem desmaiou fica no time (com metade da experiência) até ser curado, ou sai do time de vez (Nuzlocke).',
+					'A Expedição é um modo roguelike: você monta o time ao longo do caminho, num mapa sorteado a cada expedição. O administrador cria as expedições, cada uma com regras próprias, mostradas na página dela (botão "Expedition" na tela principal ou /expedicao): modo Padrão (quem desmaia fica no time, com metade da experiência, até ser curado) ou Nuzlocke (quem desmaia sai do time), a Pokédex da expedição (o tema), a captura, o Computador e o número de atos. Você tem no máximo uma expedição em andamento em cada uma.',
+					'A expedição começa com a escolha de um entre três times iniciais. No mapa, você escolhe o próximo ponto entre os ligados ao atual: mato alto (Pokémon selvagens), treinadores, treinadores elite (mais fortes, com um item de recompensa), eventos (?), itens, PokéCenters, PokéMarts e, raramente, um Pokémon lendário. Cada ato tem 15 andares e termina num chefe; vencer o chefe do último ato conclui a expedição.',
+					'Captura, conforme a expedição: escolher se fica com o selvagem vencido; lançar uma Poké Bola da mochila com captura certa; ou lançar bolas com chance de captura, como nos jogos (pode tentar de novo, e cada tentativa gasta uma bola). Com o time cheio, você escolhe quem sai. Selvagens podem aparecer shiny, raramente, e continuam shiny quando capturados.',
+					'Com o Computador ligado, no PokéCenter você escolhe entre curar o time e usar o Computador para guardar e pegar Pokémon; quem está no Computador é curado quando você sai do PokéCenter. O dinheiro vem dos treinadores e é gasto nos PokéMarts. Itens de segurar vão e voltam da mochila (nunca ficam no Computador); itens de uso são usados pela página, fora da batalha; itens-chave (Bicicleta, Old Rod, fósseis) abrem escolhas nos eventos.',
+					'Os Pokémon sobem de nível com a experiência das batalhas, e você decide os golpes novos e as evoluções. Conforme a expedição, HP, PP e status continuam de uma batalha para a outra ou são curados a cada ponto do mapa.',
+				],
+			},
+			{
+				title: 'Expedição: modo Completo',
+				paragraphs: [
+					'No modo Completo, a expedição tem 3 atos e 8 insígnias. Cada expedição jogada na sua dificuldade mais alta disputa uma insígnia que você ainda não tem, sorteada no começo: o líder dela é o chefe do último ato, e vencê-lo dá a insígnia, que fica na sua conta.',
+					'Cada insígnia soma um agravante às próximas expedições: treinadores pagam menos, o nó de item oferece menos opções, há menos PokéCenters, a IA joga melhor, os treinadores têm mais Pokémon, o PokéMart fica mais caro, os adversários sobem de nível e os chefes ficam mais fortes. Você pode escolher uma dificuldade menor, mas aí não disputa insígnia.',
+					'Quem começa uma expedição com as 8 insígnias, ao vencer o último ato, escolhe entre encerrar como vencedor e seguir ao ato especial: PokéCenter, PokéMart, dois membros da Elite 4 numa batalha em dupla e o Campeão, no nível 100. Se seguir, só a vitória contra o Campeão conta. Vencer o Campeão libera os iniciais shiny daquela expedição.',
 				],
 			},
 			{
 				title: 'Expedição: batalhas e fim',
 				paragraphs: [
-					'As batalhas da Expedição são públicas e são salvas a cada jogada: uma batalha interrompida continua quando você entra com a sua conta ou pelo botão da página. Enquanto a batalha está aberta, a página da expedição fica fechada; no fim, o botão "Voltar para a expedição" leva de volta a ela. Algumas variações têm batalhas automáticas, jogadas pelo computador pelos dois lados.',
-					'Perder uma batalha encerra a expedição. Você pode desistir a qualquer momento; desistir com uma batalha aberta conta como derrota nela. O administrador pode encerrar uma expedição, que fica no histórico como encerrada.',
-					'Vencer uma expedição pode liberar coisas novas (como um inicial extra) para as próximas, conforme a variação. Por segurança, cada jogador pode começar até 5 expedições a cada 10 minutos.',
+					'As batalhas da Expedição são públicas e são salvas a cada jogada: uma batalha interrompida continua quando você entra com a sua conta ou pelo botão da página. Enquanto a batalha está aberta, a página da expedição fica fechada; no fim, o botão "Voltar para a expedição" leva de volta a ela.',
+					'Perder uma batalha encerra a expedição. Você pode desistir a qualquer momento; desistir com uma batalha aberta conta como derrota nela. O administrador pode encerrar a sua expedição, ou a expedição inteira, e o que foi jogado fica no histórico como encerrado.',
+					'Por segurança, cada jogador pode começar até 5 expedições a cada 10 minutos.',
 				],
 			},
 			{
 				title: 'Perfil e histórico',
 				paragraphs: [
-					'O seu perfil (conquistas, insígnias, placar e jornadas no Desafio; placar, últimas expedições e desbloqueios na Expedição) e o seu histórico ficam visíveis para os outros usuários logados. Veja o aviso de privacidade em /privacidade.',
+					'O seu perfil (conquistas, insígnias, placar e jornadas no Desafio; placar, últimas expedições, conquistas, insígnias e desbloqueios na Expedição) e o seu histórico ficam visíveis para os outros usuários logados. Veja o aviso de privacidade em /privacidade.',
 				],
 			},
 		],
 	},
 	en: {
 		title: 'Rules',
-		updated: 'Last updated on 2026-10-21.',
+		updated: 'Last updated on 2026-10-22.',
 		sections: [
 			{
 				title: 'The server',
@@ -208,24 +217,33 @@ export const RULES: { [lang in Lang]: Notice } = {
 			{
 				title: 'Expedition: how it works',
 				paragraphs: [
-					'The Expedition is a roguelike mode: you build your team along the way, on a map drawn for each expedition. It has variants, each with its own rules, shown on its page ("Expedition" button on the main menu, or /expedicao). You can have at most one expedition in progress per variant.',
-					'An expedition starts with the choice of a starting team. On the map, you pick the next spot among the ones connected to where you are: wild Pokémon, trainers, events (?), items, PokéCenters (they heal your team), PokéMarts (shops) and, rarely, a legendary Pokémon. Each act ends with a boss; beating the boss of the last act completes the expedition.',
-					'Depending on the variant, you can keep the wild Pokémon you defeat; with a full team, you choose who leaves. Money comes from trainer battles and is spent at PokéMarts. Held items move to and from the bag; usable items (potions, Rare Candy, TMs) are used from the page, only outside battles.',
-					'Pokémon level up with battle experience, and you decide new moves and evolutions. Depending on the variant, HP, PP and status carry over between battles, and fainted Pokémon stay in the team (with half the experience) until healed, or leave the team for good (Nuzlocke).',
+					'The Expedition is a roguelike mode: you build your team along the way, on a map drawn for each expedition. The administrator creates the expeditions, each with its own rules, shown on its page ("Expedition" button on the main menu, or /expedicao): Standard mode (fainted Pokémon stay in the team, with half the experience, until healed) or Nuzlocke (fainted Pokémon leave the team), the expedition Pokédex (the theme), capture, the Computer and the number of acts. You can have at most one expedition in progress in each.',
+					'An expedition starts with the choice of one of three starting teams. On the map, you pick the next spot among the ones connected to where you are: tall grass (wild Pokémon), trainers, elite trainers (stronger, with an item reward), events (?), items, PokéCenters, PokéMarts and, rarely, a legendary Pokémon. Each act has 15 floors and ends with a boss; beating the boss of the last act completes the expedition.',
+					'Capture, depending on the expedition: choose whether to keep the defeated wild Pokémon; throw a Poké Ball from the bag for a sure capture; or throw balls with a capture chance, as in the games (you can try again, and each try uses a ball). With a full team, you choose who leaves. Wild Pokémon may rarely be shiny, and stay shiny when caught.',
+					'With the Computer on, at a PokéCenter you choose between healing your team and using the Computer to store and take Pokémon; those stored are healed when you leave the PokéCenter. Money comes from trainers and is spent at PokéMarts. Held items move to and from the bag (never stored in the Computer); usable items are used from the page, outside battles; key items (Bicycle, Old Rod, fossils) open choices in events.',
+					'Pokémon level up with battle experience, and you decide new moves and evolutions. Depending on the expedition, HP, PP and status carry over between battles or are healed at every map spot.',
+				],
+			},
+			{
+				title: 'Expedition: Complete mode',
+				paragraphs: [
+					'In Complete mode, the expedition has 3 acts and 8 badges. Each expedition played at your highest difficulty fights for a badge you still lack, drawn at the start: its gym leader is the boss of the last act, and beating them gives the badge, which stays on your account.',
+					'Each badge adds a penalty to the next expeditions: trainers pay less, item nodes offer fewer options, there are fewer PokéCenters, the AI plays better, trainers have more Pokémon, the PokéMart is more expensive, opponents get higher levels and bosses get stronger. You can choose a lower difficulty, but then you do not fight for a badge.',
+					'If you start an expedition with all 8 badges, beating the last act lets you choose between ending as the winner and going on to the special act: a PokéCenter, a PokéMart, two members of the Elite Four in a doubles battle and the Champion, at level 100. If you go on, only a win against the Champion counts. Beating the Champion unlocks the shiny starters of that expedition.',
 				],
 			},
 			{
 				title: 'Expedition: battles and the end',
 				paragraphs: [
-					'Expedition battles are public and saved after every move: an interrupted battle continues when you log in or with the button on the page. While the battle is open, the expedition page stays closed; at the end, the "Back to the expedition" button takes you back. Some variants have automatic battles, played by the computer on both sides.',
-					'Losing a battle ends the expedition. You can give up at any time; giving up with an open battle counts as a loss in it. The administrator can close an expedition, which stays in the history as closed.',
-					'Winning an expedition may unlock new things (like an extra starter) for the next ones, depending on the variant. For security, each player can start up to 5 expeditions every 10 minutes.',
+					'Expedition battles are public and saved after every move: an interrupted battle continues when you log in or with the button on the page. While the battle is open, the expedition page stays closed; at the end, the "Back to the expedition" button takes you back.',
+					'Losing a battle ends the expedition. You can give up at any time; giving up with an open battle counts as a loss in it. The administrator can close your expedition, or the whole expedition, and what was played stays in the history as closed.',
+					'For security, each player can start up to 5 expeditions every 10 minutes.',
 				],
 			},
 			{
 				title: 'Profile and history',
 				paragraphs: [
-					'Your profile (achievements, badges, scores and journeys in the Gym Challenge; scores, latest expeditions and unlocks in the Expedition) and your history are visible to other logged-in users. See the privacy notice at /privacidade.',
+					'Your profile (achievements, badges, scores and journeys in the Gym Challenge; scores, latest expeditions, achievements, badges and unlocks in the Expedition) and your history are visible to other logged-in users. See the privacy notice at /privacidade.',
 				],
 			},
 		],

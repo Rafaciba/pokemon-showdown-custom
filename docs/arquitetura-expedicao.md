@@ -697,3 +697,12 @@ Respostas do usuário às propostas:
 - **Vitória contra o Campeão:** vence a run e libera os iniciais shiny daquela expedição (desbloqueios por expedição, migração 7; os antigos valem para todas).
 - **Perfil:** seção "Conquistas" (expedições vencidas e quantas vezes) e as insígnias de cada expedição; os desbloqueios mostram a expedição.
 - **Validado:** testes de unidade (nível e insígnia no começo, líder do tipo, insígnia ao vencer, agravantes de dinheiro, loja, nó de item, nível, IA e tamanho, ato especial com Elite 4 em dupla e Campeão, iniciais shiny só na expedição, troca de nome e exclusão com as insígnias, validação do líder); 2652 testes do servidor; teste de ponta a ponta com a expedição Completa (18 passos); telas do começo da run e do cabeçalho conferidas no navegador.
+
+## Etapa 10: fechamento das expedições criadas pelo admin (feita em 2026-10-22)
+
+- **`/regras`** (pt e en, 22/10/2026): "Expedição: como funciona" reescrita para as expedições criadas pelo admin (modos Padrão e Nuzlocke, tema, mapa de 15 andares com elite, captura nos três modos, shiny, Computador, itens-chave), seção nova "Expedição: modo Completo" (insígnias, agravantes, dificuldade, ato especial, iniciais shiny) e "Expedição: batalhas e fim" (encerramento pelo admin da run ou da expedição inteira).
+- **Aviso de privacidade** (22/10/2026): os dados da Expedição passam a citar o Computador, a dificuldade, as insígnias e os desbloqueios por expedição; o perfil mostra conquistas e insígnias; a exclusão apaga as insígnias e os desbloqueios.
+- **Revisão completa de segurança e LGPD das etapas 6 a 9:** ver `docs/revisao-seguranca-lgpd.md`, seção "Expedição: revisão completa das etapas 6 a 9". Corrigidos o Computador que deixava o time só com desmaiados, a importação sem validação, o índice de golpe fracionário, a licença do PokéAPI resumida e o texto do painel sobre as regras de batalha.
+- **Validado:** 2652 testes do servidor, 28 do login, teste de ponta a ponta com as seções novas de `/regras` e do aviso de privacidade (18 passos).
+- **Para abrir uma expedição aos jogadores:** criar no painel (ou importar), conferir "Pronto para abrir?" e abrir. A "Expedição de teste" continua como rascunho.
+
