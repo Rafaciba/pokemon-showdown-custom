@@ -463,6 +463,27 @@ test('expedição: o admin cria uma expedição no painel', async () => {
 		actmode: 'custom', acts: '1', cap: '35',
 	});
 	await expectRoomText(admin, page, /Everything is ready|Tudo pronto/);
+	// Seletor de Pokémon com busca (no lugar do texto separado por vírgula): busca, Enter adiciona, × remove
+	const starters = admin.locator(`#room-${page} form[data-submitsend*=",iniciais,"]`);
+	const team1 = starters.locator('.exp-species-picker').first();
+	await team1.locator('.exp-species-search').fill('charm');
+	await expect(team1.locator('.exp-species-option').first()).toContainText('Charmander');
+	await team1.locator('.exp-species-search').press('Enter');
+	await team1.locator('.exp-species-search').fill('squirt');
+	await team1.locator('.exp-species-search').press('Enter');
+	await expect(team1.locator('input[type=hidden]')).toHaveValue('Charmander, Squirtle');
+	await team1.locator('.exp-species-chip', { hasText: 'Squirtle' }).locator('.exp-species-remove').click();
+	await expect(team1.locator('input[type=hidden]')).toHaveValue('Charmander');
+	await admin.evaluate(rid => (window as any).app.rooms[rid].$el
+		.find('form[data-submitsend*=",iniciais,"] button[type=submit]').click(), page);
+	await expect.poll(() => admin.evaluate(rid => (window as any).app.rooms[rid].$el
+		.find('form[data-submitsend*=",iniciais,"] input[name=teama]').val(), page)).toBe('Charmander');
+	// Treinadores: a busca e os filtros do Desafio
+	const pool = admin.locator(`#room-${page} table.gym-pool`);
+	await admin.locator(`#room-${page} .gym-filter-text`).fill('E2E Lider');
+	await expect(pool.locator('tr:visible', { hasText: 'E2E Lider' })).toHaveCount(1);
+	await expect(pool.locator('tr:visible').filter({ hasNotText: 'E2E Lider' })).toHaveCount(1, { timeout: 5000 });
+	await admin.locator(`#room-${page} .gym-filter-text`).fill('');
 	// Captura com Poké Bola (o jogador começa com 5) e o Computador no PokéCenter
 	await submitPsForm(admin, page, `form[data-submitsend^="/expedicaoadmin salvar ${expeditionId},geral,"]`, {
 		capture: 'ball', computer: 'yes',

@@ -679,7 +679,7 @@ O usuário descreveu 13 eventos novos. Decisões dele, depois das perguntas: ite
 
 Respostas do usuário às propostas:
 
-- **Agravantes** (somam-se): 1. treinadores, elite e chefes pagam 25% a menos; 2. o nó de item oferece 2 itens em vez de 3; 3. a chance de PokéCenter no meio do ato cai pela metade (o PokéCenter fixo antes do chefe continua); 4. IA um nível acima (selvagens, treinadores, elite, chefes; até a Mestre); 5. um Pokémon a mais nos treinadores e na elite (até 6); 6. PokéMart 25% mais caro; 7. +2 níveis em todos os adversários; 8. chefes com 6 Pokémon em todos os atos, +2 níveis além do agravante 7, e IA Mestre.
+- **Agravantes** (somam-se): 1. treinadores, elite e chefes pagam 25% a menos; 2. o nó de item oferece 2 itens em vez de 3; 3. a chance de PokéCenter no meio do ato cai pela metade (o PokéCenter fixo antes do chefe continua); 4. IA um nível acima (selvagens, treinadores, elite, chefes; até a Mestre); 5. um Pokémon a mais nos treinadores e na elite (até 6); 6. PokéMart 25% mais caro; 7. +2 níveis em todos os adversários; 8. chefes com 6 Pokémon em todos os atos, +2 níveis além do agravante 7, e IA Mestre. **Revisto pelo usuário (ver "Cura entre atos e agravantes revistos" abaixo).**
 - **Nível de dificuldade:** no começo da run, de 0 até o número de insígnias do jogador (o mais alto selecionado). O nível e a insígnia em disputa ficam na run; abaixo do nível máximo, não vale insígnia.
 - **Insígnias:** numa tabela de progresso por jogador e expedição, com as imagens no perfil e na página da expedição; apagadas com a conta e passadas ao nome novo. A insígnia é ganha ao vencer o chefe do ato 3 (mesmo perdendo depois). Quem já tem as 8 não disputa insígnia, e só quem começa a run com as 8 chega ao ato especial (a run que ganha a 8ª termina como vencida).
 - **Líder da insígnia** (chefe do ato 3): gerado (time do tema só com o tipo da insígnia), sorteado da seleção (um treinador do banco do mesmo tipo; sem nenhum, gerado) ou escolhido (o painel exige o tipo da insígnia).
@@ -706,3 +706,21 @@ Respostas do usuário às propostas:
 - **Validado:** 2652 testes do servidor, 28 do login, teste de ponta a ponta com as seções novas de `/regras` e do aviso de privacidade (18 passos).
 - **Para abrir uma expedição aos jogadores:** criar no painel (ou importar), conferir "Pronto para abrir?" e abrir. A "Expedição de teste" continua como rascunho.
 
+
+## Editor: seletor de Pokémon e busca de treinadores (2026-10-22)
+
+Pedido do usuário, para evitar erros de digitação:
+
+- **Seletor de Pokémon com busca** no lugar dos campos de texto separados por vírgula (lista do tema, os três times fixos e o pool dos times sorteados). O servidor manda o campo oculto com a lista e as etiquetas já escolhidas (`speciesPicker` em `admin.ts`); o cliente (`client-custom.js`, seção "Editor de expedições") busca na Pokédex do próprio cliente, mostra até 15 sugestões com ícone (Enter ou clique adiciona; setas escolhem; Esc fecha) e remove pelo ×. Os times fixos aceitam até 3. O servidor confere tudo de novo ao salvar (espécies que não existem, tema).
+- **Treinadores:** a tabela dos que podem ser sorteados ganhou a busca por nome ou Pokémon, os filtros por tipo e pela seleção e a ordenação pelos títulos, com o sprite e o time de cada um, como no Desafio (as mesmas classes do cliente). As listas de chefes, da Elite 4, do Campeão e dos líderes ganharam a busca por nome; "Gerado" e "Sorteado entre os selecionados" continuam sempre na lista.
+- **Validado:** passo novo no teste de ponta a ponta (busca, Enter, remoção e salvar num time fixo; busca na tabela de treinadores) e conferência visual no navegador.
+
+## Cura entre atos, agravantes revistos e ajustes de tela (2026-10-22)
+
+Pedidos do usuário depois de jogar:
+
+- **Cura entre atos:** o time inteiro volta 100% ao passar de um ato para o outro (inclusive para o ato especial), como no PokéCenter (`runs.ts` → `healBetweenActs`).
+- **Agravantes revistos:** o "+2 níveis em todos os adversários" saiu, e a cura reduzida entre atos entrou em 4º. Ordem atual: 1. treinadores, elite e chefes pagam 25% a menos; 2. o nó de item oferece 2 itens; 3. metade da chance de PokéCenter no meio do ato; 4. entre os atos, o time recupera só metade do HP e do PP (status curado; quem desmaiou volta com metade do HP); 5. IA um nível acima; 6. um Pokémon a mais nos treinadores e na elite; 7. PokéMart 25% mais caro; 8. chefes com 6 Pokémon, +2 níveis e IA Mestre.
+- **Clique que às vezes não funcionava de primeira** (nos eventos): o tooltip de um botão (golpe, item) aparecia por cima do botão de baixo e recebia o clique. O tooltip passou a não receber o mouse.
+- **Tooltips** abrem para cima ou para a esquerda quando não cabem na tela (`client-custom.js`), e a página da run tem um espaço no fim.
+- **Mapa** num quadro mais baixo com rolagem (420 px), que rola sozinho até o nó atual ou os próximos; escolher um nó volta a página para o topo, onde aparece o nó escolhido.
