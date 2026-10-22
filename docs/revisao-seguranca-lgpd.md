@@ -413,3 +413,9 @@ Revisão de todo o plugin (`server/chat-plugins/expedition/`), das mudanças no 
 - **DoS:** só o admin dispara a recarga dos formatos (na criação, na seção de regras, ao abrir, encerrar, reabrir e apagar). O formato de cada expedição é lido do banco só para leitura, sem lançar erro.
 - **A09:** criar, salvar (com a seção), abrir, encerrar, reabrir, apagar, trocar as insígnias e importar vão para o modlog (`EXPEDITION`).
 - **LGPD:** nada novo do jogador. As runs continuam como antes, apagadas com a conta; as expedições são dados do admin.
+
+### Expedição, etapa 7: mapa, elite e chefes do banco (2026-10-22)
+
+- **A04:** o chefe do banco é lido na hora do encontro pelo id guardado na run; um treinador apagado depois vira chefe gerado, sem erro. O ajuste do time usa só os dados do Pokémon (estágio, golpes, habilidade, Mega Stone) e o tema; o time vai ao simulador empacotado pelo servidor, como os demais encontros. A recompensa da elite sai da semente da run e do nó, e o resultado da batalha conta uma vez só (como antes).
+- **A03:** nome, título e sprite do treinador vêm do banco do Desafio, que já valida esses campos; o nome é escapado na sala da batalha e nas páginas, e o sprite passa por `isTrainerSprite`.
+- **LGPD:** nada novo.

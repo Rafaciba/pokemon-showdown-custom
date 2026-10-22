@@ -459,6 +459,16 @@ test('expedição: o admin cria uma expedição no painel', async () => {
 		actmode: 'custom', acts: '1', cap: '35',
 	});
 	await expectRoomText(admin, page, /Everything is ready|Tudo pronto/);
+	// Chefe do ato 1: um treinador do banco do Desafio (o líder E2E), escolhido a dedo
+	await expectRoomText(admin, page, /Act 1 boss|Chefe do ato 1/);
+	const leader = await admin.evaluate(rid => (window as any).app.rooms[rid].$el
+		.find('select[name="actb"] option').filter((i: number, el: HTMLOptionElement) => /E2E Lider/.test(el.textContent || ''))
+		.val(), page);
+	expect(leader, 'o líder E2E na lista de chefes').toMatch(/^\d+$/);
+	await submitPsForm(admin, page, `form[data-submitsend^="/expedicaoadmin salvar ${expeditionId},chefes,"]`, { actb: leader });
+	await expect.poll(() => admin.evaluate(rid => (window as any).app.rooms[rid].$el
+		.find('select[name="actb"] option').first().val(), page)).toBe(leader);
+	await expectRoomText(admin, page, /Everything is ready|Tudo pronto/);
 	// Rascunho: só administradores veem, com o aviso de teste
 	await openPsPage(admin, 'view-expedicao', /E2E Expedição/);
 	await expectRoomText(admin, 'view-expedicao', /Test only: visible to administrators|Só para testes/);
