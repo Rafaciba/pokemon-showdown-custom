@@ -624,3 +624,43 @@ O PS tem batalhas *multi* (dois contra dois), mas cada lado do campo é um jogad
 - **Tamanho do time do chefe por ato** (3 ou 4 no ato 1, 5 no ato 2, 6 do ato 3 em diante): vale também para os chefes gerados, para os dois tipos de chefe terem a mesma força.
 - **Calibração** refeita com a elite e os chefes por ato. Simulação com o padrão (3 atos, 5 a 95): o jogador médio chega aos chefes nos níveis 31,6, 66,8 e 95,2 (curva: 35, 65 e 95); quem pega mais batalhas, 32,9, 71,3 e 98,5; quem evita, 29,8, 61,6 e 90,8.
 - **Validado:** testes de unidade (regras do mapa em 60 mapas, tamanhos de time, ajuste dos sets e do chefe do banco, IA da elite); 2644 testes do servidor; teste de ponta a ponta com a escolha do chefe do ato 1 no editor (17 passos); mapa com a elite conferido no navegador.
+
+## Etapa 8: captura com Poké Bola, Computador e shiny (feita em 2026-10-22)
+
+- **Captura** (`capture.ts`, `runs.ts` → `decideCapture`): os três modos da expedição.
+  - **Escolha ao vencer** (padrão): como antes; quem entra fica numa Poké Ball.
+  - **Poké Bola garantida:** depois da vitória, o jogador lança uma bola da mochila e captura com certeza; a bola fica como o visual do Pokémon.
+  - **Poké Bola com chance:** a fórmula das gerações 3 e 4, com a taxa de captura da espécie e o multiplicador da bola. Como a captura vem depois da vitória, o selvagem conta como enfraquecido (HP em 20%, sem status). O jogador pode tentar de novo com outras bolas, e cada tentativa gasta uma. O resultado de cada tentativa sai da semente da run, do nó e do número da tentativa: recarregar a página não muda nada. Lendários têm pelo menos 10% por bola. Exemplos com Poké Ball: taxa 45 (iniciais, Gyarados), 15%; taxa 190, cerca de 65%; taxa 255, cerca de 87%.
+  - **Bolas** (decisão do usuário): Poké 1×, Great 1,5×, Ultra 2×, Master 100% (rara: 5% dos nós de item); Net Ball 3,5× contra Water e Bug (o bônus simples dos jogos); Premier e Luxury só visuais.
+  - **Taxas de captura** (`catch-rates.ts`): geradas por `scripts/expedicao/taxas-captura.cjs` a partir do `pokemon_species.csv` do PokéAPI (licença BSD de 3 cláusulas, com o aviso no arquivo). Formas usam a taxa da espécie.
+  - **Economia** (decisão do usuário: mais chances de conseguir bolas): o jogador começa com 5 Poké Balls no modo com chance e 3 no de captura certa (decisão do usuário; o primeiro andar é sempre de selvagens), o PokéMart vende Poké (200), Great (600), Ultra (800) e Net Ball (1000), e o nó de item oferece uma Master Ball em 5% das vezes (decisão do usuário; sorteio próprio, no lugar do primeiro item). Eventos com bolas variadas entram com as opções dos nós "?".
+  - **Presentes de evento** (presente, Pokémon ferido) entram sem bola.
+- **Computador** (`nodes.ts`, `runs.ts`, migração 6: coluna `box`): desligado por padrão. No PokéCenter, o jogador escolhe entre curar o time e usar o Computador (não os dois). No Computador, guarda e pega Pokémon (o time fica com pelo menos 1 e no máximo 6; 30 vagas, escolha nossa). Quem está no Computador só é curado quando o jogador sai do PokéCenter (decisão do usuário): quem foi guardado agora volta curado só numa visita seguinte. Com o time cheio, o capturado pode ir para o Computador, ou quem sai do time vai para lá (sem o Computador, quem sai é solto). Os itens nunca ficam no Computador (decisão do usuário): o de quem é guardado ou sai do time vai para a mochila. Os Pokémon do Computador não ganham experiência.
+- **Shiny** (`encounters.ts`): selvagens e lendários com a chance da expedição (1 em `shinyOdds`, padrão 4096), num sorteio próprio para não mudar o resto do encontro. O shiny aparece na batalha, tem a estrela ★ nas páginas e continua shiny quando capturado.
+- **Nuzlocke:** Revive e Max Revive saem da loja.
+- **Páginas:** ícone da bola ao lado de cada Pokémon, estrela dos shiny, "Shiny!" no encontro, botões de bola com a quantidade (e a chance, no modo com chance), aviso quando o Pokémon escapa, Computador com os botões de guardar e pegar.
+- **Validado:** testes de unidade (chance das bolas, captura certa e com chance, repetição da tentativa pela semente, presentes, Computador no PokéCenter e na captura, shiny, loja com bolas e sem reviver no Nuzlocke); 2648 testes do servidor; teste de ponta a ponta com a captura por bola e o Computador ligados e as 5 bolas do começo; telas de captura e do Computador conferidas no navegador, com o estado da run preparado no banco local.
+
+## Eventos "?", segunda leva (2026-10-22)
+
+O usuário descreveu 13 eventos novos. Decisões dele, depois das perguntas: itens-chave próprios (Bicicleta, Old Rod e fósseis: ficam na mochila, não vão para os Pokémon nem são usados direto); as espécies das listas fixas ficam no tema (sem nenhuma no tema, o evento não aparece; os Rocket, sem a lista, sorteiam do tema); a batalha contra dois treinadores (Rocket atacando crianças) é a dupla comum 3 + 3; o Covil Rocket continua depois de cada batalha, sem abas sobrando. Os eventos que dependem de algo (vara, fóssil, Antidote, alguém que aprende o golpe) só oferecem a escolha quando ela é possível.
+
+**Parte 1** (`events-world.ts`, feita em 2026-10-22):
+
+| Evento | Chance | Como funciona |
+|---|---|---|
+| Ataque da Equipe Rocket | 15 | batalhar (treinador gerado com a lista clássica dos Rocket no tema, sprite de Rocket Grunt, prêmio de treinador), entregar qualquer Pokémon do time (o item dele vai para a mochila), menos o único em condição de batalhar (decisão do usuário), ou, com a Bicicleta, fugir |
+| Entrada de caverna | 10 | entrar: batalha contra 3 ou 4 selvagens de caverna (Zubat, Golbat, Geodude, Graveler, Paras, Parasect) no nível da curva, sem captura; a vitória dá um fóssil clássico do tema; ou seguir |
+| Cientista | 10 | reviver um fóssil da mochila (o Pokémon entra na curva − 2, no estágio do nível), trocar um Pokémon do time por um Porygon no mesmo nível e no estágio desse nível (o item vai para a mochila) ou só pegar uma Hyper Potion (decisão do usuário) |
+| Move Reminder | 10 | de graça: até 3 Pokémon, com até 3 golpes de nível já passados cada; com 4 golpes, a decisão de qual esquecer |
+| Árvore, rocha e grande rocha no caminho | 15 cada | com alguém do time que aprende Cut, Rock Smash ou Strength por TM ou HM (numa geração com a mecânica), abre o caminho e acha um item de segurar; na árvore e na rocha, em 10% das vezes há antes uma batalha contra um Sudowoodo ou um Geodude/Graveler (o item vem na vitória, e dá para capturar). Sempre dá para dar a volta: batalha contra um selvagem do andar |
+| Pescador | 15 | dá a Old Rod (não aparece para quem já tem) |
+| Lago | 10 | só no ato 2: pescar com a Old Rod (batalha contra um Pokémon de água do tema, que dá para capturar) ou se refrescar (30% do HP e do PP de quem não desmaiou) |
+| Vendedor de Bicicleta | 10 | vende a Bicicleta por 10000 ₽ (não aparece para quem já tem) |
+| Idoso envenenado | 10 | só no ato 1: curar com um Antidote da mochila (ganha um item de segurar) ou enfrentar o Weedle (no estágio do nível) |
+
+**Limites por ato** (decisão do usuário, depois da nossa proposta): o Idoso só no ato 1, o Lago só no ato 2 e o Covil Rocket (parte 2) só no ato 3; os demais, em qualquer ato.
+
+**Correção:** o `toID` do PS apaga o "é" de "Poké Ball" ("pokball"). O ícone da bola no time e a bola enviada ao simulador passaram a usar a lista de bolas (`ballIdByName`).
+
+**Parte 2** (a fazer): Equipe Rocket atacando crianças (batalha em dupla) e Covil da Equipe Rocket (evento que continua depois das batalhas).

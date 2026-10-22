@@ -459,6 +459,12 @@ test('expedição: o admin cria uma expedição no painel', async () => {
 		actmode: 'custom', acts: '1', cap: '35',
 	});
 	await expectRoomText(admin, page, /Everything is ready|Tudo pronto/);
+	// Captura com Poké Bola (o jogador começa com 5) e o Computador no PokéCenter
+	await submitPsForm(admin, page, `form[data-submitsend^="/expedicaoadmin salvar ${expeditionId},geral,"]`, {
+		capture: 'ball', computer: 'yes',
+	});
+	await expect.poll(() => admin.evaluate(rid => (window as any).app.rooms[rid].$el
+		.find('select[name="capture"] option').first().val(), page)).toBe('ball');
 	// Chefe do ato 1: um treinador do banco do Desafio (o líder E2E), escolhido a dedo
 	await expectRoomText(admin, page, /Act 1 boss|Chefe do ato 1/);
 	const leader = await admin.evaluate(rid => (window as any).app.rooms[rid].$el
@@ -492,6 +498,8 @@ test('expedição: o admin testa o rascunho, escolhe o time, batalha e perde', a
 	// O time mostra o item de cada Pokémon (a mochila aparece quando houver itens)
 	// Dinheiro inicial padrão das expedições (decisão do usuário: 500)
 	await expectRoomText(admin, id, /Money: 500 ₽|Dinheiro: 500 ₽/);
+	// Captura certa com Poké Bola: as 3 bolas do começo na mochila
+	await expectRoomText(admin, id, /Poké Ball ×3/);
 	await expectRoomText(admin, id, /Held item.*No item|Item.*Sem item/);
 	// Tooltip de cada Pokémon do time: escondido, com atributos e golpes, e visível no hover
 	const tip = admin.locator(`#room-${id} td .exp-tip`).first();

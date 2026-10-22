@@ -419,3 +419,16 @@ Revisão de todo o plugin (`server/chat-plugins/expedition/`), das mudanças no 
 - **A04:** o chefe do banco é lido na hora do encontro pelo id guardado na run; um treinador apagado depois vira chefe gerado, sem erro. O ajuste do time usa só os dados do Pokémon (estágio, golpes, habilidade, Mega Stone) e o tema; o time vai ao simulador empacotado pelo servidor, como os demais encontros. A recompensa da elite sai da semente da run e do nó, e o resultado da batalha conta uma vez só (como antes).
 - **A03:** nome, título e sprite do treinador vêm do banco do Desafio, que já valida esses campos; o nome é escapado na sala da batalha e nas páginas, e o sprite passa por `isTrainerSprite`.
 - **LGPD:** nada novo.
+
+### Expedição, etapa 8: captura com Poké Bola, Computador e shiny (2026-10-22)
+
+- **A04 (lógica no servidor):** o lançamento confere a bola na mochila e a gasta antes do sorteio; o sorteio sai da semente da run, do nó e do número da tentativa, então recarregar ou repetir o comando não muda o resultado (sem "save scumming"). A captura só acontece na decisão pendente da run do próprio jogador; presentes de evento não aceitam bola. O Computador só funciona dentro do PokéCenter escolhido para isso (o jogador não cura e usa o Computador na mesma visita), com o time entre 1 e 6 e 30 vagas; a cura dos guardados acontece só ao sair.
+- **A03:** os ids de bola e de Pokémon vêm dos botões e são conferidos contra a lista de bolas, a mochila, o time e o Computador; os nomes vão escapados.
+- **Dados de terceiros:** a tabela de taxas de captura vem do PokéAPI (BSD de 3 cláusulas), com o aviso de copyright e a licença no arquivo gerado.
+- **LGPD:** o Computador guarda Pokémon da run (dados de jogo, apagados com a conta junto com a run). Nada pessoal novo.
+
+### Expedição: eventos "?", segunda leva, parte 1 (2026-10-22)
+
+- **A04:** cada escolha é conferida no servidor contra as escolhas oferecidas (as desabilitadas são recusadas pelo nó) e de novo na hora de aplicar: o item-chave, o fóssil, o Antidote e a vara precisam estar na mochila, o dinheiro da Bicicleta é conferido, o Pokémon entregue ou trocado precisa estar no time (e o último não pode ser entregue), e quem abre o caminho precisa aprender o golpe. Os sorteios saem da semente da run e do nó. Itens-chave não vão para os Pokémon nem são usados pela mochila.
+- **A03:** nomes de espécies, golpes e itens nos textos dos eventos são escapados pela página, como nos demais eventos.
+- **LGPD:** nada novo.
