@@ -540,3 +540,72 @@ Pedido do usuário depois da etapa 2: o time subia níveis demais no começo, e 
 - **Revisão de segurança e LGPD do modo inteiro:** ver `docs/revisao-seguranca-lgpd.md`, seção "Expedição: revisão completa do modo". Corrigidos: resultado decidido pelo nome (NPC com o mesmo id do jogador), troca de nome com batalha interrompida e com run ativa repetida, comandos numa variação desligada e oferta de evolução vencida. Criado o limite de expedições novas.
 - **Teste de ponta a ponta:** as seções da Expedição em `/regras` e `/privacidade`, nos dois idiomas, além dos passos das etapas anteriores.
 - **Para abrir uma variação aos jogadores:** programar a variação de verdade (sem `adminOnly`), conferir os textos de `/regras` (que descrevem a base, válida para todas) e ligar a variação no painel.
+
+## Expedições criadas pelo admin: decisões (2026-10-22)
+
+As variações deixam de ser programadas: o admin cria as expedições pelo painel, como os desafios do Desafio de Ginásios. Decisões do usuário, depois de duas rodadas de perguntas:
+
+- **Ciclo de vida:** expedições guardadas no banco, com rascunho, aberta e encerrada, e importar e exportar em JSON (como os pacotes do Desafio). As runs em andamento continuam com as configurações de quando começaram.
+- **Modo de jogo:** Padrão (desmaiados continuam no time e podem ser revividos) ou Nuzlocke (desmaiados saem do time). No Nuzlocke, os itens de reviver não aparecem na loja nem nos eventos. Sem restrição de captura no Nuzlocke (perder Pokémon já é punitivo o bastante).
+- **Mecânica e tema, separados:**
+  - **mecânica:** como no Desafio (formato base, limite de geração, Mega, Z, Dynamax, Tera). Padrão: Gen 9 NatDex com Mega;
+  - **tema:** a Pokédex de selvagens, treinadores e iniciais (região, geração ou lista). As evoluções ficam limitadas ao tema (num tema de Kanto, Golbat não vira Crobat).
+- **Times iniciais:** sempre 3 times para escolha, de 1 a 3 Pokémon cada, fixos (o admin define só as espécies) ou sorteados de um pool. Todo time tem pelo menos um inicial regional (os 3 de cada geração, na forma básica) das gerações do tema, e os iniciais não se repetem entre os times. Os outros Pokémon do time podem ser quaisquer (exemplo: Charmander, Rattata e Pidgey). Os sorteados respeitam o teto de força do nível inicial. Pikachu e Eevee talvez entrem como desbloqueáveis (a decidir).
+- **Atos:**
+  - **Completo:** 3 atos e o ato especial;
+  - **Personalizado:** de 1 a 4 atos, sem ato especial e sem insígnias. Vencer dá uma conquista no perfil (troféus e selos, para a Expedição e o Desafio, ficam para depois).
+- **Mapa** no modelo do Slay the Spire, com 15 andares por ato:
+  - grade de 7 colunas, 6 caminhos sem cruzar, todos terminando no chefe;
+  - andar 1 só de selvagens; um andar de item no meio do ato; andar 14 de PokéCenter; andar 15 de chefe;
+  - sem PokéCenter e sem elite antes do andar 6; sem PokéCenter no andar 13; sem dois PokéCenters, lojas ou elites seguidos; nós que saem do mesmo ponto com tipos diferentes;
+  - **chances padrão:** mato 40%, evento 20%, treinador 15%, elite 5%, PokéCenter 10%, PokéMart 5%, item 5%. O andar de item e o lendário raro ficam por fora. Ajustáveis depois das rodadas de teste;
+  - **elite:** treinador forte (gerado como os treinadores), com recompensa melhor (chance de Mega Stone e item raro).
+- **Níveis:** nível inicial (padrão 5) e teto do chefe final (padrão 95), os dois configuráveis; os níveis por ato saem da progressão entre os dois, com a calibração de experiência e dinheiro de antes. No ato especial, a Elite 4 e o Campeão ficam no 100.
+- **Dinheiro inicial:** 500 (dá para uma compra comum, ou duas Poké Balls, antes do primeiro treinador).
+- **Desgaste:** padrão continua entre as batalhas; o admin pode escolher curar a cada nó. Batalhas sempre jogadas. Time de no máximo 6.
+- **IA:** um nível padrão por ato (Fácil, Médio, Difícil), ajustável, com nível próprio para os chefes.
+- **Chefes:** sorteados (gerados), cadastrados (do banco do Desafio) ou escolhidos a dedo pelo admin, com a lista das opções do sorteio. Os cadastrados são ajustados ao nível do ato: a espécie volta ao estágio possível no nível (Dragonite vira Dragonair), os golpes que o estágio não aprende são trocados e o time é cortado por ato (3 ou 4 no ato 1, 5 no ato 2, 6 no ato 3).
+- **Insígnias (modo Completo):**
+  - sempre 8, de tipos diferentes, escolhidas pelo admin (inclusive o conjunto de uma liga, como Kanto ou Johto) ou sorteadas; **travadas** depois da primeira run;
+  - a cada run, a insígnia em disputa é sorteada entre as que faltam (o jogador não escolhe), e o chefe do ato 3 é do tipo dela;
+  - **dificuldade:** cada insígnia soma um agravante, nesta ordem: 1. menos dinheiro; 2. uma opção a menos nos nós de item; 3. menos chance de PokéCenter no meio do ato; 4. IA um nível acima; 5. times dos treinadores mais fortes; 6. PokéMart mais caro; 7. +2 níveis nos adversários; 8. chefes com times mais fortes e IA Mestre. O jogador pode escolher um nível abaixo do último liberado, mas aí não ganha insígnia;
+  - com as 8, vencer o ato 3 oferece a escolha: encerrar como vencedor ou seguir para o ato especial. Quem segue só vence ganhando do Campeão.
+- **Ato especial:** caminho único: PokéCenter, PokéMart, batalha em dupla contra dois treinadores Difícil (membros da Elite 4, cadastrados ou gerados) e o Campeão (IA Mestre). Vencer o Campeão libera os iniciais shiny daquela expedição.
+- **Shiny:** selvagens com chance configurável, padrão 1/4096; o capturado continua shiny.
+- **Captura:**
+  - **escolha ao vencer** (padrão, como hoje);
+  - **Poké Bola garantida:** captura certa, gastando a bola da mochila; as variações de bola são só visuais;
+  - **Poké Bola com chance:** depois da vitória, pela taxa de captura da espécie (tabela pública, que o PS não tem), o multiplicador da bola e um fator fixo de "enfraquecido"; o jogador pode tentar com mais bolas. Poké 1×, Great 1,5×, Ultra 2×, Master 100% (item raro de evento); as outras bolas são visuais ou com bônus simples. Lendários têm uma chance mínima;
+  - nos modos com bola, a loja e os eventos dão mais bolas, e variadas.
+- **Computador** (desligado por padrão): no PokéCenter, o jogador escolhe entre curar e usar o Computador para mexer no time. Com o time cheio, o capturado ou o substituído vai para o Computador. Quem entra no Computador só é curado quando o jogador sai daquele PokéCenter (só numa troca seguinte ele volta curado). No Nuzlocke, desmaiado não vai para o Computador.
+- **Sem** "pular todos" nas decisões de golpe e **sem** apelidos, por enquanto.
+
+### Etapas propostas
+
+6. **Expedições no banco e editor no painel:** definição da expedição, ciclo de vida, importar e exportar, a variação de teste convertida em expedição, e todas as opções acima no editor, com validação (tema, iniciais, treinadores escolhidos).
+7. **Mapa novo e encontros:** mapa de 15 andares no modelo do Slay the Spire, elite, calibração refeita, IA por ato, chefes sorteados, cadastrados ou escolhidos, com o ajuste ao nível.
+8. **Captura, Computador e shiny:** os três modos de captura, a tabela de taxas, as bolas e a economia; o Computador no PokéCenter; shiny nos selvagens; Nuzlocke sem itens de reviver.
+9. **Modo Completo:** insígnias, agravantes com escolha de nível, ato especial com a batalha contra dois treinadores, Campeão, iniciais shiny; conquista das personalizadas.
+10. **Fechamento:** `/regras`, aviso de privacidade (insígnias, Computador, shiny, conquistas), revisão de segurança e LGPD, teste de ponta a ponta.
+
+### Batalha contra dois treinadores: viabilidade
+
+O PS tem batalhas *multi* (dois contra dois), mas cada lado do campo é um jogador: o jogador controlaria só metade do time, com um aliado. Juntar dois lados num jogador só exigiria mudar o `RoomBattle` e o cliente. Caminho proposto: **batalha dupla comum**, em que o lado adversário tem o time dos dois treinadores (3 + 3) e a IA joga cada posição só com os Pokémon do seu treinador. As IAs já jogam em dupla. Limites: o lado adversário tem um nome ("Lorelei & Bruno") e um sprite só; e, quando um treinador fica sem Pokémon, o PS obriga a trocar se houver alguém no banco, então o Pokémon do outro treinador entra no lugar (nos jogos, o outro seguiria sozinho). Corrigir esse último ponto pede uma regra no simulador, ligada só nesse formato.
+
+**Decisão do usuário (2026-10-22):** aceita a batalha dupla comum com esses limites, e o Pokémon do outro treinador pode entrar no lugar vago (sem regra nova no simulador).
+
+## Etapa 6: expedições no banco e editor no painel (feita em 2026-10-22)
+
+- **Definição** (`definition.ts`): todas as opções decididas (modo, mecânica, tema, times iniciais, atos, níveis, dinheiro, desgaste, chances dos nós, lendário, shiny, IA por ato, captura, Computador, chefes, insígnias), com os valores padrão, a leitura segura (`normalizeDefinition`, que confere cada campo e cai no padrão) e a validação (`checkDefinitionFields` para salvar, `definitionProblems` para abrir).
+- **Banco** (`store.ts`, migração 5): tabela `expeditions` (nome único, situação e definição em JSON). A expedição de teste do código virou o rascunho "Expedição de teste", e as runs dela passaram para o id novo. A tabela de ajustes das variações saiu: a situação e a definição fazem esse papel.
+- **Variações** (`variant.ts`, `state.ts`): cada expedição do banco vira uma variação (`variantFromDefinition`), guardada até a próxima mudança no painel. As do código continuam possíveis, escondidas: a de teste fica registrada como "teste" só para os testes automáticos, que precisam de um formato carregado sem o banco.
+- **Quem joga:** abertas, todos; rascunhos, só administradores (para testar); encerradas, ninguém.
+- **Formatos** (`formats.ts`): o formato escondido de cada rascunho e expedição aberta é lido do banco, só para leitura, como os desafios do Desafio. O painel recarrega os formatos na criação, na seção de regras, ao abrir, encerrar, reabrir e apagar.
+- **Tema** (`species.ts`): gerações ou lista (cada espécie traz a linha evolutiva). Vale para selvagens, treinadores, lendários, eventos, iniciais e evoluções (do jogador e dos NPCs); num tema, a primeira espécie do tema em cada linha conta como básica.
+- **Mapa** desta etapa, pela base que já existia: 15 andares (14 e o chefe), 7 colunas, 6 caminhos, o primeiro andar de selvagens, o do meio de item, o anterior ao chefe de PokéCenter, sem PokéCenter antes do andar 6. A elite entra como treinador comum até a etapa 7, que traz as regras do Slay the Spire que faltam (tipos diferentes na mesma bifurcação, sem PokéCenter no andar 13, a elite).
+- **Níveis:** os níveis por ato saem do nível inicial e do teto do chefe final. Simulação de 2026-10-22 com o padrão (3 atos, 5 a 95): o jogador médio chega aos chefes nos níveis 30,6, 66 e 94,7 (curva: 35, 65 e 95); quem pega mais batalhas, 31,9, 69,5 e 97,5; quem evita, 29,2, 62,2 e 91,9. A calibração é refeita na etapa 7, com o mapa definitivo.
+- **Times iniciais:** fixos (o admin dá as espécies) ou sorteados de um pool (vazio = os iniciais regionais do tema), sempre 3 times com um inicial regional diferente em cada, sem repetir espécie nos sorteados.
+- **Insígnias:** sorteadas ao salvar (8 de tipos diferentes, com "Sortear de novo") ou escolhidas, também pelo conjunto de uma liga do catálogo (Kanto, Johto, Hoenn, Sinnoh, Kalos e Paldea têm 8 de tipos diferentes). Travadas depois da primeira run.
+- **Painel** (`admin.ts`): lista das expedições, editor em seções (cada uma com o seu botão Salvar e o rascunho do formulário quando a validação recusa), "Pronta para abrir?", abrir, encerrar (com as runs em andamento), reabrir, apagar rascunho sem runs, exportar o JSON na página da expedição e a página Importar e exportar (treinadores pelo nome). O editor avisa quais opções só valem nas próximas etapas.
+- **Ainda sem efeito no jogo** (vêm nas próximas etapas): elite e chefes do banco (7), captura com Poké Bola, Computador e shiny (8), insígnias, agravantes e ato especial (9).
+- **Validado:** testes de unidade (leitura segura, variação a partir da definição, níveis, times sorteados e fixos, tema, validação para abrir, insígnias, banco e formulários); 2641 testes do servidor passando; teste de ponta a ponta com a criação no painel, o teste do rascunho, a abertura e o encerramento (17 passos); telas do editor conferidas no navegador.

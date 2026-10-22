@@ -65,6 +65,8 @@ cleanup() {
 	docker compose exec -T -e E2E_START="$start" login node --input-type=module < tests/e2e/cleanup/login.mjs || true
 	docker compose run --rm --no-deps -v "$root/tests/e2e/cleanup:/e2e/cleanup:ro" server-setup \
 		node /e2e/cleanup/gym.cjs 2>&1 | grep '^\[e2e\]' || true
+	docker compose run --rm --no-deps -v "$root/tests/e2e/cleanup:/e2e/cleanup:ro" server-setup \
+		node /e2e/cleanup/expedition.cjs 2>&1 | grep '^\[e2e\]' || true
 	sed -i '/^E2E /Id' server/config/usergroups.csv
 	# Tira o rank do admin temporário da memória e os formatos do desafio E2E
 	docker compose restart server > /dev/null 2>&1 || true

@@ -396,3 +396,20 @@ Revisão de todo o plugin (`server/chat-plugins/expedition/`), das mudanças no 
   - **LGPD:** a exclusão da conta apaga runs, batalhas e desbloqueios. O save state some no fim da batalha. Não há IP no banco da Expedição. O aviso de privacidade descreve os dados do modo.
   - **Cliente:** `gymGo` e `expeditionReturn` só aceitam as páginas esperadas. Os tooltips são só CSS, e o botão de ver a senha só alterna o tipo do campo.
 - **Observação sem impacto:** os formatos escondidos da Expedição podem ser usados num desafio direto entre jogadores (o PS só os tira da busca). Sem o `NpcBattle`, não dão vantagem nenhuma.
+
+### Expedição, etapa 6: expedições criadas pelo admin (2026-10-22)
+
+- **A01 (controle de acesso):** o editor, a importação e todos os `/expedicaoadmin` (salvar, abrir, encerrar, reabrir, apagar, liga, sortear insígnias, importar, encerrar run) exigem administrador. Rascunhos só são vistos e jogados por administradores (para testar); encerradas, por ninguém. As variações do código (a de teste dos testes automáticos) ficam escondidas.
+- **A03 (injeção):**
+  - SQL parametrizado; a definição é guardada em JSON e relida por `normalizeDefinition`, que confere cada campo (tipo, lista, limite) e cai no padrão se vier errado;
+  - nome e descrição são escapados nas páginas; o nome não aceita `| , ; [ ] < > & " @`, barra invertida nem quebras de linha, e a descrição não aceita quebras de linha;
+  - as regras extras vão para o formato: recusam `|`, `@`, `< > & "`, barra invertida e quebras de linha, e passam por `Dex.formats.validate`;
+  - os valores dos formulários voltam escapados (textareas linha por linha), e os seletores só aceitam os valores da lista (níveis de IA, modos, ids de treinador e de insígnia conferidos na leitura e na validação).
+- **A04:**
+  - uma expedição aberta só é salva se continuar pronta para jogar; abrir e reabrir passam pela mesma validação (formato, tema, iniciais, treinadores do banco, insígnias);
+  - as insígnias ficam travadas depois da primeira run (decisão do usuário), também nos comandos de liga e de sorteio;
+  - um rascunho com runs não pode ser apagado (as runs são o histórico); encerrar a expedição encerra as runs em andamento com a batalha aberta, como o encerramento de uma run pelo admin.
+- **Importação:** o JSON colado é lido com teto (20 expedições, listas de até 400 espécies) e normalizado; nomes repetidos são pulados; treinadores pelo nome, e os que não existem viram chefes gerados. Cada expedição entra como rascunho.
+- **DoS:** só o admin dispara a recarga dos formatos (na criação, na seção de regras, ao abrir, encerrar, reabrir e apagar). O formato de cada expedição é lido do banco só para leitura, sem lançar erro.
+- **A09:** criar, salvar (com a seção), abrir, encerrar, reabrir, apagar, trocar as insígnias e importar vão para o modlog (`EXPEDITION`).
+- **LGPD:** nada novo do jogador. As runs continuam como antes, apagadas com a conta; as expedições são dados do admin.

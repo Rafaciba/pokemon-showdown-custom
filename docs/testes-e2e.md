@@ -33,8 +33,9 @@ Para rodar só uma parte, passe os argumentos do Playwright, por exemplo `sh scr
 | Pacotes | exportar o desafio E2E pela página Importar e exportar (com os dois treinadores) e importar uma cópia com outro nome e um líder novo: o Campeão, que já está no banco, é pulado e reaproveitado, e o desafio importado entra como rascunho pronto para abrir |
 | Desafio (jogador) | o jogador se cadastra com o convite gerado pelo admin, começa a jornada, vence o ginásio e o Campeão (em dupla, na variante em dupla do formato) e vê os times vencedores no perfil |
 | IA Mestre | a página IA Mestre do painel mostra os modelos em uso, conta a batalha individual contra o líder e a batalha em dupla contra o Campeão, cada uma nos dados do seu tipo, e mostra a força dos níveis |
-| Expedição: painel e perfil | o admin abre o painel da Expedição pelo painel admin, vê os números ajustáveis da variação de teste, desliga e religa a variação, vê a derrota do passo anterior no histórico e a seção da Expedição no perfil do jogador |
-| Expedição | o admin abre a expedição de teste, começa uma run, vê os três times iniciais, escolhe um, vê o dinheiro inicial, confere o tooltip de um Pokémon do time (escondido, com os atributos, visível no hover), entra num nó selvagem do primeiro andar (nível 4 a 6), abre a batalha (o lado do selvagem tem o mato alto como avatar, e o arquivo é servido) e desiste com `/forfeit`; a aba da expedição fecha enquanto a batalha está aberta; a sala da batalha mostra a derrota e o botão "Voltar para a expedição", que fecha a sala e leva à página, com o resumo da run (quem venceu e até onde chegou) |
+| Expedição (admin) | o admin abre o painel da Expedição pelo painel admin, cria a expedição "E2E Expedição" pelo formulário da seção Geral, vê as seções do editor, muda para um ato só (Personalizado, chefe no nível 35) e vê que está pronta para abrir; na lista dos jogadores, o rascunho aparece com o aviso de teste |
+| Expedição | o admin testa o rascunho: começa uma run, vê os três times iniciais, escolhe um, vê o dinheiro inicial, confere o tooltip de um Pokémon do time (escondido, com os atributos, visível no hover), entra num nó selvagem do primeiro andar (nível 4 a 6), abre a batalha (o lado do selvagem tem o mato alto como avatar, e o arquivo é servido) e desiste com `/forfeit`; a aba da expedição fecha enquanto a batalha está aberta; a sala da batalha mostra a derrota e o botão "Voltar para a expedição", que fecha a sala e leva à página, com o resumo da run (quem venceu e até onde chegou) |
+| Expedição: abrir, encerrar e perfil | o pacote JSON da expedição na página dela; o admin abre a expedição (o aviso de teste some da linha dela na lista), encerra a expedição, vê a derrota do passo anterior no histórico e a seção da Expedição no perfil do jogador |
 | Exclusão | troca de senha em `/conta`, exclusão da conta e, em até um minuto, as jornadas apagadas pelo servidor de jogo |
 
 Os treinadores de teste só têm Pokémon com Splash (o líder, um Magikarp; o Campeão, em dupla, Magikarp e Feebas), e o jogador usa Pikachu e Raichu com Thunderbolt. Assim as batalhas terminam sempre com a vitória do jogador, em poucos turnos.
@@ -49,6 +50,7 @@ Os treinadores de teste só têm Pokémon com Splash (o líder, um Magikarp; o C
 4. Limpa tudo, passe ou falhe (também com Ctrl+C):
    - no login (`tests/e2e/cleanup/login.mjs`): exclui as contas `e2e*` pela mesma rotina da exclusão pelo jogador, inclusive a fila que apaga os dados de jogo, os códigos criados durante o teste e os eventos de segurança das contas `e2e*`;
    - no Desafio de Ginásios (`tests/e2e/cleanup/gym.cjs`): apaga os desafios e treinadores `E2E*` e as jornadas deles;
+   - na Expedição (`tests/e2e/cleanup/expedition.cjs`): apaga as expedições `E2E*` e as runs delas ou de jogadores `e2e*`;
    - tira a linha do admin do `usergroups.csv`, reinicia o servidor e espera a exclusão das contas terminar (o nome só fica livre de novo depois dela).
 
 ## Cuidados

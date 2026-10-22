@@ -433,23 +433,55 @@ test('IA Mestre: a página mostra os modelos, as batalhas coletadas e a força d
 	expect(text).toMatch(/Strength of the levels|Força dos níveis/);
 });
 
-test('expedição: o admin começa a expedição de teste, escolhe o time, batalha e perde', async () => {
+let expeditionId = 0;
+
+test('expedição: o admin cria uma expedição no painel', async () => {
+	const panel = 'view-expedicao-admin';
+	await openPsPage(admin, 'view-ginasiosadmin', /Master AI|IA Mestre/);
+	await clickPsButton(admin, 'view-ginasiosadmin', `button[value="${panel}"]`);
+	await expectRoomText(admin, panel, /New expedition|Nova expedição/);
+	const before = await roomIds(admin);
+	await clickPsButton(admin, panel, `button[value="${panel}-novo"]`);
+	await expectRoomText(admin, `${panel}-novo`, /Game mode|Modo de jogo/);
+	await submitPsForm(admin, `${panel}-novo`, 'form[data-submitsend^="/expedicaoadmin salvar novo,geral,"]', {
+		name: 'E2E Expedição', desc: 'Expedição do teste de ponta a ponta.',
+	});
+	const page = await waitNewRoom(admin, /^view-expedicao-admin-\d+$/, before);
+	expeditionId = Number(page.split('-').pop());
+	// As seções do editor e o que falta para abrir: no modo Completo, as insígnias são sorteadas ao salvar
+	for (const section of [/Battle rules and theme|Regras de batalha e tema/, /Starting teams|Times iniciais/,
+		/Node chances|Chances dos nós/, /Computer difficulty|Dificuldade do computador/, /Bosses|Chefes/,
+		/Badges \(Complete mode\)|Insígnias \(modo Completo\)/]) {
+		await expectRoomText(admin, page, section);
+	}
+	// Um ato só (Personalizado), até o nível 35: a expedição fica curta para o teste
+	await submitPsForm(admin, page, `form[data-submitsend^="/expedicaoadmin salvar ${expeditionId},atos,"]`, {
+		actmode: 'custom', acts: '1', cap: '35',
+	});
+	await expectRoomText(admin, page, /Everything is ready|Tudo pronto/);
+	// Rascunho: só administradores veem, com o aviso de teste
+	await openPsPage(admin, 'view-expedicao', /E2E Expedição/);
+	await expectRoomText(admin, 'view-expedicao', /Test only: visible to administrators|Só para testes/);
+});
+
+test('expedição: o admin testa o rascunho, escolhe o time, batalha e perde', async () => {
 	const list = 'view-expedicao';
-	const id = 'view-expedicao-run-teste';
-	await openPsPage(admin, list, /Test expedition|Expedição de teste/);
+	const run = String(expeditionId);
+	const id = `view-expedicao-run-${run}`;
+	await openPsPage(admin, list, /E2E Expedição/);
 	await clickPsButton(admin, list, `button[value="${id}"]`);
 	await expectRoomText(admin, id, /Start expedition|Começar a expedição/);
-	await clickPsButton(admin, id, 'button[value="/expedicao iniciar teste"]');
+	await clickPsButton(admin, id, `button[value="/expedicao iniciar ${run}"]`);
 	await expectRoomText(admin, id, /Choose your starting team|Escolha o seu time inicial/);
 	// Três times de três iniciais
-	const options = await admin.evaluate(rid => (window as any).app.rooms[rid].$el
-		.find('button[value^="/expedicao inicial teste,"]').length, id);
+	const options = await admin.evaluate(([rid, v]) => (window as any).app.rooms[rid].$el
+		.find(`button[value^="/expedicao inicial ${v},"]`).length, [id, run] as const);
 	expect(options).toBe(3);
-	await clickPsButton(admin, id, 'button[value="/expedicao inicial teste,0"]');
+	await clickPsButton(admin, id, `button[value="/expedicao inicial ${run},0"]`);
 	await expectRoomText(admin, id, /Choose the next node on the map|Escolha o próximo ponto no mapa/);
 	// O time mostra o item de cada Pokémon (a mochila aparece quando houver itens)
-	// Dinheiro inicial da variação de teste (loja: etapa 3, parte 2)
-	await expectRoomText(admin, id, /Money: 1,000 ₽|Dinheiro: 1\.000 ₽/);
+	// Dinheiro inicial padrão das expedições (decisão do usuário: 500)
+	await expectRoomText(admin, id, /Money: 500 ₽|Dinheiro: 500 ₽/);
 	await expectRoomText(admin, id, /Held item.*No item|Item.*Sem item/);
 	// Tooltip de cada Pokémon do time: escondido, com atributos e golpes, e visível no hover
 	const tip = admin.locator(`#room-${id} td .exp-tip`).first();
@@ -459,15 +491,15 @@ test('expedição: o admin começa a expedição de teste, escolhe o time, batal
 	await expect(tip.locator('.exp-tip-body')).toContainText(/Atk/);
 	await admin.mouse.move(5, 5);
 	// Primeiro andar (sempre selvagem): o encontro aparece, no nível inicial
-	const first = await admin.evaluate(rid => (window as any).app.rooms[rid].$el
-		.find('button[value^="/expedicao avancar teste,"]').map((i: number, b: HTMLButtonElement) => b.value).get(), id);
+	const first = await admin.evaluate(([rid, v]) => (window as any).app.rooms[rid].$el
+		.find(`button[value^="/expedicao avancar ${v},"]`).map((i: number, b: HTMLButtonElement) => b.value).get(), [id, run] as const);
 	expect(first.length, 'nós do primeiro andar').toBeGreaterThanOrEqual(2);
 	await clickPsButton(admin, id, `button[value="${first[0]}"]`);
 	await expectRoomText(admin, id, /\(Lv\. [3-7]\) appeared!|\(Nv\. [3-7]\) apareceu!/);
 	// A batalha abre numa sala; a desistência (forfeit) é derrota e encerra a expedição
 	const before = await roomIds(admin);
-	await clickPsButton(admin, id, 'button[value="/expedicao escolha teste,battle"]');
-	const battleRoom = await waitNewRoom(admin, /^battle-gen9expeditionteste-\d+/, before);
+	await clickPsButton(admin, id, `button[value="/expedicao escolha ${run},battle"]`);
+	const battleRoom = await waitNewRoom(admin, new RegExp(`^battle-gen9expedition${run}-\\d+`), before);
 	// Uma aba só: com a batalha aberta, a aba da expedição fecha
 	await expect.poll(() => admin.evaluate(rid => !!(window as any).app.rooms[rid], id)).toBe(false);
 	// O lado do selvagem tem o mato alto como avatar (sprite próprio, servido pelo Caddy)
@@ -479,7 +511,7 @@ test('expedição: o admin começa a expedição de teste, escolhe o time, batal
 	await admin.evaluate(rid => (window as any).app.send('/forfeit', rid), battleRoom);
 	// No fim, a sala da batalha mostra o resultado e o botão de volta para a expedição
 	await expectRoomText(admin, battleRoom, /Defeat\. The expedition is over\.|Derrota\. A expedição acabou\./);
-	await clickPsButton(admin, battleRoom, 'button[name="expeditionReturn"][value="view-expedicao-run-teste"]');
+	await clickPsButton(admin, battleRoom, `button[name="expeditionReturn"][value="${id}"]`);
 	// Uma aba só: a da batalha fecha, e a da expedição volta
 	await expect.poll(() => admin.evaluate(() => (window as any).app.curRoom?.id)).toBe(id);
 	expect(await admin.evaluate(rid => !!(window as any).app.rooms[rid], battleRoom)).toBe(false);
@@ -490,22 +522,24 @@ test('expedição: o admin começa a expedição de teste, escolhe o time, batal
 	await expectRoomText(admin, id, /Start expedition|Começar a expedição/);
 });
 
-test('expedição: painel do admin (variações, histórico) e seção no perfil', async () => {
+test('expedição: o admin abre e encerra a expedição; histórico e seção no perfil', async () => {
 	const panel = 'view-expedicao-admin';
-	await openPsPage(admin, 'view-ginasiosadmin', /Master AI|IA Mestre/);
-	await clickPsButton(admin, 'view-ginasiosadmin', `button[value="${panel}"]`);
-	await expectRoomText(admin, panel, /Variants|Variações/);
-	// Números ajustáveis da variação de teste, com os limites
-	await expectRoomText(admin, panel, /Floors per act|Andares por ato/);
-	const fields = await admin.evaluate(id => (window as any).app.rooms[id].$el
-		.find('form[data-submitsend^="/expedicaoadmin ajustar teste"] input[type=number]').length, panel);
-	expect(fields).toBeGreaterThan(5);
-	// Desligar e religar a variação
-	await clickPsButton(admin, panel, 'button[value="/expedicaoadmin desligar teste"]');
-	await expectRoomText(admin, panel, /Turn on|Ligar/);
-	await clickPsButton(admin, panel, 'button[value="/expedicaoadmin ligar teste"]');
-	await expectRoomText(admin, panel, /Turn off|Desligar/);
+	const page = `${panel}-${expeditionId}`;
+	await openPsPage(admin, page, /Ready to open\?|Pronto para abrir\?/);
+	// O pacote para levar a expedição a outro servidor (JSON, com os treinadores pelo nome)
+	const exported = await admin.evaluate(rid => (window as any).app.rooms[rid].$el.find('details textarea').val(), page);
+	expect(JSON.parse(exported).expeditions[0].name).toBe('E2E Expedição');
+	await clickPsButton(admin, page, `button[value="/expedicaoadmin abrir ${expeditionId}"]`);
+	await expectRoomText(admin, page, /Close expedition|Encerrar expedição/);
+	// Aberta: some o aviso de teste na lista dos jogadores
+	await openPsPage(admin, 'view-expedicao', /E2E Expedição/);
+	const row = await admin.evaluate(rid => (window as any).app.rooms[rid].$el.find('tr')
+		.filter((i: number, tr: Element) => /E2E Expedição/.test(tr.textContent || '')).text(), 'view-expedicao');
+	expect(row).not.toMatch(/Test only|Só para testes/);
+	await clickPsButton(admin, page, `button[value="/expedicaoadmin encerrarexpedicao ${expeditionId}"]`);
+	await expectRoomText(admin, page, /Reopen expedition|Reabrir expedição/);
 	// A derrota do passo anterior aparece no histórico e no perfil
+	await openPsPage(admin, panel, /New expedition|Nova expedição/);
 	await expectRoomText(admin, panel, /e2eadmin.*(Defeated|Derrota)/);
 	const profile = 'view-ginasios-perfil-e2eadmin';
 	await openPsPage(admin, profile, /Player profile|Perfil do jogador/);
