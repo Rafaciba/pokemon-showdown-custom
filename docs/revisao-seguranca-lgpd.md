@@ -435,5 +435,11 @@ Revisão de todo o plugin (`server/chat-plugins/expedition/`), das mudanças no 
 
 ### Expedição: eventos "?", segunda leva, parte 2 (2026-10-22)
 
-- **A04:** no Covil, cada sala e o final saem da semente da run, do nó, do passo e da direção (repetir o comando ou recarregar não muda nada); as escolhas são conferidas contra o estado do covil (dentro, fora, terminado). A batalha que continua o evento só é aplicada uma vez (como as demais); a derrota encerra a run. A Master Ball e os itens vão para a mochila só pelo servidor. Na dupla contra dois treinadores, o envoltório da IA só corrige as escolhas do NPC; o time do jogador não é tocado.
+- **A04 (Covil):** cada sala e o final saem da semente da run, do nó, do passo e da direção (repetir o comando ou recarregar não muda nada); as escolhas são conferidas contra o estado do covil (dentro, fora, terminado). A batalha que continua o evento só é aplicada uma vez (como as demais); a derrota encerra a run. A Master Ball e os itens vão para a mochila só pelo servidor. Na dupla contra dois treinadores, o envoltório da IA só corrige as escolhas do NPC; o time do jogador não é tocado.
 - **LGPD:** nada novo.
+
+### Expedição, etapa 9: modo Completo (2026-10-22)
+
+- **A04:** o nível de dificuldade pedido é limitado no servidor ao número de insígnias do jogador; a insígnia em disputa é sorteada no servidor e gravada na run; a insígnia só entra no progresso ao vencer o chefe do último ato, e o ato especial só abre para quem começou a run com as 8. A escolha de seguir ao ato especial só vale na fase certa. Os iniciais shiny só saem para quem tem o desbloqueio daquela expedição.
+- **A03:** nomes de insígnias e líderes vêm do catálogo do Desafio e vão escapados.
+- **LGPD:** dado novo do jogador: as insígnias de cada expedição (tabela `progress`). Ficam visíveis no perfil aos logados, como as conquistas do Desafio; são apagadas com a conta e passam ao nome novo numa troca de nome. O aviso de privacidade é atualizado no fechamento (etapa 10).

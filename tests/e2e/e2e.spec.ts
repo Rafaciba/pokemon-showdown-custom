@@ -480,6 +480,29 @@ test('expedição: o admin cria uma expedição no painel', async () => {
 	await expectRoomText(admin, 'view-expedicao', /Test only: visible to administrators|Só para testes/);
 });
 
+test('expedição Completa: insígnias, nível de dificuldade e insígnia em disputa', async () => {
+	const panel = 'view-expedicao-admin';
+	const before = await roomIds(admin);
+	await openPsPage(admin, `${panel}-novo`, /Game mode|Modo de jogo/);
+	await submitPsForm(admin, `${panel}-novo`, 'form[data-submitsend^="/expedicaoadmin salvar novo,geral,"]', {
+		name: 'E2E Completa',
+	});
+	const page = await waitNewRoom(admin, /^view-expedicao-admin-\d+$/, before);
+	const id = Number(page.split('-').pop());
+	// Modo Completo (o padrão): as 8 insígnias são sorteadas ao salvar, e a expedição fica pronta
+	await expectRoomText(admin, page, /Everything is ready|Tudo pronto/);
+	const runPage = `view-expedicao-run-${id}`;
+	await openPsPage(admin, runPage, /Badges \(0\/8\)|Insígnias \(0\/8\)/);
+	await expectRoomText(admin, runPage, /Difficulty 0 \(fights for a badge\)|Dificuldade 0 \(disputa uma insígnia\)/);
+	await expectRoomText(admin, runPage, /Difficulty penalties|Agravantes de dificuldade/);
+	await submitPsForm(admin, runPage, `form[data-submitsend^="/expedicao iniciar ${id},"]`, { level: '0' });
+	await expectRoomText(admin, runPage, /Badge in play|Insígnia em disputa/);
+	await clickPsButton(admin, runPage, `button[value="/expedicao inicial ${id},0"]`);
+	await expectRoomText(admin, runPage, /Choose the next node on the map|Escolha o próximo ponto no mapa/);
+	await clickPsButton(admin, runPage, `button[value="/expedicao desistir ${id}"]`);
+	await expectRoomText(admin, runPage, /Start expedition|Começar a expedição/);
+});
+
 test('expedição: o admin testa o rascunho, escolhe o time, batalha e perde', async () => {
 	const list = 'view-expedicao';
 	const run = String(expeditionId);
