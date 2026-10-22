@@ -47,12 +47,21 @@ test.beforeAll(async ({ browser }) => {
 });
 
 test('páginas do site: privacidade, regras e cabeçalhos de segurança', async ({ request }) => {
-	for (const [lang, title, rules] of [['pt-BR', /Aviso de privacidade/, /Regras/], ['en-US', /Privacy notice/, /Rules/]]) {
-		const privacy = await request.get('/privacidade', { headers: { 'Accept-Language': lang as string } });
+	const pages = [
+		['pt-BR', /Aviso de privacidade/, /Regras/, /Expedição: como funciona/, /Expedição: as suas expedições/],
+		['en-US', /Privacy notice/, /Rules/, /Expedition: how it works/, /Expedition: your expeditions/],
+	] as const;
+	for (const [lang, title, rules, expeditionRules, expeditionData] of pages) {
+		const privacy = await request.get('/privacidade', { headers: { 'Accept-Language': lang } });
 		expect(privacy.status()).toBe(200);
-		expect(await privacy.text()).toMatch(title as RegExp);
-		const page = await request.get('/regras', { headers: { 'Accept-Language': lang as string } });
-		expect(await page.text()).toMatch(rules as RegExp);
+		const privacyText = await privacy.text();
+		expect(privacyText).toMatch(title);
+		// A Expedição no aviso de privacidade e nas regras
+		expect(privacyText).toMatch(expeditionData);
+		const page = await request.get('/regras', { headers: { 'Accept-Language': lang } });
+		const rulesText = await page.text();
+		expect(rulesText).toMatch(rules);
+		expect(rulesText).toMatch(expeditionRules);
 	}
 	const signup = await request.get('/cadastro');
 	expect(signup.headers()['content-security-policy']).toContain("default-src 'none'");

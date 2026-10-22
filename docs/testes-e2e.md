@@ -20,7 +20,7 @@ Para rodar só uma parte, passe os argumentos do Playwright, por exemplo `sh scr
 
 | Passo | O que confere |
 |---|---|
-| Páginas do site | `/privacidade` e `/regras` em pt e en; CSP nas páginas do login (com `script-src 'self'` e o `/conta.js` do botão de ver a senha) e HSTS no site |
+| Páginas do site | `/privacidade` e `/regras` em pt e en, com as seções da Expedição; CSP nas páginas do login (com `script-src 'self'` e o `/conta.js` do botão de ver a senha) e HSTS no site |
 | Contas | cadastro do admin pelo convite; o mesmo convite recusado na segunda vez; nome sem conta não recebe assertion; o admin entra no jogo e abre o painel |
 | Assertion forjada | o servidor de jogo recusa um login com assinatura falsa |
 | Convites | gerar um convite pela página do painel; o código aparece uma vez só; convite reservado listado e revogado; nome em uso recusado; redefinição de senha para jogador inexistente e para o admin |

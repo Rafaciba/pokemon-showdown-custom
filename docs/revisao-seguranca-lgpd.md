@@ -371,3 +371,28 @@ O teste de ponta a ponta tem 11 passos, com o de exportação e importação.
 - **A04:** os ajustes do painel são conferidos contra os limites declarados pela variação, e a run só é encerrada se estiver em andamento.
 - **A09:** ligar, desligar e ajustar variações e encerrar runs vão para o modlog (`EXPEDITION`).
 - **LGPD:** o perfil mostra o histórico de runs aos usuários logados, como no Desafio (decisão do usuário): variação, resultado, progresso, time e data, sem nada além do nome. Runs e desbloqueios são apagados com a conta e passam para o nome novo numa troca de nome (etapa 1).
+
+### Expedição: revisão completa do modo (etapa 5, 2026-10-21)
+
+Revisão de todo o plugin (`server/chat-plugins/expedition/`), das mudanças no `NpcBattle` e no perfil do Desafio e do `client-custom.js`, contra o OWASP Top 10 e a LGPD.
+
+- **Achados e correções:**
+  - **(média) Derrota contada como vitória pelo nome:** o `NpcBattle` decide o resultado comparando o id do vencedor com o do jogador. Um NPC com o mesmo id do jogador (uma conta "Lass" contra a Lass) faria a derrota contar como vitória, com experiência, dinheiro e recompensa. O mesmo valia para o Desafio de Ginásios. **Corrigido:** o NPC com o mesmo id do jogador ganha " (NPC)" no nome, na criação e na retomada (`createNpcBattle`). Há teste.
+  - **(baixa) Troca de nome com batalha da Expedição interrompida:** o registro de entrada guarda o nome antigo. **Corrigido:** a troca de nome espera a batalha acabar, como no Desafio (`accountRenameBlockers`). Há teste.
+  - **(baixa) Troca de nome que falhava no meio:** se o nome novo já tivesse uma run ativa na mesma variação (dados ainda não limpos), o índice de uma run ativa por variação derrubava a transação, e a troca ficava parcial. **Corrigido:** a run do nome antigo fica encerrada antes. Há teste.
+  - **(baixa) Variação desligada jogável por comando:** a página e o começo de runs respeitavam o desligamento, mas os comandos de uma run em andamento não. **Corrigido:** os comandos também conferem se a variação está disponível.
+  - **(baixa) Oferta de evolução especial vencida:** depois do sorteio do evento, um Rare Candy podia evoluir o Pokémon por nível, e a oferta antiga ainda era aplicada. **Corrigido:** a oferta guarda a espécie de origem e só vale para ela. Há teste.
+  - **(defesa extra)** o id do item no formulário de uso da mochila passou a ser escapado.
+  - **(limite)** como as jornadas do Desafio, cada jogador pode começar até 5 expedições a cada 10 minutos. Há teste.
+- **Conferido e correto:**
+  - **A01:** todos os comandos agem só na run do próprio usuário. O painel e os `/expedicaoadmin` exigem administrador.
+  - **A03:** nomes, espécies, golpes, itens, textos de nós e eventos e ids de escolhas são escapados. Todo o SQL é parametrizado.
+  - **A04:**
+    - compra, mochila, uso de itens, escolhas de eventos (as desabilitadas são recusadas), capturas, decisões e avanço no mapa são conferidos no servidor;
+    - o resultado de uma batalha conta uma vez só;
+    - o estado do time vai ao simulador só pelo servidor, e a linha privada do estado final só vem do simulador;
+    - os ajustes do admin são conferidos contra os limites.
+  - **DoS:** a calibração fica em cache por configuração, os laços têm teto, e as listas do painel e do perfil têm limite.
+  - **LGPD:** a exclusão da conta apaga runs, batalhas e desbloqueios. O save state some no fim da batalha. Não há IP no banco da Expedição. O aviso de privacidade descreve os dados do modo.
+  - **Cliente:** `gymGo` e `expeditionReturn` só aceitam as páginas esperadas. Os tooltips são só CSS, e o botão de ver a senha só alterna o tipo do campo.
+- **Observação sem impacto:** os formatos escondidos da Expedição podem ser usados num desafio direto entre jogadores (o PS só os tira da busca). Sem o `NpcBattle`, não dão vantagem nenhuma.

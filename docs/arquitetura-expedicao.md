@@ -116,18 +116,18 @@ Cada etapa é validada antes da próxima, como no Desafio:
    - resultado de volta para a run;
    - batalhas automáticas;
    - níveis, ganho de nível e evolução.
-3. **Variação de teste completa:**
+3. **Variação de teste completa** (feita, ver abaixo):
    - nós de batalha selvagem com captura, treinador, descanso, item e chefe;
    - itens da run;
    - time cheio com troca;
    - fim da run, com vitória ou derrota.
-4. **Painel, perfil e desbloqueios:**
+4. **Painel, perfil e desbloqueios** (feito, ver abaixo):
    - ajustes das variações no painel;
    - runs em andamento e histórico;
    - perfil;
    - estrutura de desbloqueios;
    - exclusão de dados com a conta.
-5. **Fechamento:**
+5. **Fechamento** (feito, ver abaixo):
    - `/regras` e aviso de privacidade;
    - revisão de segurança (OWASP) e LGPD;
    - passos no teste de ponta a ponta;
@@ -532,3 +532,11 @@ Pedido do usuário depois da etapa 2: o time subia níveis demais no começo, e 
   - testes de unidade: o desbloqueio ao vencer, o inicial liberado nas opções, o encerramento pelo admin, a lista do painel, a seção do perfil e o padrão das chances raras;
   - no navegador: painel (ajuste salvo e desfeito, desligar e religar, run em andamento encerrada), página da run encerrada e perfil;
   - teste de ponta a ponta: passo novo do painel e do perfil.
+
+## Etapa 5: fechamento (2026-10-21)
+
+- **`/regras`:** seções "Expedição: como funciona" (variações, mapa, tipos de nó, captura, dinheiro e itens, níveis, golpes e evoluções, desgaste e desmaio) e "Expedição: batalhas e fim" (batalhas públicas e salvas, uma aba só, batalhas automáticas, derrota, desistência, encerramento pelo admin, desbloqueios e o limite de 5 expedições a cada 10 minutos), em pt e en. O perfil cita a Expedição.
+- **Aviso de privacidade:** os dados da Expedição (variação, semente do mapa, caminho, time, mochila, dinheiro, resultado e desbloqueios), o perfil visível aos logados, o estado das batalhas em andamento e a exclusão com a conta.
+- **Revisão de segurança e LGPD do modo inteiro:** ver `docs/revisao-seguranca-lgpd.md`, seção "Expedição: revisão completa do modo". Corrigidos: resultado decidido pelo nome (NPC com o mesmo id do jogador), troca de nome com batalha interrompida e com run ativa repetida, comandos numa variação desligada e oferta de evolução vencida. Criado o limite de expedições novas.
+- **Teste de ponta a ponta:** as seções da Expedição em `/regras` e `/privacidade`, nos dois idiomas, além dos passos das etapas anteriores.
+- **Para abrir uma variação aos jogadores:** programar a variação de verdade (sem `adminOnly`), conferir os textos de `/regras` (que descrevem a base, válida para todas) e ligar a variação no painel.
