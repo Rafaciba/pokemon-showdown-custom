@@ -460,3 +460,12 @@ Revisão independente de todo o código das etapas 6 a 9 (expedições criadas p
 - **Regra confirmada com o usuário:** quem tem as 8 insígnias chega ao ato especial em qualquer dificuldade escolhida.
 - **`/regras` e aviso de privacidade** atualizados com as expedições criadas pelo admin, a captura, o Computador, o shiny, os itens-chave, o modo Completo (insígnias, agravantes, ato especial) e os dados novos (insígnias, Computador, desbloqueios por expedição, conquistas no perfil).
 
+### Expedição: ajustes finos antes do deploy (2026-10-23)
+
+Handicap de experiência para quem está abaixo da curva, experiência para o Computador e sprite do jogador por time inicial.
+
+- **Entrada do admin:** o sprite fixo de cada time só é aceito se for um sprite oficial (`isTrainerSprite`) ao salvar; na normalização (importação), só ids com letras, números e hífen, e o sorteio e a imagem conferem a lista oficial de novo. O id vai no HTML só depois dessa conferência.
+- **Batalha:** o sprite da run substitui o avatar só do dono da batalha (`NpcBattle.avatarOf` compara com `ownerid`); outros usuários que entram na sala continuam com o próprio avatar. Na retomada, o registro salvo já traz o sprite.
+- **Decisões dos guardados:** golpes e evoluções de quem está no Computador passam pelas mesmas conferências (decisão da vez, espaço inteiro, evolução oferecida).
+- **LGPD:** o sprite da expedição é dado de jogo, guardado na run e apagado com ela na exclusão da conta. O aviso de privacidade passou a citá-lo. `/regras` atualizado (sprite por time, experiência do Computador).
+

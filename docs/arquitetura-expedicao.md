@@ -724,3 +724,11 @@ Pedidos do usuário depois de jogar:
 - **Clique que às vezes não funcionava de primeira** (nos eventos): o tooltip de um botão (golpe, item) aparecia por cima do botão de baixo e recebia o clique. O tooltip passou a não receber o mouse.
 - **Tooltips** abrem para cima ou para a esquerda quando não cabem na tela (`client-custom.js`), e a página da run tem um espaço no fim.
 - **Mapa** num quadro mais baixo com rolagem (420 px), que rola sozinho até o nó atual ou os próximos; escolher um nó volta a página para o topo, onde aparece o nó escolhido.
+
+## Ajustes finos antes do deploy (2026-10-23)
+
+Pedidos do usuário:
+
+- **Handicap de experiência:** a calibração acerta o caminho médio, e quem pega poucos nós de batalha chegava aos chefes bem abaixo (nas runs do usuário, 6 batalhas no ato 1 deixaram o time no nível 21 com a curva em 33). A primeira tentativa, 10% fixos sobre a calibração, valia só meio nível no fim do ato e foi trocada (decisão do usuário): cada Pokémon abaixo da curva no andar da batalha ganha 5% a mais por nível abaixo, até 50% (`progression.ts` → `expHandicap`); na curva ou acima, nada muda. Vale também para quem está no Computador; não vale no ato especial (nível 100).
+- **Computador ganha experiência:** quem está guardado ganha metade da experiência de cada vitória, como quem desmaiou (`gainExperience` com `stored`). Golpes novos e evoluções dos guardados entram na fila de decisões como os do time (`findRunMon` procura no time e no Computador), e o resumo da vitória mostra "No Computador: metade da Exp.".
+- **Sprite do jogador na run:** cada time inicial vem com um protagonista dos jogos principais sorteado, sem repetir entre os times (`protagonists.ts`); escolher o time escolhe o sprite. Nos times fixos, o admin pode fixar o sprite de cada time no editor (seção Iniciais; sem escolha, sorteado). O sprite aparece na escolha do time, na página da run (ao lado do dinheiro) e no lado do jogador nas batalhas da expedição. Para isso o `RoomBattle` ganhou o método `avatarOf(user)`, que a `NpcBattle` sobrescreve com `humanAvatar` (só para o dono da batalha). Fica na run (migração 8, coluna `avatar`); runs de antes disso usam o avatar da conta.

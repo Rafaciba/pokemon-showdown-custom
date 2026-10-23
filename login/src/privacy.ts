@@ -6,7 +6,7 @@
  */
 import type { Lang } from './i18n.ts';
 
-export const PRIVACY_UPDATED = '2026-10-22';
+export const PRIVACY_UPDATED = '2026-10-23';
 
 interface Section {
 	title: string;
@@ -24,7 +24,7 @@ export interface Notice {
 export const PRIVACY: { [lang in Lang]: Notice } = {
 	pt: {
 		title: 'Aviso de privacidade',
-		updated: 'Atualizado em 22/10/2026.',
+		updated: 'Atualizado em 23/10/2026.',
 		sections: [
 			{
 				title: 'Quem somos',
@@ -38,7 +38,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 					'Conta: o seu nome de usuário e um hash da sua senha (a senha em si nunca é guardada). Não pedimos e-mail nem nenhum outro dado pessoal.',
 					'Sessão: um cookie (ps_session) que mantém você conectado por 30 dias, renovados a cada uso. No servidor fica só um hash desse cookie.',
 					'Jogo: a sua posição no ranking (ladder), um eventual cargo de moderação e, no Desafio de Ginásios, as suas jornadas, insígnias e conquistas, com os Pokémon do time que venceu cada insígnia e o Campeão (só as espécies, sem itens, golpes ou outros detalhes). O seu perfil e histórico no Desafio de Ginásios ficam visíveis para os outros usuários logados.',
-					'Expedição: as suas expedições (qual expedição, a semente do mapa, o caminho percorrido, o time com níveis, golpes, itens e estado, os Pokémon do Computador, a mochila, o dinheiro, a dificuldade escolhida e o resultado), as suas insígnias do modo Completo e os seus desbloqueios de cada expedição. O seu perfil na Expedição (placar, conquistas, insígnias, últimas expedições com o time no fim e desbloqueios) fica visível para os outros usuários logados.',
+					'Expedição: as suas expedições (qual expedição, a semente do mapa, o caminho percorrido, o time com níveis, golpes, itens e estado, o sprite de treinador da expedição, os Pokémon do Computador, a mochila, o dinheiro, a dificuldade escolhida e o resultado), as suas insígnias do modo Completo e os seus desbloqueios de cada expedição. O seu perfil na Expedição (placar, conquistas, insígnias, últimas expedições com o time no fim e desbloqueios) fica visível para os outros usuários logados.',
 					'Batalhas do Desafio de Ginásios e da Expedição em andamento: o estado da batalha (nomes, times e jogadas, sem as mensagens de chat), para que ela continue se for interrompida. Ele é apagado quando a batalha termina.',
 					'Aprendizado da IA Mestre: das batalhas do Desafio de Ginásios, guardamos dados anônimos de cada turno, vistos pelo treinador e pelo jogador (números como o HP somado de cada lado, os Pokémon restantes, os boosts, os status e os hazards) e quem venceu. Eles não têm o seu nome, a sua conta, o desafio, a data nem os Pokémon do seu time, e não há como ligá-los a você. Servem só para a IA Mestre aprender a jogar melhor e ficam guardados sem prazo.',
 					'Registros de batalhas da ladder: nomes dos jogadores e times usados, guardados por 30 dias. As batalhas são públicas enquanto acontecem.',
@@ -84,7 +84,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 	},
 	en: {
 		title: 'Privacy notice',
-		updated: 'Last updated on 2026-10-22.',
+		updated: 'Last updated on 2026-10-23.',
 		sections: [
 			{
 				title: 'Who we are',
@@ -98,7 +98,7 @@ export const PRIVACY: { [lang in Lang]: Notice } = {
 					'Account: your username and a hash of your password (the password itself is never stored). We do not ask for an e-mail address or any other personal data.',
 					'Session: a cookie (ps_session) that keeps you logged in for 30 days, renewed whenever you use it. The server keeps only a hash of it.',
 					'Game: your ladder ranking, any moderation rank and, in the Gym Challenge, your journeys, badges and achievements, with the Pokémon of the team that won each badge and the Champion (species only, without items, moves or other details). Your Gym Challenge profile and history are visible to other logged-in users.',
-					'Expedition: your expeditions (which expedition, the map seed, the path taken, the team with levels, moves, items and condition, the Pokémon in the Computer, the bag, the money, the chosen difficulty and the result), your Complete mode badges and your unlocks in each expedition. Your Expedition profile (scores, achievements, badges, latest expeditions with the final team, and unlocks) is visible to other logged-in users.',
+					'Expedition: your expeditions (which expedition, the map seed, the path taken, the team with levels, moves, items and condition, the trainer sprite of the expedition, the Pokémon in the Computer, the bag, the money, the chosen difficulty and the result), your Complete mode badges and your unlocks in each expedition. Your Expedition profile (scores, achievements, badges, latest expeditions with the final team, and unlocks) is visible to other logged-in users.',
 					'Gym Challenge and Expedition battles in progress: the battle state (names, teams and moves, without chat messages), so the battle can continue if it is interrupted. It is deleted when the battle ends.',
 					'Master AI learning: from Gym Challenge battles, we keep anonymous data about each turn, as seen by the trainer and by the player (numbers such as the total HP of each side, the remaining Pokémon, boosts, status conditions and hazards) and who won. It does not include your name, your account, the challenge, the date or the Pokémon in your team, and it cannot be linked to you. It is used only to help the Master AI learn to play better and is kept with no time limit.',
 					'Ladder battle logs: player names and the teams used, kept for 30 days. Battles are public while they happen.',

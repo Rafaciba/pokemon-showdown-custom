@@ -541,8 +541,14 @@ test('expedição: o admin testa o rascunho, escolhe o time, batalha e perde', a
 	const options = await admin.evaluate(([rid, v]) => (window as any).app.rooms[rid].$el
 		.find(`button[value^="/expedicao inicial ${v},"]`).length, [id, run] as const);
 	expect(options).toBe(3);
+	// Cada time vem com um sprite de protagonista sorteado, sem repetir; escolher o time escolhe o sprite
+	const sprites: string[] = await admin.evaluate(rid => (window as any).app.rooms[rid].$el
+		.find('h4 img[src*="/sprites/trainers/"]').map((_: number, img: HTMLImageElement) => img.alt).get(), id);
+	expect(sprites.length).toBe(3);
+	expect(new Set(sprites).size).toBe(3);
 	await clickPsButton(admin, id, `button[value="/expedicao inicial ${run},0"]`);
 	await expectRoomText(admin, id, /Choose the next node on the map|Escolha o próximo ponto no mapa/);
+	await expect(admin.locator(`#room-${id} img[alt="${sprites[0]}"]`).first()).toBeVisible();
 	// O time mostra o item de cada Pokémon (a mochila aparece quando houver itens)
 	// Dinheiro inicial padrão das expedições (decisão do usuário: 500)
 	await expectRoomText(admin, id, /Money: 500 ₽|Dinheiro: 500 ₽/);
@@ -571,6 +577,9 @@ test('expedição: o admin testa o rascunho, escolhe o time, batalha e perde', a
 	// O lado do selvagem tem o mato alto como avatar (sprite próprio, servido pelo Caddy)
 	await expect.poll(() => admin.evaluate(rid => (window as any).app.rooms[rid].battle?.p2?.avatar, battleRoom))
 		.toBe('#expeditiongrass');
+	// O lado do jogador usa o sprite do time escolhido, não o avatar da conta
+	await expect.poll(() => admin.evaluate(rid => (window as any).app.rooms[rid].battle?.p1?.avatar, battleRoom))
+		.toBe(sprites[0]);
 	const grass = await admin.request.get('/sprites/trainers-custom/expeditiongrass.png');
 	expect(grass.status()).toBe(200);
 	expect(grass.headers()['content-type']).toContain('image/png');
